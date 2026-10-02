@@ -299,9 +299,17 @@ body.editor-entered .player-dock {
                 <input type="file" id="audioFile" accept="audio/*">
               </label>
             </div>
-            <div class="filename-wrap">
-              <span class="file-status-icon">●</span>
-              <span class="filename empty" id="audioFileName">no file selected</span>
+            <div class="filename-wrap" id="audioFileInfoWrap">
+              <div class="file-status-left">
+                <span class="file-status-icon">●</span>
+                <span class="filename empty" id="audioFileName">no file selected</span>
+              </div>
+              <button type="button" class="remove-audio-btn" id="removeAudioBtn" title="Remove loaded audio track" aria-label="Remove loaded audio track" style="display: none;">
+                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M10 11v6M14 11v6"/>
+                </svg>
+                <span>Remove track</span>
+              </button>
             </div>
           </div>
           <div class="card card-lyrics" id="lyricsDropzone">
@@ -366,9 +374,9 @@ body.editor-entered .player-dock {
                 <div class="panel-title-wrap">
                   <span class="panel-badge">INSPECTOR</span>
                   <h2>Lyrics</h2>
-                  <button id="autoFollowBtn" class="follow-toggle-btn active" type="button" title="Toggle auto-following current lyric line during playback">
+                  <button id="autoFollowBtn" class="follow-toggle-btn active" type="button" title="Toggle audio playback sync highlight">
                     <span class="follow-dot"></span>
-                    <span class="follow-label">Follow: ON</span>
+                    <span class="follow-label">Sync: ON</span>
                   </button>
                 </div>
                 <div class="count-wrap">
@@ -607,6 +615,40 @@ body.editor-entered .player-dock {
     <div class="modal-foot shortcuts-modal-foot">
       <span class="preview-scratch-hint">Pro tip: Set speed to 0.75× for intricate or fast vocal rhythms.</span>
       <button class="modal-action-btn primary" id="shortcutsDoneBtn">Got it</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ Remove Audio Track Confirmation Modal ============ -->
+<div class="modal-backdrop" id="removeAudioModal" aria-hidden="true" style="display:none">
+  <div class="modal-card confirm-modal-card" role="dialog" aria-labelledby="removeAudioTitle" aria-modal="true">
+    <div class="modal-head">
+      <div class="modal-title-wrap">
+        <span class="modal-badge danger">CONFIRM REMOVE</span>
+        <h2 id="removeAudioTitle">Remove Audio Track?</h2>
+      </div>
+      <button class="modal-close-btn" id="removeAudioCloseBtn" title="Cancel" aria-label="Close modal">✕</button>
+    </div>
+    <div class="confirm-modal-body">
+      <div class="confirm-icon-wrap danger">
+        <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M10 11v6M14 11v6"/>
+        </svg>
+      </div>
+      <div class="confirm-text-wrap">
+        <p class="confirm-main-text">Are you sure you want to unload and remove this audio track?</p>
+        <p class="confirm-track-name" id="confirmTrackNameDisplay">Track: <b>demo.mp3</b></p>
+        <p class="confirm-sub-text">Playback and waveform visualization will be reset. Any lyrics and timestamp tags you've created will remain intact in the console.</p>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="modal-action-btn secondary" id="removeAudioCancelBtn">Cancel</button>
+      <button class="modal-action-btn danger" id="removeAudioConfirmBtn">
+        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+        </svg>
+        <span>Yes, Remove Track</span>
+      </button>
     </div>
   </div>
 </div>

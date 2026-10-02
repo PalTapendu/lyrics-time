@@ -281,13 +281,7 @@
 
   </div>
 
-  <!-- Ambient Golden Sparkle -->
-  <div class="sparkle" id="sparkle" aria-hidden="true">
-    <svg viewBox="0 0 24 24" width="28" height="28" fill="none">
-      <path d="M12 1 C12 8 16 12 23 12 C16 12 12 16 12 23 C12 16 8 12 1 12 C8 12 12 8 12 1 Z" fill="#e8c76a"
-        opacity="0.65" />
-    </svg>
-  </div>
+
 
   <!-- Cursor glow follower -->
   <div class="cursor-glow" id="cursor-glow" aria-hidden="true"></div>
@@ -531,6 +525,104 @@
 
       if (mobileDrawerClose) mobileDrawerClose.addEventListener('click', closeMobileDrawer);
 
+      // Products Dropdown Navigation Controller
+      const navItemDropdown = document.querySelector('.nav-item-dropdown');
+      const linkProducts = document.getElementById('link-products');
+      const productsMenu = document.getElementById('productsMenu');
+      let dropdownCloseTimer = null;
+
+      function openProductsMenu() {
+        if (dropdownCloseTimer) {
+          clearTimeout(dropdownCloseTimer);
+          dropdownCloseTimer = null;
+        }
+        if (navItemDropdown) {
+          navItemDropdown.classList.add('is-open');
+        }
+        if (linkProducts) {
+          linkProducts.setAttribute('aria-expanded', 'true');
+        }
+      }
+
+      function scheduleCloseProductsMenu(delay) {
+        const ms = typeof delay === 'number' ? delay : 250;
+        if (dropdownCloseTimer) clearTimeout(dropdownCloseTimer);
+        dropdownCloseTimer = setTimeout(function () {
+          closeProductsMenu();
+        }, ms);
+      }
+
+      function closeProductsMenu() {
+        if (dropdownCloseTimer) {
+          clearTimeout(dropdownCloseTimer);
+          dropdownCloseTimer = null;
+        }
+        if (navItemDropdown) {
+          navItemDropdown.classList.remove('is-open');
+        }
+        if (linkProducts) {
+          linkProducts.setAttribute('aria-expanded', 'false');
+        }
+      }
+
+      if (navItemDropdown && linkProducts && productsMenu) {
+        // Pointer interactions across trigger & panel
+        linkProducts.addEventListener('mouseenter', openProductsMenu);
+        linkProducts.addEventListener('mouseleave', function () {
+          scheduleCloseProductsMenu(250);
+        });
+
+        productsMenu.addEventListener('mouseenter', openProductsMenu);
+        productsMenu.addEventListener('mouseleave', function () {
+          scheduleCloseProductsMenu(250);
+        });
+
+        // Click / tap toggle on the Products button
+        linkProducts.addEventListener('click', function (e) {
+          e.preventDefault();
+          e.stopPropagation();
+          if (navItemDropdown.classList.contains('is-open')) {
+            closeProductsMenu();
+          } else {
+            openProductsMenu();
+          }
+        });
+
+        // Accessible keyboard focus support
+        navItemDropdown.addEventListener('focusin', openProductsMenu);
+        navItemDropdown.addEventListener('focusout', function (e) {
+          if (!navItemDropdown.contains(e.relatedTarget)) {
+            scheduleCloseProductsMenu(150);
+          }
+        });
+
+        // Menu item click handlers: reliably execute action before closing
+        const dropdownItems = productsMenu.querySelectorAll('.dropdown-item');
+        dropdownItems.forEach(function (item) {
+          item.addEventListener('click', function (e) {
+            const href = this.getAttribute('href');
+            if (href === 'editor/index.html') {
+              e.preventDefault();
+              closeProductsMenu();
+              startTransition(e);
+            } else if (href === '#features') {
+              e.preventDefault();
+              closeProductsMenu();
+              openDemoModal();
+            } else {
+              closeProductsMenu();
+            }
+          });
+        });
+
+        // Close on outside click
+        document.addEventListener('click', function (e) {
+          if (!navItemDropdown.contains(e.target)) {
+            closeProductsMenu();
+          }
+        });
+      }
+
       // Topbar interactive links
       const linkPricing = document.getElementById('link-pricing');
       if (linkPricing) {
@@ -609,9 +701,10 @@
         });
       });
 
-      // Escape key closes modals/drawer
+      // Escape key closes modals/drawer/dropdown
       window.addEventListener('keydown', function (e) {
         if (e.key === 'Escape') {
+          closeProductsMenu();
           closeDemoModal();
           closeMobileDrawer();
         }

@@ -10,7 +10,7 @@
    Preserves all external API hooks: available, init, attachAudio,
    start, stop, updateColors, onResize.
 ================================================================= */
-window.TimingConsoleSpectrum = (function(){
+window.TimingConsoleSpectrum = (function () {
   const available = (typeof window !== 'undefined') && !!(window.AudioContext || window.webkitAudioContext);
 
   let mountEl = null;
@@ -30,16 +30,16 @@ window.TimingConsoleSpectrum = (function(){
     borderActive: 'rgba(226, 179, 74, 0.15)'
   };
 
-  function readCSSVar(name, fallback){
+  function readCSSVar(name, fallback) {
     try {
       const v = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
       return v || fallback;
-    } catch(e){
+    } catch (e) {
       return fallback;
     }
   }
 
-  function updateThemeColors(){
+  function updateThemeColors() {
     currentColors.accent = readCSSVar('--accent', '#e2b34a');
     currentColors.accent2 = readCSSVar('--accent-2', '#dfcfab');
     currentColors.accent3 = readCSSVar('--gold-light', '#f5df9a');
@@ -48,7 +48,7 @@ window.TimingConsoleSpectrum = (function(){
   }
 
   // Parse color string to rgb object
-  function parseColor(col){
+  function parseColor(col) {
     const d = document.createElement('div');
     d.style.color = col;
     document.body.appendChild(d);
@@ -59,7 +59,7 @@ window.TimingConsoleSpectrum = (function(){
   }
 
   // Harmonic acoustic frequency gradient (Calm, friendly, and natural warm honey & champagne tones):
-  function interpolateSpectrumColor(t){
+  function interpolateSpectrumColor(t) {
     const cAmber = { r: 226, g: 179, b: 74 };
     const cChampagne = { r: 245, g: 223, b: 154 };
     const cIvory = { r: 253, g: 247, b: 236 };
@@ -79,7 +79,7 @@ window.TimingConsoleSpectrum = (function(){
     return { r: Math.round(r), g: Math.round(g), b: Math.round(b) };
   }
 
-  function init(containerEl){
+  function init(containerEl) {
     if (!available || !containerEl) return false;
     mountEl = containerEl;
     updateThemeColors();
@@ -104,7 +104,7 @@ window.TimingConsoleSpectrum = (function(){
     return true;
   }
 
-  function onResize(){
+  function onResize() {
     if (!mountEl || !canvas || !ctx) return;
     const w = mountEl.clientWidth;
     const h = mountEl.clientHeight;
@@ -121,7 +121,7 @@ window.TimingConsoleSpectrum = (function(){
     // Desired bar width ~3.2px, gap ~1.8px (approx 50-80 bars depending on width)
     const targetStride = 5;
     const count = Math.max(28, Math.min(96, Math.floor(w / targetStride)));
-    
+
     // Re-initialize or adjust barStates length smoothly
     if (barStates.length !== count) {
       const newStates = [];
@@ -141,7 +141,7 @@ window.TimingConsoleSpectrum = (function(){
     renderFrame();
   }
 
-  function attachAudio(audioEl){
+  function attachAudio(audioEl) {
     if (!available || attachedEl === audioEl) return;
     try {
       const Ctx = window.AudioContext || window.webkitAudioContext;
@@ -154,20 +154,20 @@ window.TimingConsoleSpectrum = (function(){
       sourceNode.connect(analyser);
       analyser.connect(audioCtx.destination);
       attachedEl = audioEl;
-    } catch(e){
+    } catch (e) {
       console.warn('TimingConsoleSpectrum: audio graph setup failed or already connected', e);
     }
   }
 
-  function resumeContext(){
+  function resumeContext() {
     if (audioCtx && audioCtx.state === 'suspended') {
-      audioCtx.resume().catch(()=>{});
+      audioCtx.resume().catch(() => { });
     }
   }
 
   // Perceptual frequency bin mapping: human hearing is logarithmic
   // Distributes bass, mids, highs across the available visual bars
-  function getSampledEnergy(barIndex, totalBars){
+  function getSampledEnergy(barIndex, totalBars) {
     if (!analyser || !freqData) return 0;
     const binCount = freqData.length; // 256
     const t = barIndex / (totalBars - 1);
@@ -184,7 +184,7 @@ window.TimingConsoleSpectrum = (function(){
     return Math.min(1, Math.pow(rawVal * trebleTilt, 1.15));
   }
 
-  function renderFrame(){
+  function renderFrame() {
     if (!canvas || !ctx || !mountEl) return;
     const w = mountEl.clientWidth;
     const h = mountEl.clientHeight;
@@ -212,7 +212,7 @@ window.TimingConsoleSpectrum = (function(){
     // Compute overall spectrum energy for volumetric ambient glow
     let totalEnergy = 0;
 
-    for (let i = 0; i < numBars; i++){
+    for (let i = 0; i < numBars; i++) {
       const state = barStates[i];
       let targetH = 2;
 
@@ -264,7 +264,7 @@ window.TimingConsoleSpectrum = (function(){
     ctx.stroke();
 
     // 2. Render Precision Meter Bars
-    for (let i = 0; i < numBars; i++){
+    for (let i = 0; i < numBars; i++) {
       const t = i / (numBars - 1);
       const state = barStates[i];
       const barH = state.current;
@@ -293,7 +293,7 @@ window.TimingConsoleSpectrum = (function(){
   }
 
   // Rounded rectangle helper
-  function roundRect(c, x, y, w, h, r){
+  function roundRect(c, x, y, w, h, r) {
     if (w < 2 * r) r = w / 2;
     if (h < 2 * r) r = h / 2;
     c.beginPath();
@@ -305,26 +305,26 @@ window.TimingConsoleSpectrum = (function(){
     c.closePath();
   }
 
-  function startIdleLoop(){
+  function startIdleLoop() {
     if (rafId) cancelAnimationFrame(rafId);
-    function tick(){
+    function tick() {
       renderFrame();
       rafId = requestAnimationFrame(tick);
     }
     rafId = requestAnimationFrame(tick);
   }
 
-  function start(){
+  function start() {
     if (!available) return;
     resumeContext();
     running = true;
   }
 
-  function stop(){
+  function stop() {
     running = false;
   }
 
-  function updateColors(){
+  function updateColors() {
     updateThemeColors();
   }
 

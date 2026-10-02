@@ -30,6 +30,9 @@
   /* ---------------- refs ---------------- */
   const player = $('player');
   const audioFileInput = $('audioFile'), audioFileName = $('audioFileName');
+  const removeAudioBtn = $('removeAudioBtn'), removeAudioModal = $('removeAudioModal');
+  const removeAudioCloseBtn = $('removeAudioCloseBtn'), removeAudioCancelBtn = $('removeAudioCancelBtn'), removeAudioConfirmBtn = $('removeAudioConfirmBtn');
+  const confirmTrackNameDisplay = $('confirmTrackNameDisplay');
   const lyricsFileInput = $('lyricsFile'), lyricsInput = $('lyricsInput');
   const modeSeg = $('modeSeg'), captureSeg = $('captureSeg'), interactionSeg = $('interactionSeg');
   const captureHint = $('captureHint'), buildBtn = $('buildBtn'), statusLine = $('statusLine');
@@ -262,8 +265,9 @@
   --------------------------------------------------------------- */
   (function dockResize() {
     let dragging = false, startY = 0, startH = 0;
-    const MIN = 225, MAX = () => Math.min(window.innerHeight * 0.75, 760);
-    function px() { return parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--player-h')) || 275; }
+    const DEFAULT_H = 175;
+    const MIN = 136, MAX = () => Math.min(window.innerHeight * 0.70, 520);
+    function px() { return parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--player-h')) || DEFAULT_H; }
     dockResizeHandle.addEventListener('mousedown', e => {
       dragging = true; startY = e.clientY; startH = px();
       dockResizeHandle.classList.add('dragging');
@@ -286,7 +290,14 @@
     });
     let savedH = null;
     try { savedH = localStorage.getItem('timing-console-dock-h'); } catch (e) { }
-    const initialH = Math.max(MIN, savedH ? parseFloat(savedH) : 275);
+    let initialH = DEFAULT_H;
+    if (savedH) {
+      const parsed = parseFloat(savedH);
+      // Migrate old oversized legacy defaults (275, 341) to new ergonomic height
+      if (!isNaN(parsed) && parsed !== 275 && parsed !== 341 && parsed >= MIN && parsed <= 500) {
+        initialH = parsed;
+      }
+    }
     document.documentElement.style.setProperty('--player-h', initialH + 'px');
   })();
 
@@ -295,12 +306,14 @@
     blocksTrack.classList.toggle('expanded', blocksExpanded);
     blocksExpandBtn.classList.toggle('expanded', blocksExpanded);
     blocksExpandBtn.title = blocksExpanded ? 'Collapse lyric blocks track to slim strip' : 'Expand lyric blocks track (show text)';
-    const h = blocksExpanded ? 80 : 14;
+    const h = blocksExpanded ? 30 : 10;
     document.documentElement.style.setProperty('--blocks-h', h + 'px');
-    // grow the dock alongside it so the waveform doesn't get squeezed
-    const cur = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--player-h')) || 275;
-    document.documentElement.style.setProperty('--player-h', (cur + (blocksExpanded ? 66 : -66)) + 'px');
-    setTimeout(() => { drawWaveform(); drawMinimap(); renderBlocks(); if (window.TimingConsoleSpectrum) window.TimingConsoleSpectrum.onResize(); }, 380);
+    // gently adapt the dock so the waveform preserves its comfortable height
+    const cur = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--player-h')) || 175;
+    const delta = blocksExpanded ? 20 : -20;
+    const nextH = Math.max(136, cur + delta);
+    document.documentElement.style.setProperty('--player-h', nextH + 'px');
+    setTimeout(() => { drawWaveform(); drawMinimap(); renderBlocks(); if (window.TimingConsoleSpectrum) window.TimingConsoleSpectrum.onResize(); }, 280);
   });
 
   /* ---------------------------------------------------------------
@@ -364,6 +377,7 @@
     }
     player.src = URL.createObjectURL(f);
     audioFileName.textContent = f.name; audioFileName.classList.remove('empty');
+    if (removeAudioBtn) removeAudioBtn.style.display = 'inline-flex';
     songBaseName = f.name.replace(/\.[^/.]+$/, '');
     hasAudioFile = true; audioLoaded = false;
     playerSongName.textContent = f.name; playerSongName.classList.remove('empty');
@@ -502,6 +516,97 @@
       const demoFile = createDemoAudioFile();
       loadAudioFile(demoFile, null);
       showToast('⚡ Demo audio track loaded! Ready to play or sync.');
+    });
+  }
+
+  /* ---------------- Remove / Unload Audio Track with Confirmation ---------------- */
+  function openRemoveAudioModal() {
+    if (!hasAudioFile) return;
+    if (confirmTrackNameDisplay) {
+      const name = (audioFileName && !audioFileName.classList.contains('empty') && audioFileName.textContent)
+        || songBaseName
+        || 'Loaded audio track';
+      confirmTrackNameDisplay.innerHTML = `Track: <b>${escapeHtml(name)}</b>`;
+    }
+    if (removeAudioModal) {
+      removeAudioModal.style.display = 'flex';
+      removeAudioModal.setAttribute('aria-hidden', 'false');
+    }
+  }
+
+  function closeRemoveAudioModal() {
+    if (!removeAudioModal) return;
+    removeAudioModal.style.display = 'none';
+    removeAudioModal.setAttribute('aria-hidden', 'true');
+  }
+
+  function unloadAudioTrack() {
+    if (!hasAudioFile) return;
+
+    // 1. Pause and stop playback loop
+    player.pause();
+    cancelAnimationFrame(playheadRaf);
+    stopLoop();
+    clearPlayingHighlight();
+    currentPlayingIdx = -1;
+
+    // 2. Revoke and reset audio source
+    if (player.src && player.src.startsWith('blob:')) {
+      try { URL.revokeObjectURL(player.src); } catch (e) { }
+    }
+    player.removeAttribute('src');
+    player.load();
+
+    // 3. Clear file inputs & state flags
+    audioFileInput.value = '';
+    currentAudioHandle = null;
+    currentAudioHandleId = null;
+    songBaseName = '';
+    hasAudioFile = false;
+    audioLoaded = false;
+
+    // 4. Update UI labels and hide remove button
+    audioFileName.textContent = 'no file selected';
+    audioFileName.classList.add('empty');
+    if (removeAudioBtn) removeAudioBtn.style.display = 'none';
+
+    playerSongName.textContent = 'No song loaded yet';
+    playerSongName.classList.add('empty');
+
+    tcCurrent.textContent = '00:00.000';
+    tcTotal.textContent = '/ 00:00.000';
+
+    // 5. Reset waveform & minimap view
+    waveformPeaks = null;
+    waveformEmpty.style.display = 'flex';
+    waveformEmpty.textContent = 'Waveform appears once you load a song';
+    viewStart = 0;
+    zoom = 1;
+    updateZoomUI();
+    updatePlayhead();
+    drawWaveform();
+    drawMinimap();
+    renderBlocks();
+
+    // 6. Refresh status and button readiness
+    updateStatus();
+    checkBuildReady();
+
+    showToast('🗑️ Audio track removed.');
+  }
+
+  if (removeAudioBtn) removeAudioBtn.addEventListener('click', openRemoveAudioModal);
+  if (removeAudioCloseBtn) removeAudioCloseBtn.addEventListener('click', closeRemoveAudioModal);
+  if (removeAudioCancelBtn) removeAudioCancelBtn.addEventListener('click', closeRemoveAudioModal);
+  if (removeAudioConfirmBtn) {
+    removeAudioConfirmBtn.addEventListener('click', () => {
+      closeRemoveAudioModal();
+      unloadAudioTrack();
+    });
+  }
+  if (removeAudioModal) {
+    removeAudioModal.addEventListener('click', e => {
+      if (e.target === removeAudioModal) closeRemoveAudioModal();
     });
   }
 
@@ -1078,7 +1183,8 @@
     stopLoop();
 
     updateStatus();
-    renderLyrics();
+    lyricsPanel.scrollTop = 0;
+    renderLyrics({ keepScroll: true });
     renderTags();
     renderBlocks();
     openPane('console');
@@ -1133,7 +1239,10 @@
     activeCapture = captureChoice; activeInteraction = interactionChoice;
     items = parts.map(text => ({ text, start: null, end: null, _revert: null }));
     history = []; cursorIndex = 0; stopLoop();
-    updateStatus(); renderLyrics(); renderTags(); renderBlocks();
+    updateStatus();
+    lyricsPanel.scrollTop = 0;
+    renderLyrics({ keepScroll: true });
+    renderTags(); renderBlocks();
     openPane('console'); saveAutosave();
     showToast(`Loaded ${items.length} ${mode === 'line' ? 'lines' : 'words'} — ${activeCapture === 'start' ? 'Start only' : 'Start & End'}, ${activeInteraction === 'buttons' ? 'buttons' : 'click line'}.`);
   });
@@ -1147,90 +1256,103 @@
   }
 
   /* ---------------------------------------------------------------
-     Lyrics list — with position-preserving auto-advance & smooth scrolling
+     Lyrics list — Stationary hit-target conveyor with hardware-accelerated auto-advance
   --------------------------------------------------------------- */
+  let scrollTween = null;
+  function smoothScrollPanelTo(targetScrollTop, duration = 0.22) {
+    const maxScroll = Math.max(0, lyricsPanel.scrollHeight - lyricsPanel.clientHeight);
+    const clampedTarget = Math.max(0, Math.min(maxScroll, Math.round(targetScrollTop)));
+
+    const prefersReducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (prefersReducedMotion) {
+      if (scrollTween) scrollTween.kill();
+      lyricsPanel.scrollTop = clampedTarget;
+      return;
+    }
+
+    if (window.gsap) {
+      if (scrollTween) scrollTween.kill();
+      const proxy = { y: lyricsPanel.scrollTop };
+      scrollTween = gsap.to(proxy, {
+        y: clampedTarget,
+        duration: duration,
+        ease: 'power2.out',
+        overwrite: 'auto',
+        onUpdate: () => {
+          lyricsPanel.scrollTop = proxy.y;
+        }
+      });
+    } else {
+      lyricsPanel.scrollTo({ top: clampedTarget, behavior: 'smooth' });
+    }
+  }
+
   function updateLyricPadding() {
     const ph = lyricsPanel.clientHeight;
     if (!ph) return;
-    const topPad = Math.max(0, Math.round(ph / 2 - 28));
-    const btmPad = Math.max(0, Math.round(ph - 40));
+    const topPad = 8;
+    // Generous runway ensures any row (including the final row) can scroll to the top focal spot
+    const btmPad = Math.max(ph + 120, 420);
     lyricsList.style.setProperty('--lyric-pad-top', topPad + 'px');
     lyricsList.style.setProperty('--lyric-pad-bottom', btmPad + 'px');
     lyricsList.style.setProperty('--lyric-pad', topPad + 'px');
   }
 
+  function scrollToRowFocal(el) {
+    if (!el) return;
+    const target = el.offsetTop - 8;
+    smoothScrollPanelTo(Math.max(0, target), 0.22);
+  }
+
   function centreRow(el) {
     if (!el) return;
     const target = el.offsetTop - (lyricsPanel.clientHeight / 2) + (el.offsetHeight / 2);
-    const prefersReducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (prefersReducedMotion) {
-      lyricsPanel.scrollTop = Math.max(0, target);
-      return;
-    }
-    if (window.gsap) {
-      gsap.killTweensOf(lyricsPanel);
-      lyricsPanel.style.scrollBehavior = 'auto';
-      gsap.to(lyricsPanel, {
-        scrollTop: Math.max(0, target),
-        duration: 0.35,
-        ease: 'power2.out',
-        overwrite: 'auto'
-      });
-    } else {
-      lyricsPanel.scrollTo({ top: Math.max(0, target), behavior: 'smooth' });
-    }
+    smoothScrollPanelTo(Math.max(0, target), 0.32);
   }
 
   function advanceScrollToNext(taggedIdx) {
-    // 1. Measure the exact screen position of the just-tagged line relative to lyricsPanel
-    const taggedEl = lyricsList.querySelector(`.lyric-row[data-idx="${taggedIdx}"]`);
-    let taggedOffsetFromPanel = null;
-    if (taggedEl) {
-      const panelRect = lyricsPanel.getBoundingClientRect();
-      const taggedRect = taggedEl.getBoundingClientRect();
-      // Align vertical center so next line centers precisely under the cursor
-      taggedOffsetFromPanel = (taggedRect.top + taggedRect.height / 2) - panelRect.top;
+    const nextIdx = cursorIndex;
+    if (nextIdx >= items.length) {
+      renderLyrics({ keepScroll: true });
+      renderTags();
+      saveAutosave();
+      showToast('🎉 All lyric lines have been timestamped!');
+      return;
     }
+
+    const taggedEl = lyricsList.querySelector(`.lyric-row[data-idx="${taggedIdx}"]`);
+    if (!taggedEl) {
+      renderLyrics({ keepScroll: true });
+      renderTags();
+      saveAutosave();
+      return;
+    }
+
+    // 1. Measure exact screen position of the just-tagged line relative to lyricsPanel
+    const panelRect = lyricsPanel.getBoundingClientRect();
+    const taggedRect = taggedEl.getBoundingClientRect();
+    const taggedOffsetFromPanel = taggedRect.top - panelRect.top;
 
     // 2. Re-render lyrics DOM without default auto-centering
     renderLyrics({ keepScroll: true });
     renderTags();
     saveAutosave();
 
-    // 3. If there is no next row to advance to, we're done
-    const nextIdx = cursorIndex;
-    if (nextIdx >= items.length || taggedOffsetFromPanel == null) return;
-
-    // 4. Find the newly active next row
+    // 3. Find the newly active next row
     const nextEl = lyricsList.querySelector(`.lyric-row[data-idx="${nextIdx}"]`);
     if (!nextEl) return;
 
-    // 5. Calculate where nextEl currently sits relative to the panel, and how far to scroll
-    const panelRect = lyricsPanel.getBoundingClientRect();
+    // 4. Calculate where nextEl currently sits relative to the panel
+    const newPanelRect = lyricsPanel.getBoundingClientRect();
     const nextRect = nextEl.getBoundingClientRect();
-    const nextOffsetFromPanel = (nextRect.top + nextRect.height / 2) - panelRect.top;
+    const nextOffsetFromPanel = nextRect.top - newPanelRect.top;
+
+    // 5. Delta: exact pixels nextEl needs to move UP to land precisely where taggedEl was
     const delta = nextOffsetFromPanel - taggedOffsetFromPanel;
-    const targetScrollTop = Math.max(0, lyricsPanel.scrollTop + delta);
+    const targetScrollTop = lyricsPanel.scrollTop + delta;
 
     // 6. Smoothly animate lyricsPanel to targetScrollTop so nextEl lands exactly where taggedEl was
-    const prefersReducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (prefersReducedMotion) {
-      lyricsPanel.scrollTop = targetScrollTop;
-      return;
-    }
-
-    if (window.gsap) {
-      gsap.killTweensOf(lyricsPanel);
-      lyricsPanel.style.scrollBehavior = 'auto';
-      gsap.to(lyricsPanel, {
-        scrollTop: targetScrollTop,
-        duration: 0.35,
-        ease: 'power2.out',
-        overwrite: 'auto'
-      });
-    } else {
-      lyricsPanel.scrollTo({ top: targetScrollTop, behavior: 'smooth' });
-    }
+    smoothScrollPanelTo(targetScrollTop, 0.22);
   }
 
   function renderLyrics(opts) {
@@ -1291,7 +1413,11 @@
     }).join('');
 
     updateLyricPadding();
-    if (!opts.keepScroll) centreRow(lyricsList.querySelector('.lyric-row.current'));
+    if (!opts.keepScroll) {
+      if (cursorIndex === 0) {
+        lyricsPanel.scrollTop = 0;
+      }
+    }
     drawWaveform(); renderBlocks();
   }
 
@@ -1325,7 +1451,7 @@
     const cursorBefore = cursorIndex;
     history.push({ idx, field: 'start', prevValue: prev, cursorBefore });
     maybeAdvanceCursor(idx);
-    if (cursorIndex > cursorBefore && cursorIndex > idx) {
+    if (isComplete(it) && cursorIndex > cursorBefore && cursorIndex > idx) {
       advanceScrollToNext(idx);
     } else {
       renderLyrics({ keepScroll: true });
@@ -1342,7 +1468,7 @@
     const cursorBefore = cursorIndex;
     history.push({ idx, field: 'end', prevValue: prev, cursorBefore });
     maybeAdvanceCursor(idx);
-    if (cursorIndex > cursorBefore && cursorIndex > idx) {
+    if (isComplete(it) && cursorIndex > cursorBefore && cursorIndex > idx) {
       advanceScrollToNext(idx);
     } else {
       renderLyrics({ keepScroll: true });
@@ -1356,7 +1482,12 @@
     if (!it || !it._revert) return;
     it[it._revert.field] = it._revert.value;
     it._revert = null;
-    renderLyrics(); renderTags(); saveAutosave();
+    cursorIndex = idx;
+    renderLyrics({ keepScroll: true });
+    renderTags();
+    saveAutosave();
+    const curEl = lyricsList.querySelector(`.lyric-row[data-idx="${idx}"]`);
+    if (curEl) scrollToRowFocal(curEl);
     showToast('Reverted to the previous timestamp on that line.');
   }
 
@@ -1505,9 +1636,16 @@
   undoBtn.addEventListener('click', () => {
     if (!history.length) { showToast('Nothing to undo.'); return; }
     const last = history.pop();
+    const prevCursor = cursorIndex;
     items[last.idx][last.field] = last.prevValue;
     cursorIndex = last.cursorBefore;
-    renderLyrics(); renderTags(); saveAutosave();
+    renderLyrics({ keepScroll: true });
+    renderTags();
+    saveAutosave();
+    if (cursorIndex < prevCursor && cursorIndex >= 0) {
+      const targetRow = lyricsList.querySelector(`.lyric-row[data-idx="${cursorIndex}"]`);
+      if (targetRow) scrollToRowFocal(targetRow);
+    }
   });
   resetBtn.addEventListener('click', () => {
     if (!items.length || !items.some(i => i.start != null || i.end != null)) { showToast('Nothing to reset.'); return; }
@@ -1515,8 +1653,11 @@
     stopLoop();
     items.forEach(it => { it.start = null; it.end = null; it._revert = null; });
     history = []; cursorIndex = 0;
-    renderLyrics(); renderTags(); saveAutosave();
-    showToast('All timestamps cleared — starting fresh.');
+    smoothScrollPanelTo(0, 0.2);
+    renderLyrics({ keepScroll: true });
+    renderTags();
+    saveAutosave();
+    showToast('All timestamps cleared — starting fresh from line 1.');
   });
 
   /* ---------------- transport ---------------- */
@@ -1545,8 +1686,9 @@
       autoFollowPlayback = !autoFollowPlayback;
       autoFollowBtn.classList.toggle('active', autoFollowPlayback);
       const lbl = autoFollowBtn.querySelector('.follow-label');
-      if (lbl) lbl.textContent = autoFollowPlayback ? 'Follow: ON' : 'Follow: OFF';
-      showToast(`Auto-follow lyrics ${autoFollowPlayback ? 'enabled' : 'disabled'}.`);
+      if (lbl) lbl.textContent = autoFollowPlayback ? 'Sync: ON' : 'Sync: OFF';
+      if (!autoFollowPlayback) clearPlayingHighlight();
+      showToast(`Playback highlight sync ${autoFollowPlayback ? 'enabled' : 'disabled'}.`);
     });
   }
 
@@ -1604,12 +1746,8 @@
             if (idxEl) idxEl.after(ind);
             else currRow.prepend(ind);
           }
-          if (autoFollowPlayback && !player.paused) {
-            const hasPendingLines = items.some(it => !isComplete(it));
-            if (!hasPendingLines || matchIdx >= cursorIndex) {
-              centreRow(currRow);
-            }
-          }
+          // Note: NO automatic scrolling during replay/playback!
+          // View remains 100% steady while the active playing line is highlighted with animated bouncing audio bars.
         }
       }
       currentPlayingIdx = matchIdx;
@@ -1762,6 +1900,10 @@
   /* ---------------- keyboard ---------------- */
   document.addEventListener('keydown', e => {
     if (e.key === 'Escape') {
+      if (removeAudioModal && removeAudioModal.style.display !== 'none') {
+        closeRemoveAudioModal();
+        return;
+      }
       if (shortcutsModal && shortcutsModal.style.display !== 'none') {
         closeShortcutsModal();
         return;
