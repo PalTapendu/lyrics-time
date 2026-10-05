@@ -1,5 +1,5 @@
 /* =================================================================
-   TIMING CONSOLE — Neo-Acoustic Luminescent Spectrum Visualizer
+   SYNCLINES — Neo-Acoustic Luminescent Spectrum Visualizer
    Mastering-grade audio-reactive spectrum with:
    - Luminescent rounded capsule pillars with tactile 3D glass highlight
    - Volumetric ambient back-glow & glossy baseline reflection

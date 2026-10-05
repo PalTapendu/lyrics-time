@@ -1,9 +1,10 @@
 /* =================================================================
-   TIMING CONSOLE — Modern 3D DAW Precision Instrument Stylesheet
+   SYNC LYRICS & SCRIPT — Modern 3D DAW Precision Instrument Stylesheet
    Specializing in high-end audio workstation & Awwwards aesthetic
 ================================================================= */
 
-:root {
+:root,
+[data-theme="dark"] {
   /* Systematic Spacing Scale (4, 8, 12, 16, 20, 24, 32, 40, 48px) */
   --space-1: 4px;
   --space-2: 8px;
@@ -108,65 +109,293 @@
 }
 
 [data-theme="light"] {
-  /* Warm Ivory / Linen Architectural Light Theme */
-  --bg-core: #fcfaf5;
-  --bg-gradient: none;
+  /* =================================================================
+     SYNCLINES LIGHT PALETTE — Mapped strictly to Landing Hero Reference
+     Chassis: Warm Cream & Sand (#fbf7ee / #f8f4ec / #f3eee3)
+     Headings: SyncLines Deep Forest Emerald (#073a24 / #0a5836)
+     Secondary Accents: SyncLines Deep Maroon / Wine (#7e1925 / #5a0e23)
+     Action & Highlights: SyncLines Emerald Gradient (#107548) & Honey Gold (#c89e4b)
+     Surfaces: Crisp Studio White (#ffffff) with Soft Slate-Green Borders
+     ================================================================= */
+  --brand-accent: #107548;
+  --brand-secondary: #7e1925;
+
+  --bg-core: #fbf7ee;
+  --bg-gradient: radial-gradient(1000px 600px at 15% 15%, #ffffff, transparent 70%),
+    radial-gradient(1200px 800px at 85% 75%, #f4ece0, transparent 75%),
+    linear-gradient(135deg, #fdfaf4 0%, #f8f1e4 50%, #f4ead7 100%);
   --bg-panel: #ffffff;
-  --bg-panel-subtle: #f7f4ec;
-  --bg-surface: #efebe0;
-  --bg-surface-hover: #e5dfd2;
-  --bg-surface-active: #dbd4c4;
-  --bg-inset: #f3efe6;
+  --bg-panel-subtle: #f8f4ec;
+  --bg-surface: #f3eee3;
+  --bg-surface-hover: #ebe4d5;
+  --bg-surface-active: #e2d9c6;
+  --bg-inset: #f8f4eb;
 
-  --border-subtle: rgba(184, 130, 32, 0.08);
-  --border-default: rgba(184, 130, 32, 0.15);
-  --border-hover: rgba(184, 130, 32, 0.30);
-  --border-active: rgba(184, 130, 32, 0.60);
-  --border-focus: #b88220;
+  --border-subtle: rgba(22, 38, 28, 0.08);
+  --border-default: rgba(22, 38, 28, 0.13);
+  --border-hover: rgba(16, 117, 72, 0.35);
+  --border-active: rgba(16, 117, 72, 0.65);
+  --border-focus: #107548;
 
-  --glass-bg: #ffffff;
+  --glass-bg: rgba(255, 255, 255, 0.94);
   --glass-bg-strong: #ffffff;
-  --glass-border: rgba(184, 130, 32, 0.12);
-  --glass-specular: inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  --glass-border: rgba(22, 38, 28, 0.12);
+  --glass-specular: inset 0 1px 0 rgba(255, 255, 255, 1);
 
-  --text-pure: #1c201d;
-  --text-main: #2f3632;
-  --text-dim: #65736b;
-  --text-faint: #98a59e;
+  /* SyncLines Typography Tokens */
+  --text-pure: #073a24;
+  --text-main: #14241a;
+  --text-dim: #44594c;
+  --text-faint: #7a8d80;
 
-  /* Primary Accent: Rich Honey Amber */
-  --accent: #b88220;
-  --accent-rgb: 184, 130, 32;
-  --accent-hover: #9c6c14;
-  --accent-dim: #7f5509;
+  /* Primary Accent: SyncLines Forest Emerald Green #107548 (from hero upload buttons) */
+  --accent: #107548;
+  --accent-rgb: 16, 117, 72;
+  --accent-hover: #138753;
+  --accent-dim: #0a5836;
   --accent-on: #ffffff;
-  --accent-glow: rgba(184, 130, 32, 0.20);
-  --accent-wash: rgba(184, 130, 32, 0.10);
-  --accent-strong-wash: rgba(184, 130, 32, 0.18);
-  --accent-border: rgba(184, 130, 32, 0.35);
+  --accent-glow: rgba(16, 117, 72, 0.22);
+  --accent-wash: rgba(16, 117, 72, 0.08);
+  --accent-strong-wash: rgba(16, 117, 72, 0.16);
+  --accent-border: rgba(16, 117, 72, 0.28);
 
-  --accent-2: #8a734e;
-  --accent-2-rgb: 138, 115, 78;
-  --accent-2-dim: #6e5a38;
+  /* Secondary Accent: SyncLines Wine Maroon #7e1925 (from hero #t2 & stat pills) */
+  --accent-2: #7e1925;
+  --accent-2-rgb: 126, 25, 37;
+  --accent-2-dim: #590f23;
   --accent-2-on: #ffffff;
-  --accent-2-glow: rgba(138, 115, 78, 0.15);
-  --accent-2-wash: rgba(138, 115, 78, 0.08);
-  --accent-strong-wash: rgba(138, 115, 78, 0.16);
+  --accent-2-glow: rgba(126, 25, 37, 0.20);
+  --accent-2-wash: rgba(126, 25, 37, 0.08);
+  --accent-2-strong-wash: rgba(126, 25, 37, 0.16);
 
-  --accent-3: #2d8a64;
-  --accent-3-rgb: 45, 138, 100;
-  --accent-3-dim: #1e6347;
-  --accent-3-wash: rgba(45, 138, 100, 0.10);
+  /* Tertiary Accent: SyncLines Mint Sage #0f764a / #10b981 */
+  --accent-3: #0f764a;
+  --accent-3-rgb: 15, 118, 74;
+  --accent-3-dim: #08492c;
+  --accent-3-wash: rgba(15, 118, 74, 0.10);
+
+  /* Gold Highlights (from landing hero badges & pills) */
+  --gold: #c89e4b;
+  --gold-light: #f5df9a;
+  --gold-wash: rgba(200, 158, 75, 0.12);
 
   --danger: #cf4242;
   --danger-wash: rgba(207, 66, 66, 0.10);
 
-  --waveform-track: rgba(0, 0, 0, 0.08);
-  --waveform-played: #b88220;
+  /* Waveform colors in Light Mode */
+  --waveform-track: rgba(22, 38, 28, 0.09);
+  --waveform-played: #107548;
 
-  --shadow-3d: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
-  --shadow-pop: 0 12px 28px rgba(0, 0, 0, 0.08), 0 0 1px rgba(0, 0, 0, 0.1);
-  --shadow-dock: 0 -4px 20px rgba(0, 0, 0, 0.06), 0 -1px 0 rgba(0, 0, 0, 0.08);
+  --shadow-3d: 0 1px 3px rgba(22, 38, 28, 0.05), 0 1px 2px rgba(22, 38, 28, 0.03);
+  --shadow-pop: 0 16px 36px rgba(15, 30, 20, 0.12), 0 2px 6px rgba(0, 0, 0, 0.04);
+  --shadow-dock: 0 -4px 20px rgba(15, 30, 20, 0.08), 0 -1px 0 rgba(22, 38, 28, 0.09);
+}
+
+/* ================= SyncLines Light Theme Component Adaptations ================= */
+[data-theme="light"] body {
+  background-color: var(--bg-core);
+  background-image: radial-gradient(rgba(22, 38, 28, 0.05) 1px, transparent 1px);
+}
+
+[data-theme="light"] .card {
+  box-shadow: 0 2px 8px rgba(22, 38, 28, 0.04);
+}
+
+[data-theme="light"] .panel {
+  box-shadow: 0 2px 8px rgba(22, 38, 28, 0.04);
+}
+
+[data-theme="light"] textarea#lyricsInput {
+  box-shadow: inset 0 1px 2px rgba(22, 38, 28, 0.06);
+}
+
+[data-theme="light"] .segmented button.active {
+  background: #ffffff;
+  color: var(--text-pure);
+  border: 1px solid rgba(22, 38, 28, 0.14);
+  box-shadow: 0 1px 3px rgba(22, 38, 28, 0.08);
+}
+
+/* Primary "Load into console" Button — matched to SyncLines Hero Primary CTA */
+[data-theme="light"] .buildbtn {
+  background: linear-gradient(180deg, #107548 0%, #07472c 100%);
+  color: #ffffff;
+  border: 1px solid rgba(5, 55, 34, 0.7);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3), 0 2px 6px rgba(7, 71, 44, 0.22);
+}
+
+[data-theme="light"] .buildbtn:not(:disabled):hover {
+  background: linear-gradient(180deg, #138753 0%, #095434 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35), 0 4px 12px rgba(7, 71, 44, 0.32);
+}
+
+/* Header Live Demo Pill — Warm Honey Gold */
+[data-theme="light"] .themebtn.demo-quick-start {
+  background: rgba(200, 158, 75, 0.14);
+  border-color: rgba(200, 158, 75, 0.38);
+  color: #8a6218;
+  box-shadow: 0 1px 4px rgba(200, 158, 75, 0.10);
+}
+
+[data-theme="light"] .themebtn.demo-quick-start:hover {
+  background: rgba(200, 158, 75, 0.22);
+  border-color: #c89e4b;
+  color: #5a3e0b;
+  box-shadow: 0 2px 8px rgba(200, 158, 75, 0.18);
+}
+
+/* Follow Toggle Button */
+[data-theme="light"] .follow-toggle-btn.active {
+  background: rgba(16, 117, 72, 0.10);
+  border-color: rgba(16, 117, 72, 0.35);
+  color: #107548;
+}
+
+[data-theme="light"] .follow-toggle-btn.active .follow-dot {
+  background: #107548;
+  box-shadow: 0 0 5px rgba(16, 117, 72, 0.5);
+}
+
+/* Lyric Rows — Active & Playing States matched to Landing Hero Lyric List */
+[data-theme="light"] .lyric-row.current {
+  border-color: rgba(16, 117, 72, 0.32);
+  background: linear-gradient(90deg, #e4efe0 0%, rgba(228, 239, 224, 0.4) 65%, transparent 100%);
+  box-shadow: 0 1px 4px rgba(16, 117, 72, 0.08);
+}
+
+[data-theme="light"] .lyric-row.current::before {
+  background: #107548;
+  box-shadow: 0 0 6px rgba(16, 117, 72, 0.45);
+}
+
+[data-theme="light"] .lyric-row.current .txt {
+  color: #08492c;
+  font-weight: 600;
+}
+
+[data-theme="light"] .lyric-row.current .idx {
+  color: #107548;
+  font-weight: 700;
+}
+
+[data-theme="light"] .lyric-row.playing-now {
+  background: linear-gradient(90deg, #e4efe0 0%, rgba(228, 239, 224, 0.55) 55%, transparent 100%) !important;
+  border-color: rgba(16, 117, 72, 0.45) !important;
+  box-shadow: 0 2px 8px rgba(16, 117, 72, 0.12) !important;
+}
+
+[data-theme="light"] .lyric-row.playing-now .txt {
+  color: #073a24 !important;
+  font-weight: 700;
+  text-shadow: none;
+}
+
+[data-theme="light"] .lyric-row.playing-now .idx {
+  color: #107548 !important;
+  font-weight: 700;
+}
+
+[data-theme="light"] .lyric-row.current.playing-now {
+  background: linear-gradient(90deg, #d8e9d3 0%, rgba(228, 239, 224, 0.6) 60%, transparent 100%) !important;
+  border-color: #107548 !important;
+  box-shadow: 0 2px 10px rgba(16, 117, 72, 0.18) !important;
+}
+
+[data-theme="light"] .playing-indicator span {
+  background: #107548;
+  box-shadow: 0 0 4px rgba(16, 117, 72, 0.4);
+}
+
+[data-theme="light"] .lyric-row.current .markbtn.start:not(.set) {
+  border-color: #107548;
+  color: #107548;
+  background: rgba(16, 117, 72, 0.08);
+  box-shadow: 0 0 8px rgba(16, 117, 72, 0.2);
+}
+
+/* Player Dock & Transport Controls */
+[data-theme="light"] .player-dock {
+  background: rgba(255, 255, 255, 0.96);
+  border-top: 1px solid rgba(22, 38, 28, 0.12);
+  box-shadow: 0 -4px 20px rgba(15, 30, 20, 0.06), 0 -1px 0 rgba(22, 38, 28, 0.08);
+}
+
+[data-theme="light"] .iconbtn.play {
+  background: linear-gradient(180deg, #107548 0%, #07472c 100%);
+  color: #ffffff;
+  border: 1px solid rgba(5, 55, 34, 0.7);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35), 0 3px 10px rgba(9, 78, 48, 0.28);
+}
+
+[data-theme="light"] .iconbtn.play:hover {
+  background: linear-gradient(180deg, #138753 0%, #095434 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4), 0 5px 14px rgba(9, 78, 48, 0.38);
+}
+
+/* Waveform Playhead — Ruby Red Line with Forest Grip matching Hero Playhead */
+[data-theme="light"] .waveform-playhead {
+  background: #e11d48;
+  box-shadow: 0 0 6px rgba(225, 29, 72, 0.5);
+}
+
+[data-theme="light"] .waveform-playhead .ph-grip {
+  background: #073a24;
+  border: 1.5px solid #ffffff;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+}
+
+[data-theme="light"] .waveform-hover-line {
+  background: rgba(22, 38, 28, 0.35);
+}
+
+[data-theme="light"] .waveform-hover-line .hl-tag {
+  background: #ffffff;
+  border-color: rgba(22, 38, 28, 0.15);
+  color: #073a24;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+/* Timeline Lyric Blocks */
+[data-theme="light"] .lyric-block {
+  background: rgba(16, 117, 72, 0.22);
+  border-color: rgba(16, 117, 72, 0.40);
+}
+
+[data-theme="light"] .lyric-block:hover {
+  background: rgba(16, 117, 72, 0.35);
+  border-color: rgba(16, 117, 72, 0.60);
+}
+
+[data-theme="light"] .lyric-block.active-playing {
+  box-shadow: 0 0 10px rgba(16, 117, 72, 0.35) !important;
+  border-color: #107548 !important;
+  background: rgba(16, 117, 72, 0.65) !important;
+}
+
+[data-theme="light"] .blocks-track.expanded .lyric-block.active-playing {
+  background: linear-gradient(90deg, #e4efe0 0%, rgba(228, 239, 224, 0.45) 100%) !important;
+  border: 1px solid rgba(16, 117, 72, 0.45) !important;
+  border-left: 3.5px solid #107548 !important;
+  box-shadow: 0 2px 10px rgba(16, 117, 72, 0.12) !important;
+}
+
+[data-theme="light"] .blocks-track.expanded .lyric-block.active-playing .bl-text {
+  color: #073a24 !important;
+  font-weight: 700;
+  text-shadow: none;
+}
+
+/* Modals & Overlays */
+[data-theme="light"] .modal-backdrop {
+  background: rgba(15, 30, 20, 0.45);
+}
+
+[data-theme="light"] .modal-card {
+  box-shadow: 0 20px 48px rgba(15, 30, 20, 0.18), 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+[data-theme="light"] .toast {
+  box-shadow: 0 8px 24px rgba(15, 30, 20, 0.14), 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
 /* ================= Base & Layout ================= */
@@ -180,11 +409,13 @@ html {
   color-scheme: dark;
   font-size: 14px;
 }
+
 [data-theme="light"] {
   color-scheme: light;
 }
 
-html, body {
+html,
+body {
   margin: 0;
   padding: 0;
   background: var(--bg-core);
@@ -416,15 +647,23 @@ header.topbar {
   color: var(--text-pure);
 }
 
+/* Theme Toggle Button Icons */
+.themebtn .icon-moon {
+  opacity: 1;
+  transform: rotate(0) scale(1);
+}
+
 .themebtn .icon-sun {
   opacity: 0;
   transform: rotate(-60deg) scale(0.6);
 }
-[data-theme="light"] .themebtn .icon-sun {
+
+[data-theme="dark"] .themebtn .icon-sun {
   opacity: 1;
   transform: rotate(0) scale(1);
 }
-[data-theme="light"] .themebtn .icon-moon {
+
+[data-theme="dark"] .themebtn .icon-moon {
   opacity: 0;
   transform: rotate(60deg) scale(0.6);
 }
@@ -452,8 +691,18 @@ header.topbar {
 }
 
 @keyframes radarPing {
-  0%, 100% { transform: scale(1); opacity: 1; }
-  50% { transform: scale(1.25); opacity: 0.55; box-shadow: 0 0 14px var(--accent-2); }
+
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+
+  50% {
+    transform: scale(1.25);
+    opacity: 0.55;
+    box-shadow: 0 0 14px var(--accent-2);
+  }
 }
 
 .status-text-wrap {
@@ -602,7 +851,9 @@ header.topbar {
 }
 
 @media (max-width: 1024px) {
-  .setup { grid-template-columns: 1fr; }
+  .setup {
+    grid-template-columns: 1fr;
+  }
 }
 
 .card {
@@ -808,7 +1059,9 @@ header.topbar {
   border-color: var(--border-hover);
 }
 
-.filebtn-mini input { display: none; }
+.filebtn-mini input {
+  display: none;
+}
 
 .clear-lyrics-btn {
   font-family: var(--font-mono);
@@ -1000,7 +1253,9 @@ textarea#lyricsInput:focus {
 }
 
 @media (max-width: 1024px) {
-  .maingrid { grid-template-columns: 1fr; }
+  .maingrid {
+    grid-template-columns: 1fr;
+  }
 }
 
 .panel {
@@ -1160,13 +1415,16 @@ textarea#lyricsInput:focus {
 .panel-body::-webkit-scrollbar {
   width: 5px;
 }
+
 .panel-body::-webkit-scrollbar-thumb {
   background: var(--border-default);
   border-radius: 3px;
 }
+
 .panel-body::-webkit-scrollbar-thumb:hover {
   background: var(--border-hover);
 }
+
 .panel-body::-webkit-scrollbar-track {
   background: transparent;
 }
@@ -1311,10 +1569,12 @@ textarea#lyricsInput:focus {
     height: 25%;
     opacity: 0.6;
   }
+
   50% {
     height: 100%;
     opacity: 1;
   }
+
   100% {
     height: 40%;
     opacity: 0.8;
@@ -1486,7 +1746,8 @@ textarea#lyricsInput:focus {
   height: 12px;
 }
 
-.loopbtn, .playbtn-mini {
+.loopbtn,
+.playbtn-mini {
   width: 24px;
   height: 24px;
   border-radius: var(--radius-xs);
@@ -1513,7 +1774,8 @@ textarea#lyricsInput:focus {
   background: var(--bg-surface-hover);
 }
 
-.loopbtn svg, .playbtn-mini svg {
+.loopbtn svg,
+.playbtn-mini svg {
   width: 12px;
   height: 12px;
 }
@@ -1646,7 +1908,7 @@ textarea#lyricsInput:focus {
   grid-template-rows: 0fr;
   opacity: 0;
   transition: grid-template-rows 0.22s var(--ease-smooth),
-              opacity 0.18s var(--ease-smooth);
+    opacity 0.18s var(--ease-smooth);
 }
 
 .tag-item.expanded .tag-card-details-wrapper {
@@ -1828,7 +2090,10 @@ textarea#lyricsInput:focus {
   flex-wrap: wrap;
 }
 
-.expbtn, .sessionbtn, .resetbtn, .undobtn {
+.expbtn,
+.sessionbtn,
+.resetbtn,
+.undobtn {
   background: var(--bg-surface);
   border: 1px solid var(--border-default);
   color: var(--text-main);
@@ -1842,7 +2107,8 @@ textarea#lyricsInput:focus {
   transition: all var(--duration-fast);
 }
 
-.expbtn:hover, .sessionbtn:hover {
+.expbtn:hover,
+.sessionbtn:hover {
   border-color: var(--border-hover);
   background: var(--bg-surface-hover);
   color: var(--text-pure);
@@ -2171,13 +2437,14 @@ body.dock-resizing {
 
 [data-theme="light"] .blocks-track.expanded .lyric-block {
   background: var(--bg-panel);
-  border-color: rgba(184, 130, 32, 0.3);
+  border-color: var(--border-default);
   border-left-color: var(--accent);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 1px 3px rgba(22, 38, 28, 0.06);
 }
 
 [data-theme="light"] .blocks-track.expanded .lyric-block:hover {
   background: var(--bg-surface);
+  border-color: var(--border-hover);
 }
 
 [data-theme="light"] .blocks-track.expanded .lyric-block .bl-text {
@@ -2216,8 +2483,13 @@ body.dock-resizing {
   background: transparent;
 }
 
-.lyric-block .bl-handle.left { left: 0; }
-.lyric-block .bl-handle.right { right: 0; }
+.lyric-block .bl-handle.left {
+  left: 0;
+}
+
+.lyric-block .bl-handle.right {
+  right: 0;
+}
 
 .lyric-block .bl-handle::after {
   content: '';
@@ -2231,8 +2503,13 @@ body.dock-resizing {
   transition: opacity 0.1s;
 }
 
-.lyric-block .bl-handle.left::after { left: 1px; }
-.lyric-block .bl-handle.right::after { right: 1px; }
+.lyric-block .bl-handle.left::after {
+  left: 1px;
+}
+
+.lyric-block .bl-handle.right::after {
+  right: 1px;
+}
 
 .lyric-block:hover .bl-handle::after {
   opacity: 1;
@@ -2632,8 +2909,13 @@ body.scrubbing {
 }
 
 @keyframes modalFadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
 }
 
 .modal-card {
@@ -2652,8 +2934,15 @@ body.scrubbing {
 }
 
 @keyframes modalScaleIn {
-  from { opacity: 0; transform: translateY(14px) scale(0.95); }
-  to { opacity: 1; transform: translateY(0) scale(1); }
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.95);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 .modal-head {
@@ -3217,6 +3506,7 @@ button:active,
 }
 
 @media (hover: hover) and (pointer: fine) {
+
   .themebtn:hover,
   .iconbtn:hover,
   .tool-btn:hover,
@@ -3253,15 +3543,18 @@ footer.hint-foot .credit-line b {
     width: 95vw;
     padding: var(--space-5) 0 var(--space-4);
   }
+
   .transport-controls {
     flex-wrap: wrap;
     gap: var(--space-3);
   }
+
   .spectrum-wrap {
     flex-basis: 100%;
     order: 5;
     height: 40px;
   }
+
   .player-dock-inner {
     width: 95vw;
   }
@@ -3272,83 +3565,109 @@ footer.hint-foot .credit-line b {
     width: 96vw;
     padding: var(--space-4) 0;
   }
+
   .brand {
     gap: var(--space-3);
   }
+
   .brand .glyph-container {
     width: 36px;
     height: 36px;
   }
+
   .brand .glyph {
     width: 36px;
     height: 36px;
   }
+
   .brand .glyph svg {
     width: 18px;
     height: 18px;
   }
+
   .brand h1 {
     font-size: 17px;
   }
+
   .brand .sub {
     display: none;
   }
+
   .header-right {
     gap: var(--space-2);
   }
+
   .themebtn {
     padding: var(--space-2) var(--space-3);
     font-size: 11.5px;
   }
+
   .status-chip {
     display: none;
   }
+
   .pane-header {
     padding: var(--space-3) var(--space-4);
   }
+
   .pane-header .pane-meta {
     display: none;
   }
+
   .card {
     padding: var(--space-4);
   }
+
   .panel-head {
     padding: var(--space-3) var(--space-4);
   }
+
   .panel-body {
     max-height: 42vh;
   }
+
   .lyric-row {
     flex-wrap: wrap;
     padding: var(--space-3);
   }
-  .t-times, .t-duration {
+
+  .t-times,
+  .t-duration {
     padding-left: 0;
   }
+
   .player-dock-inner {
     width: 96vw;
     padding: 0 0 var(--space-2);
   }
+
   .player-head {
     padding: var(--space-2) 0;
     gap: var(--space-2);
   }
+
   .timeline-tools {
     gap: var(--space-1);
   }
+
   .timecode {
     font-size: 11.5px;
   }
+
   .timecode b {
     font-size: 12.5px;
   }
+
   .speedgroup .label {
     display: none;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  *, ::before, ::after {
+
+  *,
+  ::before,
+  ::after {
     animation-duration: 0.001ms !important;
     transition-duration: 0.001ms !important;
   }

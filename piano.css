@@ -1,0 +1,330 @@
+/* ==========================================================================
+   SELF-PLAYING MINI PIANO WIDGET (Elongated Keys, Soft Pastel Hues, Zero Side Fade)
+   Sibling card inside .lower-section alongside .lyrics-card
+   ========================================================================== */
+
+.mini-piano-widget {
+  position: absolute;
+  left: 552px;
+  top: 0;
+  width: 194px;
+  height: 242px;
+  border-radius: 20px;
+  background: linear-gradient(180deg, #ffffff 0%, #fafcf8 55%, #f2f7ef 100%);
+  border: 1px solid rgba(255, 255, 255, 0.95);
+  box-shadow: 
+    inset 0 1px 0 #ffffff,
+    0 1px 3px rgba(0, 0, 0, 0.02),
+    0 6px 18px -2px rgba(22, 38, 28, 0.06);
+  transform: translateZ(20px);
+  transform-style: preserve-3d;
+  pointer-events: auto;
+  z-index: 20;
+  user-select: none;
+  -webkit-user-select: none;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  transition: transform 0.42s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+#console.is-straight .mini-piano-widget {
+  transform: translateZ(0);
+}
+
+/* Focused Highlight Pulse when Live Piano is selected from Nav or Sidebar */
+.mini-piano-widget.piano-focused-pulse {
+  animation: pianoFocusGlow 1.6s cubic-bezier(0.16, 1, 0.3, 1) 2;
+  border-color: rgba(16, 185, 129, 0.8) !important;
+  box-shadow: 
+    inset 0 1px 0 #ffffff,
+    0 0 0 3px rgba(16, 185, 129, 0.35),
+    0 12px 30px rgba(16, 185, 129, 0.22) !important;
+}
+
+@keyframes pianoFocusGlow {
+  0% {
+    transform: translateZ(20px) scale(1);
+    box-shadow: inset 0 1px 0 #ffffff, 0 1px 3px rgba(0, 0, 0, 0.02), 0 6px 18px -2px rgba(22, 38, 28, 0.06);
+  }
+  50% {
+    transform: translateZ(28px) scale(1.035);
+    box-shadow: inset 0 1px 0 #ffffff, 0 0 0 4px rgba(16, 185, 129, 0.45), 0 16px 36px rgba(16, 185, 129, 0.3);
+  }
+  100% {
+    transform: translateZ(20px) scale(1);
+    box-shadow: inset 0 1px 0 #ffffff, 0 1px 3px rgba(0, 0, 0, 0.02), 0 6px 18px -2px rgba(22, 38, 28, 0.06);
+  }
+}
+
+#console.is-straight .mini-piano-widget.piano-focused-pulse {
+  animation: pianoFocusGlowFlat 1.6s cubic-bezier(0.16, 1, 0.3, 1) 2;
+}
+
+@keyframes pianoFocusGlowFlat {
+  0% {
+    transform: translateZ(0) scale(1);
+  }
+  50% {
+    transform: translateZ(0) scale(1.035);
+    box-shadow: inset 0 1px 0 #ffffff, 0 0 0 4px rgba(16, 185, 129, 0.45), 0 16px 36px rgba(16, 185, 129, 0.3);
+  }
+  100% {
+    transform: translateZ(0) scale(1);
+  }
+}
+
+/* Strictly Vertical Ambient Glow at Bottom (PURE upward fade, ZERO side fade) */
+.piano-ambient-glow {
+  position: absolute;
+  inset: 0;
+  border-radius: 20px;
+  background: linear-gradient(0deg, rgba(16, 185, 129, 0.08) 0%, rgba(16, 185, 129, 0.02) 36%, transparent 68%);
+  pointer-events: none;
+  opacity: 0.9;
+  transition: opacity 0.3s ease;
+}
+
+.mini-piano-widget.proximity-active .piano-ambient-glow {
+  opacity: 1;
+  background: linear-gradient(0deg, rgba(16, 185, 129, 0.14) 0%, rgba(16, 185, 129, 0.04) 42%, transparent 72%);
+}
+
+/* Top Header Bar (Status Chip & Sound Toggle) */
+.piano-header {
+  position: absolute;
+  top: 10px;
+  left: 12px;
+  right: 10px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  z-index: 30;
+  transform: translateZ(10px);
+  pointer-events: none;
+  transition: transform 0.42s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+#console.is-straight .piano-header {
+  transform: translateZ(0);
+}
+
+.piano-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 7px;
+  border-radius: 100px;
+  background: rgba(22, 38, 28, 0.04);
+  border: 1px solid rgba(22, 38, 28, 0.07);
+  user-select: none;
+}
+
+.piano-badge-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #10b981;
+  box-shadow: 0 0 6px rgba(16, 185, 129, 0.6);
+  animation: pianoBadgePulse 2.4s ease-in-out infinite;
+}
+
+@keyframes pianoBadgePulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(1.3);
+    opacity: 1;
+  }
+}
+
+.piano-badge-title {
+  font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  color: #1e3a2b;
+  text-transform: uppercase;
+}
+
+/* Minimalist Unobtrusive Sound Toggle in Top-Right */
+.piano-sound-toggle {
+  pointer-events: auto;
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  background: rgba(28, 42, 34, 0.04);
+  border: 1px solid rgba(28, 42, 34, 0.08);
+  color: #1c2a22;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+  opacity: 0.55;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  outline: none;
+}
+
+.piano-sound-toggle:hover {
+  opacity: 0.95;
+  background: rgba(16, 185, 129, 0.18);
+  color: #0f5a3d;
+  border-color: rgba(16, 185, 129, 0.4);
+  transform: scale(1.08);
+}
+
+.piano-sound-toggle:active {
+  transform: scale(0.94);
+}
+
+.piano-sound-toggle.unmuted {
+  opacity: 0.92;
+  background: rgba(16, 185, 129, 0.22);
+  color: #0a5836;
+  border-color: rgba(16, 185, 129, 0.5);
+  box-shadow: 0 0 8px rgba(16, 185, 129, 0.35);
+}
+
+/* Canvas 2D for Rising Musical Notes & Sparkles */
+.piano-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 5;
+}
+
+/* Full SVG Layer for Beams, Separators & Keys */
+.piano-keys-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: auto;
+  z-index: 10;
+  overflow: visible;
+}
+
+/* Key Base Styles */
+.piano-key {
+  cursor: pointer;
+  outline: none;
+  transform-origin: center 132px;
+  transition: transform 0.10s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform;
+}
+
+.piano-key:focus-visible rect.key-body {
+  stroke: #10b981;
+  stroke-width: 1.5;
+}
+
+/* White Key Body - Silky Ivory with Elongated Key Profile */
+.white-key rect.key-body {
+  fill: url(#whiteKeyGrad);
+  stroke: #ded6c4;
+  stroke-width: 0.75;
+  rx: 4.5;
+  filter: drop-shadow(0 3px 5px rgba(0, 0, 0, 0.08));
+  transition: filter 0.10s ease;
+}
+
+/* White Key Front Lip Line */
+.white-key .key-lip {
+  fill: #dfd7c6;
+  pointer-events: none;
+  transition: opacity 0.12s ease;
+}
+
+/* White Key Note Letter Label (C, D, E, F, G, A, B) */
+.key-note-label {
+  fill: #94a39b;
+  font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  pointer-events: none;
+  transition: fill 0.10s ease;
+}
+
+/* Black Key Body - Sleek Obsidian Onyx */
+.black-key rect.key-body {
+  fill: url(#blackKeyGrad);
+  stroke: rgba(0, 0, 0, 0.45);
+  stroke-width: 0.55;
+  rx: 3.5;
+  filter: drop-shadow(0 4px 7px rgba(0, 0, 0, 0.34));
+  transition: filter 0.10s ease;
+}
+
+/* Key Active (Pressed) States - Responsive tactile depression */
+.piano-key.active {
+  transform: translateY(2.5px);
+}
+
+.piano-key.active.white-key rect.key-body {
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.14));
+}
+
+.piano-key.active.black-key rect.key-body {
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.38));
+}
+
+.piano-key.active .key-note-label {
+  fill: #ffffff;
+  font-weight: 800;
+}
+
+/* Key Active Surface Soft Pastel Color Overlay */
+.key-glow-overlay {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.piano-key.active .key-glow-overlay {
+  opacity: 0.88;
+  transition: opacity 0.04s ease-out;
+}
+
+/* Clean Vertical Light Beam - Soft pastel fade upward (PURE vertical, ZERO side blur) */
+.key-light-beam {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.piano-key.active .key-light-beam {
+  opacity: 0.88;
+  transition: opacity 0.04s ease-out;
+}
+
+/* Ripple Ring on Key Tap / Burst */
+.key-ripple-circle {
+  opacity: 0;
+  transform: scale(0.4);
+  transform-origin: center center;
+  transition: transform 0.35s ease-out, opacity 0.35s ease-out;
+  pointer-events: none;
+}
+
+.piano-key.rippling .key-ripple-circle {
+  opacity: 0.55;
+  transform: scale(1.6);
+}
+
+/* Reduced Motion Mode */
+@media (prefers-reduced-motion: reduce) {
+  .piano-ambient-glow {
+    animation: none;
+  }
+  .piano-key {
+    transition: none;
+  }
+}

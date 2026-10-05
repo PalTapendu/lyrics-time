@@ -1,723 +1,858 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="color-scheme" content="dark light">
-<title>Timing Console — Lyric Timestamp Tagger</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light dark">
+  <title>Sync Lyrics & Script — Lyric Timestamp Tagger</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
 
-<!-- Shared Page Transition & Entrance Styles -->
-<style>
-:root {
-  --trans-bg-radial: radial-gradient(ellipse 85% 65% at 50% 50%, #0d1e15 0%, #060d09 65%, #030705 100%);
-  --trans-gold:      #d9a445;
-  --trans-gold-light:#f0d080;
-  --trans-green:     #00ffb0;
-  --trans-ease:      cubic-bezier(0.22, 1, 0.36, 1);
-  --trans-ease-out:  cubic-bezier(0.16, 1, 0.3, 1);
-}
+  <!-- Shared Page Transition & Entrance Styles -->
+  <style>
+    :root {
+      --trans-bg-radial: radial-gradient(1000px 600px at 50% 38%, rgba(255, 255, 255, 0.96), transparent 75%),
+        radial-gradient(1200px 800px at 50% 62%, rgba(244, 236, 224, 0.92), transparent 75%),
+        linear-gradient(135deg, #fdfaf4 0%, #f6eee0 50%, #eee2cb 100%);
+      --trans-gold: #c89e4b;
+      --trans-gold-light: #851b27;
+      --trans-green: #0a5836;
+      --trans-ease: cubic-bezier(0.23, 1, 0.32, 1);
+      --trans-ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+    }
 
-/* Matching Fullscreen Transition Overlay */
-.page-transition-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 99999;
-  background: var(--trans-bg-radial);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  pointer-events: auto;
-  opacity: 1;
-  visibility: visible;
-  transition: opacity 0.48s var(--trans-ease), visibility 0.48s var(--trans-ease);
-}
+    [data-theme="light"] {
+      --trans-bg-radial: radial-gradient(1000px 600px at 50% 38%, rgba(255, 255, 255, 0.96), transparent 75%),
+        radial-gradient(1200px 800px at 50% 62%, rgba(244, 236, 224, 0.92), transparent 75%),
+        linear-gradient(135deg, #fdfaf4 0%, #f6eee0 50%, #eee2cb 100%);
+      --trans-gold: #c89e4b;
+      --trans-gold-light: #851b27;
+      --trans-green: #0a5836;
+    }
 
-.page-transition-overlay.fade-out {
-  opacity: 0;
-  visibility: hidden;
-  pointer-events: none;
-}
+    /* Matching Fullscreen Transition Overlay */
+    .page-transition-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 99999;
+      background: var(--trans-bg-radial);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      pointer-events: auto;
+      opacity: 1;
+      visibility: visible;
+      transition: opacity 0.48s var(--trans-ease), visibility 0.48s var(--trans-ease);
+    }
 
-.trans-glow-disc {
-  position: absolute;
-  width: 320px;
-  height: 320px;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(217, 164, 69, 0.16) 0%, rgba(0, 255, 176, 0.08) 40%, transparent 70%);
-  filter: blur(28px);
-  pointer-events: none;
-  animation: transDiscBreath 2s ease-in-out infinite alternate;
-}
+    .page-transition-overlay.fade-out {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
 
-@keyframes transDiscBreath {
-  0%   { transform: scale(0.92); opacity: 0.7; }
-  100% { transform: scale(1.08); opacity: 1;   }
-}
+    .trans-glow-disc {
+      position: absolute;
+      width: 320px;
+      height: 320px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(217, 164, 69, 0.16) 0%, rgba(0, 255, 176, 0.08) 40%, transparent 70%);
+      filter: blur(28px);
+      pointer-events: none;
+      animation: transDiscBreath 2s ease-in-out infinite alternate;
+    }
 
-.trans-badge {
-  position: relative;
-  z-index: 2;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 12px;
-}
+    @keyframes transDiscBreath {
+      0% {
+        transform: scale(0.92);
+        opacity: 0.7;
+      }
 
-.trans-logo-wave {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  filter: drop-shadow(0 0 10px rgba(232, 199, 106, 0.55));
-}
+      100% {
+        transform: scale(1.08);
+        opacity: 1;
+      }
+    }
 
-.trans-logo-wave svg {
-  overflow: visible;
-}
+    .trans-badge {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+    }
 
-.trans-logo-wave .bar {
-  transform-origin: 50% 18px;
-  transition: transform 0.2s ease;
-}
+    .trans-logo-wave {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      filter: drop-shadow(0 0 10px rgba(232, 199, 106, 0.55));
+    }
 
-.trans-logo-wave .b1 { animation: transBarPulse 1s ease-in-out infinite 0.00s; }
-.trans-logo-wave .b2 { animation: transBarPulse 1s ease-in-out infinite 0.12s; }
-.trans-logo-wave .b3 { animation: transBarPulse 1s ease-in-out infinite 0.24s; }
-.trans-logo-wave .b4 { animation: transBarPulse 1s ease-in-out infinite 0.36s; }
-.trans-logo-wave .b5 { animation: transBarPulse 1s ease-in-out infinite 0.48s; }
-.trans-logo-wave .b6 { animation: transBarPulse 1s ease-in-out infinite 0.60s; }
+    .trans-logo-wave svg {
+      overflow: visible;
+    }
 
-@keyframes transBarPulse {
-  0%, 100% { transform: scaleY(1); opacity: 0.85; }
-  50%      { transform: scaleY(1.35); opacity: 1; filter: drop-shadow(0 0 4px #00ffb0); }
-}
+    .trans-logo-wave .bar {
+      transform-origin: 50% 18px;
+      transition: transform 0.2s ease;
+    }
 
-.trans-title {
-  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
-  font-size: 0.76rem;
-  font-weight: 600;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-  color: var(--trans-gold-light);
-  text-shadow: 0 0 16px rgba(240, 208, 128, 0.45);
-}
+    .trans-logo-wave .b1 {
+      animation: transBarPulse 1s ease-in-out infinite 0.00s;
+    }
 
-.trans-line-track {
-  width: 130px;
-  height: 2px;
-  background: rgba(255, 255, 255, 0.09);
-  border-radius: 999px;
-  overflow: hidden;
-  position: relative;
-}
+    .trans-logo-wave .b2 {
+      animation: transBarPulse 1s ease-in-out infinite 0.12s;
+    }
 
-.trans-line-bar {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent 0%, var(--trans-gold) 35%, var(--trans-green) 70%, var(--trans-gold-light) 100%);
-  border-radius: inherit;
-  animation: transBeamSweep 1.2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
-}
+    .trans-logo-wave .b3 {
+      animation: transBarPulse 1s ease-in-out infinite 0.24s;
+    }
 
-@keyframes transBeamSweep {
-  0%   { transform: translateX(-100%); }
-  100% { transform: translateX(100%);  }
-}
+    .trans-logo-wave .b4 {
+      animation: transBarPulse 1s ease-in-out infinite 0.36s;
+    }
 
-/* Staggered entrance animation for editor interface elements */
-@keyframes editorSectionFadeUp {
-  0% {
-    opacity: 0;
-    transform: translateY(16px);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
+    .trans-logo-wave .b5 {
+      animation: transBarPulse 1s ease-in-out infinite 0.48s;
+    }
 
-body.editor-entrance-active header.topbar {
-  animation: editorSectionFadeUp 0.52s var(--trans-ease-out) 0.06s both;
-}
+    .trans-logo-wave .b6 {
+      animation: transBarPulse 1s ease-in-out infinite 0.60s;
+    }
 
-body.editor-entrance-active .pane:nth-of-type(1) {
-  animation: editorSectionFadeUp 0.52s var(--trans-ease-out) 0.14s both;
-}
+    @keyframes transBarPulse {
 
-body.editor-entrance-active .pane:nth-of-type(2) {
-  animation: editorSectionFadeUp 0.52s var(--trans-ease-out) 0.22s both;
-}
+      0%,
+      100% {
+        transform: scaleY(1);
+        opacity: 0.85;
+      }
 
-body.editor-entrance-active .player-dock {
-  animation: editorSectionFadeUp 0.52s var(--trans-ease-out) 0.30s both;
-}
+      50% {
+        transform: scaleY(1.35);
+        opacity: 1;
+        filter: drop-shadow(0 0 4px #00ffb0);
+      }
+    }
 
-/* Clean unencumbered state after entrance completes */
-body.editor-entered header.topbar,
-body.editor-entered .pane,
-body.editor-entered .player-dock {
-  animation: none !important;
-  transform: none !important;
-  opacity: 1 !important;
-}
+    .trans-brand-eyebrow {
+      font-family: 'Space Grotesk', -apple-system, sans-serif;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: #0a5836;
+      background: rgba(16, 138, 84, 0.1);
+      border: 1px solid rgba(16, 138, 84, 0.2);
+      padding: 4px 14px;
+      border-radius: 999px;
+    }
 
-/* Accessibility: Reduced Motion */
-@media (prefers-reduced-motion: reduce) {
-  .page-transition-overlay {
-    display: none !important;
-    opacity: 0 !important;
-    visibility: hidden !important;
-    transition: none !important;
-    animation: none !important;
-  }
-  body.editor-entrance-active header.topbar,
-  body.editor-entrance-active .pane,
-  body.editor-entrance-active .player-dock {
-    animation: none !important;
-    transform: none !important;
-    opacity: 1 !important;
-  }
-}
-</style>
+    .trans-title {
+      font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      color: #0f1e15;
+    }
+
+    .trans-line-track {
+      width: 180px;
+      height: 3px;
+      background: rgba(15, 30, 21, 0.1);
+      border-radius: 3px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .trans-line-bar {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, #0a5836 0%, #c89e4b 50%, #851b27 100%);
+      border-radius: 3px;
+      animation: transBeamSweep 1.2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+    }
+
+    @keyframes transBeamSweep {
+      0% {
+        transform: translateX(-100%);
+      }
+
+      100% {
+        transform: translateX(100%);
+      }
+    }
+
+    /* Staggered entrance animation for editor interface elements */
+    @keyframes editorSectionFadeUp {
+      0% {
+        opacity: 0;
+        transform: translateY(16px);
+      }
+
+      100% {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    body.editor-entrance-active header.topbar {
+      animation: editorSectionFadeUp 0.52s var(--trans-ease-out) 0.06s both;
+    }
+
+    body.editor-entrance-active .pane:nth-of-type(1) {
+      animation: editorSectionFadeUp 0.52s var(--trans-ease-out) 0.14s both;
+    }
+
+    body.editor-entrance-active .pane:nth-of-type(2) {
+      animation: editorSectionFadeUp 0.52s var(--trans-ease-out) 0.22s both;
+    }
+
+    body.editor-entrance-active .player-dock {
+      animation: editorSectionFadeUp 0.52s var(--trans-ease-out) 0.30s both;
+    }
+
+    /* Clean unencumbered state after entrance completes */
+    body.editor-entered header.topbar,
+    body.editor-entered .pane,
+    body.editor-entered .player-dock {
+      animation: none !important;
+      transform: none !important;
+      opacity: 1 !important;
+    }
+
+    /* Accessibility: Reduced Motion */
+    @media (prefers-reduced-motion: reduce) {
+      .page-transition-overlay {
+        display: none !important;
+        opacity: 0 !important;
+        visibility: hidden !important;
+        transition: none !important;
+        animation: none !important;
+      }
+
+      body.editor-entrance-active header.topbar,
+      body.editor-entrance-active .pane,
+      body.editor-entrance-active .player-dock {
+        animation: none !important;
+        transform: none !important;
+        opacity: 1 !important;
+      }
+    }
+  </style>
 </head>
+
 <body>
 
-<!-- Premium Page Transition Overlay (Handoff from Hero) -->
-<div class="page-transition-overlay" id="pageTransitionOverlay" aria-hidden="true">
-  <div class="trans-glow-disc"></div>
-  <div class="trans-badge">
-    <div class="trans-logo-wave">
-      <svg width="34" height="34" viewBox="0 0 24 24" fill="none">
-        <rect x="1" y="10" width="2" height="4" rx="1" fill="#e8c76a" class="bar b1" />
-        <rect x="4.5" y="7" width="2" height="10" rx="1" fill="#e8c76a" class="bar b2" />
-        <rect x="8" y="4" width="2" height="16" rx="1" fill="#e8c76a" class="bar b3" />
-        <rect x="11.5" y="8" width="2" height="8" rx="1" fill="#e8c76a" class="bar b4" />
-        <rect x="15" y="5" width="2" height="14" rx="1" fill="#e8c76a" class="bar b5" />
-        <rect x="18.5" y="9" width="2" height="6" rx="1" fill="#e8c76a" class="bar b6" />
-      </svg>
-    </div>
-    <div class="trans-title">INITIALIZING CONSOLE</div>
-    <div class="trans-line-track">
-      <div class="trans-line-bar"></div>
+  <!-- Premium Page Transition Overlay (Handoff from Hero) -->
+  <div class="page-transition-overlay" id="pageTransitionOverlay" aria-hidden="true">
+    <div class="trans-glow-disc"></div>
+    <div class="trans-badge">
+      <div class="trans-brand-eyebrow">SYNCLINES STUDIO</div>
+      <div class="trans-logo-wave">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none">
+          <rect x="1" y="10" width="2" height="4" rx="1" fill="#0a5836" class="bar b1" />
+          <rect x="4.5" y="7" width="2" height="10" rx="1" fill="#108a54" class="bar b2" />
+          <rect x="8" y="4" width="2" height="16" rx="1" fill="#c89e4b" class="bar b3" />
+          <rect x="11.5" y="8" width="2" height="8" rx="1" fill="#851b27" class="bar b4" />
+          <rect x="15" y="5" width="2" height="14" rx="1" fill="#0a5836" class="bar b5" />
+          <rect x="18.5" y="9" width="2" height="6" rx="1" fill="#108a54" class="bar b6" />
+        </svg>
+      </div>
+      <div class="trans-title">Sync Lyrics & Script</div>
+      <div class="trans-line-track">
+        <div class="trans-line-bar"></div>
+      </div>
     </div>
   </div>
-</div>
 
-<!-- Ambient 3D audio-reactive grid / particle backdrop -->
-<canvas id="ambientCanvas" class="ambient-canvas" aria-hidden="true"></canvas>
+  <!-- Ambient 3D audio-reactive grid / particle backdrop -->
+  <canvas id="ambientCanvas" class="ambient-canvas" aria-hidden="true"></canvas>
 
-<div class="shell">
-  <div class="wrap">
-    <header class="topbar">
-      <div class="brand">
-        <a href="../index.html" class="glyph-container" id="backToHomeBtn" title="Return to Home Landing" aria-label="Return to Home">
-          <span class="glyph">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M19 12H5M12 19l-7-7 7-7"/>
+  <div class="shell">
+    <div class="wrap">
+      <header class="topbar">
+        <div class="brand">
+          <a href="../index.html" class="glyph-container" id="backToHomeBtn" title="Return to Home Landing"
+            aria-label="Return to Home">
+            <span class="glyph">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"
+                stroke-linejoin="round">
+                <path d="M19 12H5M12 19l-7-7 7-7" />
+              </svg>
+            </span>
+            <span class="glyph-glow"></span>
+          </a>
+          <div class="brand-text">
+            <div class="brand-line">
+              <h1>Sync Lyrics & Script</h1>
+              <span class="version-badge">PRO v8</span>
+            </div>
+            <div class="sub">Tap-to-timestamp lyric tagger — runs entirely in your browser</div>
+          </div>
+        </div>
+        <div class="header-right">
+          <button class="themebtn demo-quick-start" id="loadInteractiveDemoBtn"
+            title="Load complete 1-click playable demo with synchronized electronic track and lyrics"
+            aria-label="Load interactive demo">
+            <span class="icon-wrap" style="color:#e8c76a;font-size:13px;">⚡</span>
+            <span>Live Demo</span>
+          </button>
+          <button class="themebtn" id="shortcutsBtn" title="Keyboard Shortcuts (Press ?)"
+            aria-label="Keyboard shortcuts">
+            <span class="icon-wrap" style="font-size: 13px;">⌨</span>
+            <span>Shortcuts</span>
+          </button>
+          <button class="themebtn" id="audioHapticBtn" title="Toggle audio click feedback"
+            aria-label="Toggle audio feedback">
+            <span class="icon-wrap" style="font-size: 13px;">🔔</span>
+            <span id="audioHapticLabel">Clicks: On</span>
+          </button>
+          <button class="themebtn" id="topHistoryBtn" title="View past session history" aria-label="Session history">
+            <span class="icon-wrap" style="font-size: 13px;">🕒</span>
+            <span>History</span>
+          </button>
+          <button class="themebtn" id="themeBtn" title="Switch theme" aria-label="Switch between dark and light theme">
+            <span class="icon-wrap">
+              <svg class="icon-moon" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor"
+                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+              </svg>
+              <svg class="icon-sun" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor"
+                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="4" />
+                <path
+                  d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41" />
+              </svg>
+            </span>
+            <span id="themeBtnLabel">Dark</span>
+          </button>
+          <div class="status-chip">
+            <div class="status-indicator-dot"></div>
+            <div class="status-text-wrap">
+              <span id="statusLine">no audio loaded · no lyrics loaded</span>
+              <span class="credit">created by <b>Tapendu Pal</b></span>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- ============ PANE 1: Setup ============ -->
+      <section class="pane">
+        <button class="pane-header" id="setupHeader" aria-expanded="true" aria-controls="setupSection">
+          <span class="pane-icon-slot">
+            <span class="pane-num">01</span>
+            <span class="chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path d="M6 9l6 6 6-6" />
+              </svg></span>
+          </span>
+          <span class="pane-title">Setup — song &amp; lyrics</span>
+          <span class="pane-meta" id="setupPaneMeta">no song loaded</span>
+        </button>
+        <div class="accordion-section" id="setupSection">
+          <div class="setup">
+            <div class="card card-audio" id="audioDropzone">
+              <div class="card-header">
+                <span class="card-pill">TRACK 01</span>
+                <h2>Audio Engine</h2>
+                <button type="button" class="demo-loader-pill" id="loadDemoAudioBtn"
+                  title="Load built-in electronic sample track">⚡ Demo Track</button>
+              </div>
+              <p class="card-hint">Drag &amp; drop audio track here, or select from disk.</p>
+              <div class="drop-target-area" id="audioDropTarget">
+                <div class="drop-icon-ring">
+                  <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M9 18V5l12-2v13" />
+                    <circle cx="6" cy="18" r="3" />
+                    <circle cx="18" cy="16" r="3" />
+                  </svg>
+                </div>
+                <span class="drop-prompt">Drop MP3, WAV, FLAC, M4A here</span>
+                <label class="filebtn">
+                  <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 5v14M5 12h14" />
+                  </svg>
+                  Choose Audio File
+                  <input type="file" id="audioFile" accept="audio/*">
+                </label>
+              </div>
+              <div class="filename-wrap" id="audioFileInfoWrap">
+                <div class="file-status-left">
+                  <span class="file-status-icon">●</span>
+                  <span class="filename empty" id="audioFileName">no file selected</span>
+                </div>
+                <button type="button" class="remove-audio-btn" id="removeAudioBtn" title="Remove loaded audio track"
+                  aria-label="Remove loaded audio track" style="display: none;">
+                  <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path
+                      d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M10 11v6M14 11v6" />
+                  </svg>
+                  <span>Remove track</span>
+                </button>
+              </div>
+            </div>
+            <div class="card card-lyrics" id="lyricsDropzone">
+              <div class="card-header">
+                <span class="card-pill">SOURCE</span>
+                <h2>Lyrics &amp; Cues</h2>
+                <button type="button" class="demo-loader-pill" id="loadDemoLyricsBtn" title="Load sample lyrics">📄
+                  Sample Lyrics</button>
+              </div>
+              <p class="card-hint">Paste lyrics, drop a .txt file, or load sample text.</p>
+              <div class="lyrics-toolbar-mini">
+                <label class="filebtn-mini">
+                  <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                    <path d="M14 2v6h6M16 13H8M16 17H8M10 9H8" />
+                  </svg>
+                  Load .txt
+                  <input type="file" id="lyricsFile" accept=".txt,text/plain">
+                </label>
+                <button type="button" class="clear-lyrics-btn" id="clearLyricsBtn"
+                  title="Clear lyrics text">Clear</button>
+              </div>
+              <textarea id="lyricsInput"
+                placeholder="Paste lyrics here. One line per row is fine — line breaks mark where each line ends."></textarea>
+              <div class="mode-row">
+                <span class="label">Split by</span>
+                <div class="segmented" id="modeSeg">
+                  <button data-mode="line" class="active">Line</button>
+                  <button data-mode="word">Word</button>
+                </div>
+              </div>
+              <div class="mode-row">
+                <span class="label">Capture</span>
+                <div class="segmented" id="captureSeg">
+                  <button data-capture="start" class="active">Start only</button>
+                  <button data-capture="both">Start &amp; End</button>
+                </div>
+              </div>
+              <div class="mode-row">
+                <span class="label">Tap using</span>
+                <div class="segmented" id="interactionSeg">
+                  <button data-interaction="buttons" class="active">Buttons</button>
+                  <button data-interaction="click">Click line</button>
+                </div>
+                <button class="buildbtn" id="buildBtn" disabled>Load into console</button>
+              </div>
+              <div class="capture-hint" id="captureHint">Start only — one tap per line, highlight moves on immediately.
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ PANE 2: Console ============ -->
+      <section class="pane">
+        <button class="pane-header" id="consoleHeader" aria-expanded="false" aria-controls="consoleSection">
+          <span class="pane-icon-slot">
+            <span class="pane-num">02</span>
+            <span class="chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path d="M6 9l6 6 6-6" />
+              </svg></span>
+          </span>
+          <span class="pane-title">Console — tagging</span>
+          <span class="pane-meta" id="consolePaneMeta">nothing loaded yet</span>
+        </button>
+        <div class="accordion-section collapsed" id="consoleSection">
+          <div class="maingrid">
+            <div class="panel panel-lyrics">
+              <div class="panel-head">
+                <div class="row1">
+                  <div class="panel-title-wrap">
+                    <span class="panel-badge">INSPECTOR</span>
+                    <h2>Lyrics</h2>
+                    <button id="autoFollowBtn" class="follow-toggle-btn active" type="button"
+                      title="Toggle audio playback sync highlight">
+                      <span class="follow-dot"></span>
+                      <span class="follow-label">Sync: ON</span>
+                    </button>
+                  </div>
+                  <div class="count-wrap">
+                    <span class="skipped-badge" id="skippedBadge" style="display:none;"></span>
+                    <span class="count" id="lyricsCount">0 / 0 complete</span>
+                  </div>
+                </div>
+                <div class="progressbar">
+                  <div class="fill" id="progressFill"></div>
+                </div>
+              </div>
+              <div class="panel-body" id="lyricsPanel">
+                <div class="lyrics-list" id="lyricsList">
+                  <div class="empty-state">Load a song and lyrics above, then click "Load into console" to begin
+                    tagging.</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="panel panel-tags">
+              <div class="panel-head">
+                <div class="row1">
+                  <div class="panel-title-wrap">
+                    <span class="panel-badge">EVENTS</span>
+                    <h2>Captured timestamps</h2>
+                  </div>
+                </div>
+                <div class="row1 action-bar-row">
+                  <div class="toolbar">
+                    <button id="undoBtn" class="undobtn" title="Undo previous action">↺ undo</button>
+                    <button id="resetBtn" class="resetbtn" title="Clear all captures">⟲ reset all</button>
+                  </div>
+                  <div class="toolbar">
+                    <button id="historyBtn" class="sessionbtn" title="View past session history">🕒 history</button>
+                    <button id="saveSessionBtn" class="sessionbtn" title="Save your progress to a file">💾 save</button>
+                    <button id="loadSessionBtn" class="sessionbtn" title="Resume a previously saved session">📂
+                      load</button>
+                  </div>
+                </div>
+              </div>
+              <div class="panel-body" id="tagsPanel">
+                <div class="empty-state">Lines with a Start or End captured will appear here.</div>
+              </div>
+              <div class="panel-foot">
+                <div class="export-row">
+                  <button class="expbtn" id="expLRC" disabled>Export .LRC</button>
+                  <button class="expbtn" id="expSRT" disabled>Export .SRT</button>
+                  <button class="expbtn" id="expVTT" disabled>Export .VTT</button>
+                  <button class="expbtn" id="expTXT" disabled>Export .TXT</button>
+                  <button class="expbtn preview" id="expPreview" disabled
+                    title="Preview formatted output and copy to clipboard">Preview &amp; Copy</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <footer class="hint-foot">
+        Everything stays on this machine — no uploads, no server, no account.<br>
+        <span class="credit-line">SyncLines — created by <b>Tapendu Pal</b></span>
+      </footer>
+    </div>
+  </div>
+
+  <!-- ============ Permanent player dock ============ -->
+  <div class="player-dock" id="playerDock">
+    <div class="dock-resize-handle" id="dockResizeHandle" title="Drag to resize the player">
+      <div class="grip-line"></div>
+      <span class="grip"></span>
+      <div class="grip-line"></div>
+    </div>
+    <div class="player-dock-inner">
+
+      <div class="player-head">
+        <div class="player-song-wrap">
+          <span class="song-dot"></span>
+          <span class="song-name empty" id="playerSongName">No song loaded yet</span>
+        </div>
+        <div class="timeline-tools">
+          <button class="tool-btn" id="blocksExpandBtn" title="Expand lyric blocks track (show text)"
+            aria-label="Expand lyric blocks">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"
+              stroke-linejoin="round">
+              <path d="M18 15l-6-6-6 6" />
             </svg>
-          </span>
-          <span class="glyph-glow"></span>
-        </a>
-        <div class="brand-text">
-          <div class="brand-line">
-            <h1>Timing Console</h1>
-            <span class="version-badge">PRO v8</span>
-          </div>
-          <div class="sub">Tap-to-timestamp lyric tagger — runs entirely in your browser</div>
+          </button>
+          <span class="tool-sep"></span>
+          <button class="tool-btn" id="zoomOutBtn" title="Zoom out" aria-label="Zoom out">−</button>
+          <span class="zoom-label" id="zoomLabel">1×</span>
+          <button class="tool-btn" id="zoomInBtn" title="Zoom in" aria-label="Zoom in">+</button>
         </div>
+        <span class="timecode"><b id="tcCurrent">00:00.000</b> <span id="tcTotal">/ 00:00.000</span></span>
       </div>
-      <div class="header-right">
-        <button class="themebtn demo-quick-start" id="loadInteractiveDemoBtn" title="Load complete 1-click playable demo with synchronized electronic track and lyrics" aria-label="Load interactive demo">
-          <span class="icon-wrap" style="color:#e8c76a;font-size:13px;">⚡</span>
-          <span>Live Demo</span>
-        </button>
-        <button class="themebtn" id="shortcutsBtn" title="Keyboard Shortcuts (Press ?)" aria-label="Keyboard shortcuts">
-          <span class="icon-wrap" style="font-size: 13px;">⌨</span>
-          <span>Shortcuts</span>
-        </button>
-        <button class="themebtn" id="audioHapticBtn" title="Toggle audio click feedback" aria-label="Toggle audio feedback">
-          <span class="icon-wrap" style="font-size: 13px;">🔔</span>
-          <span id="audioHapticLabel">Clicks: On</span>
-        </button>
-        <button class="themebtn" id="topHistoryBtn" title="View past session history" aria-label="Session history">
-          <span class="icon-wrap" style="font-size: 13px;">🕒</span>
-          <span>History</span>
-        </button>
-        <button class="themebtn" id="themeBtn" title="Switch theme" aria-label="Switch between dark and light theme">
-          <span class="icon-wrap">
-            <svg class="icon-moon" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-            <svg class="icon-sun" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
-          </span>
-          <span id="themeBtnLabel">Dark</span>
-        </button>
-        <div class="status-chip">
-          <div class="status-indicator-dot"></div>
-          <div class="status-text-wrap">
-            <span id="statusLine">no audio loaded · no lyrics loaded</span>
-            <span class="credit">created by <b>Tapendu Pal</b></span>
-          </div>
-        </div>
-      </div>
-    </header>
 
-    <!-- ============ PANE 1: Setup ============ -->
-    <section class="pane">
-      <button class="pane-header" id="setupHeader" aria-expanded="true" aria-controls="setupSection">
-        <span class="pane-icon-slot">
-          <span class="pane-num">01</span>
-          <span class="chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></span>
-        </span>
-        <span class="pane-title">Setup — song &amp; lyrics</span>
-        <span class="pane-meta" id="setupPaneMeta">no song loaded</span>
-      </button>
-      <div class="accordion-section" id="setupSection">
-        <div class="setup">
-          <div class="card card-audio" id="audioDropzone">
-            <div class="card-header">
-              <span class="card-pill">TRACK 01</span>
-              <h2>Audio Engine</h2>
-              <button type="button" class="demo-loader-pill" id="loadDemoAudioBtn" title="Load built-in electronic sample track">⚡ Demo Track</button>
-            </div>
-            <p class="card-hint">Drag &amp; drop audio track here, or select from disk.</p>
-            <div class="drop-target-area" id="audioDropTarget">
-              <div class="drop-icon-ring">
-                <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M9 18V5l12-2v13"/>
-                  <circle cx="6" cy="18" r="3"/>
-                  <circle cx="18" cy="16" r="3"/>
-                </svg>
-              </div>
-              <span class="drop-prompt">Drop MP3, WAV, FLAC, M4A here</span>
-              <label class="filebtn">
-                <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
-                Choose Audio File
-                <input type="file" id="audioFile" accept="audio/*">
-              </label>
-            </div>
-            <div class="filename-wrap" id="audioFileInfoWrap">
-              <div class="file-status-left">
-                <span class="file-status-icon">●</span>
-                <span class="filename empty" id="audioFileName">no file selected</span>
-              </div>
-              <button type="button" class="remove-audio-btn" id="removeAudioBtn" title="Remove loaded audio track" aria-label="Remove loaded audio track" style="display: none;">
-                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M10 11v6M14 11v6"/>
-                </svg>
-                <span>Remove track</span>
-              </button>
-            </div>
-          </div>
-          <div class="card card-lyrics" id="lyricsDropzone">
-            <div class="card-header">
-              <span class="card-pill">SOURCE</span>
-              <h2>Lyrics &amp; Cues</h2>
-              <button type="button" class="demo-loader-pill" id="loadDemoLyricsBtn" title="Load sample lyrics">📄 Sample Lyrics</button>
-            </div>
-            <p class="card-hint">Paste lyrics, drop a .txt file, or load sample text.</p>
-            <div class="lyrics-toolbar-mini">
-              <label class="filebtn-mini">
-                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg>
-                Load .txt
-                <input type="file" id="lyricsFile" accept=".txt,text/plain">
-              </label>
-              <button type="button" class="clear-lyrics-btn" id="clearLyricsBtn" title="Clear lyrics text">Clear</button>
-            </div>
-            <textarea id="lyricsInput" placeholder="Paste lyrics here. One line per row is fine — line breaks mark where each line ends."></textarea>
-            <div class="mode-row">
-              <span class="label">Split by</span>
-              <div class="segmented" id="modeSeg">
-                <button data-mode="line" class="active">Line</button>
-                <button data-mode="word">Word</button>
-              </div>
-            </div>
-            <div class="mode-row">
-              <span class="label">Capture</span>
-              <div class="segmented" id="captureSeg">
-                <button data-capture="start" class="active">Start only</button>
-                <button data-capture="both">Start &amp; End</button>
-              </div>
-            </div>
-            <div class="mode-row">
-              <span class="label">Tap using</span>
-              <div class="segmented" id="interactionSeg">
-                <button data-interaction="buttons" class="active">Buttons</button>
-                <button data-interaction="click">Click line</button>
-              </div>
-              <button class="buildbtn" id="buildBtn" disabled>Load into console</button>
-            </div>
-            <div class="capture-hint" id="captureHint">Start only — one tap per line, highlight moves on immediately.</div>
+      <!-- lyric blocks track, sits directly above the waveform -->
+      <div class="blocks-track" id="blocksTrack">
+        <div class="blocks-inner" id="blocksInner"></div>
+        <div class="blocks-empty" id="blocksEmpty">Tagged lines will appear here as blocks</div>
+      </div>
+
+      <div class="waveform-wrap" id="waveformWrap">
+        <canvas id="waveformCanvas"></canvas>
+        <div class="waveform-hover-line" id="waveformHoverLine"><span class="hl-tag" id="hoverTimeTag">00:00.000</span>
+        </div>
+        <div class="waveform-playhead" id="waveformPlayhead"><span class="ph-grip"></span></div>
+        <div class="waveform-empty" id="waveformEmpty">Waveform appears once you load a song</div>
+      </div>
+
+      <div class="minimap" id="minimap">
+        <canvas id="minimapCanvas"></canvas>
+        <div class="minimap-window" id="minimapWindow"></div>
+      </div>
+
+      <div class="transport-controls">
+        <div class="transport-buttons">
+          <button class="iconbtn" id="backBtn" title="Back 2s" aria-label="Seek backward 2 seconds">
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <path d="M11 18V6l-8.5 6zM21 18V6l-8.5 6z" />
+            </svg>
+          </button>
+          <button class="iconbtn play" id="playBtn" title="Play / Pause (Space)" aria-label="Play or Pause">
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <path d="M8 5v14l11-7z" />
+            </svg>
+          </button>
+          <button class="iconbtn" id="fwdBtn" title="Forward 2s" aria-label="Seek forward 2 seconds">
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <path d="M13 6v12l8.5-6zM3 6v12l8.5-6z" />
+            </svg>
+          </button>
+        </div>
+        <div class="speedgroup">
+          <span class="label">SPEED</span>
+          <div class="segmented" id="speedSeg">
+            <button data-speed="0.5">0.5×</button>
+            <button data-speed="0.75">0.75×</button>
+            <button data-speed="1" class="active">1×</button>
+            <button data-speed="1.25">1.25×</button>
           </div>
         </div>
-      </div>
-    </section>
-
-    <!-- ============ PANE 2: Console ============ -->
-    <section class="pane">
-      <button class="pane-header" id="consoleHeader" aria-expanded="false" aria-controls="consoleSection">
-        <span class="pane-icon-slot">
-          <span class="pane-num">02</span>
-          <span class="chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></span>
-        </span>
-        <span class="pane-title">Console — tagging</span>
-        <span class="pane-meta" id="consolePaneMeta">nothing loaded yet</span>
-      </button>
-      <div class="accordion-section collapsed" id="consoleSection">
-        <div class="maingrid">
-          <div class="panel panel-lyrics">
-            <div class="panel-head">
-              <div class="row1">
-                <div class="panel-title-wrap">
-                  <span class="panel-badge">INSPECTOR</span>
-                  <h2>Lyrics</h2>
-                  <button id="autoFollowBtn" class="follow-toggle-btn active" type="button" title="Toggle audio playback sync highlight">
-                    <span class="follow-dot"></span>
-                    <span class="follow-label">Sync: ON</span>
-                  </button>
-                </div>
-                <div class="count-wrap">
-                  <span class="skipped-badge" id="skippedBadge" style="display:none;"></span>
-                  <span class="count" id="lyricsCount">0 / 0 complete</span>
-                </div>
-              </div>
-              <div class="progressbar"><div class="fill" id="progressFill"></div></div>
-            </div>
-            <div class="panel-body" id="lyricsPanel">
-              <div class="lyrics-list" id="lyricsList">
-                <div class="empty-state">Load a song and lyrics above, then click "Load into console" to begin tagging.</div>
-              </div>
-            </div>
-          </div>
-
-          <div class="panel panel-tags">
-            <div class="panel-head">
-              <div class="row1">
-                <div class="panel-title-wrap">
-                  <span class="panel-badge">EVENTS</span>
-                  <h2>Captured timestamps</h2>
-                </div>
-              </div>
-              <div class="row1 action-bar-row">
-                <div class="toolbar">
-                  <button id="undoBtn" class="undobtn" title="Undo previous action">↺ undo</button>
-                  <button id="resetBtn" class="resetbtn" title="Clear all captures">⟲ reset all</button>
-                </div>
-                <div class="toolbar">
-                  <button id="historyBtn" class="sessionbtn" title="View past session history">🕒 history</button>
-                  <button id="saveSessionBtn" class="sessionbtn" title="Save your progress to a file">💾 save</button>
-                  <button id="loadSessionBtn" class="sessionbtn" title="Resume a previously saved session">📂 load</button>
-                </div>
-              </div>
-            </div>
-            <div class="panel-body" id="tagsPanel">
-              <div class="empty-state">Lines with a Start or End captured will appear here.</div>
-            </div>
-            <div class="panel-foot">
-              <div class="export-row">
-                <button class="expbtn" id="expLRC" disabled>Export .LRC</button>
-                <button class="expbtn" id="expSRT" disabled>Export .SRT</button>
-                <button class="expbtn" id="expVTT" disabled>Export .VTT</button>
-                <button class="expbtn" id="expTXT" disabled>Export .TXT</button>
-                <button class="expbtn preview" id="expPreview" disabled title="Preview formatted output and copy to clipboard">Preview &amp; Copy</button>
-              </div>
-            </div>
-          </div>
+        <div class="spectrum-wrap" id="spectrumWrap">
+          <div class="spectrum-idle-note" id="spectrumIdleNote"></div>
         </div>
       </div>
-    </section>
 
-    <footer class="hint-foot">
-      Everything stays on this machine — no uploads, no server, no account.<br>
-      <span class="credit-line">Timing Console — created by <b>Tapendu Pal</b></span>
-    </footer>
+    </div>
   </div>
-</div>
 
-<!-- ============ Permanent player dock ============ -->
-<div class="player-dock" id="playerDock">
-  <div class="dock-resize-handle" id="dockResizeHandle" title="Drag to resize the player">
-    <div class="grip-line"></div>
-    <span class="grip"></span>
-    <div class="grip-line"></div>
+  <audio id="player"></audio>
+  <input type="file" id="sessionFileInput" accept=".json,application/json" style="display:none">
+  <!-- ============ History Modal ============ -->
+  <div class="modal-backdrop" id="historyModal" aria-hidden="true" style="display:none">
+    <div class="modal-card" role="dialog" aria-labelledby="historyTitle" aria-modal="true">
+      <div class="modal-head">
+        <div class="modal-title-wrap">
+          <span class="modal-badge">ARCHIVE</span>
+          <h2 id="historyTitle">Session History</h2>
+        </div>
+        <button class="modal-close-btn" id="historyCloseBtn" title="Close history" aria-label="Close modal">✕</button>
+      </div>
+      <p class="modal-hint">Past tagging sessions saved in this browser. Click any snapshot to resume exactly where you
+        left off.</p>
+      <div class="history-list" id="historyList">
+        <!-- Populated dynamically by app.js -->
+      </div>
+      <div class="modal-foot">
+        <button class="modal-action-btn secondary" id="clearHistoryBtn" title="Clear all history snapshots">Clear All
+          History</button>
+        <button class="modal-action-btn primary" id="historyDoneBtn">Done</button>
+      </div>
+    </div>
   </div>
-  <div class="player-dock-inner">
 
-    <div class="player-head">
-      <div class="player-song-wrap">
-        <span class="song-dot"></span>
-        <span class="song-name empty" id="playerSongName">No song loaded yet</span>
+  <!-- ============ Preview & Copy Modal ============ -->
+  <div class="modal-backdrop" id="previewModal" aria-hidden="true" style="display:none">
+    <div class="modal-card preview-modal-card" role="dialog" aria-labelledby="previewTitle" aria-modal="true">
+      <div class="modal-head">
+        <div class="modal-title-wrap">
+          <span class="modal-badge">EXPORT PREVIEW</span>
+          <h2 id="previewTitle">Preview &amp; Copy</h2>
+        </div>
+        <button class="modal-close-btn" id="previewCloseBtn" title="Close preview" aria-label="Close modal">✕</button>
       </div>
-      <div class="timeline-tools">
-        <button class="tool-btn" id="blocksExpandBtn" title="Expand lyric blocks track (show text)" aria-label="Expand lyric blocks">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M18 15l-6-6-6 6"/></svg>
-        </button>
-        <span class="tool-sep"></span>
-        <button class="tool-btn" id="zoomOutBtn" title="Zoom out" aria-label="Zoom out">−</button>
-        <span class="zoom-label" id="zoomLabel">1×</span>
-        <button class="tool-btn" id="zoomInBtn" title="Zoom in" aria-label="Zoom in">+</button>
+      <div class="preview-modal-toolbar">
+        <div class="preview-format-tabs" id="previewFormatTabs" role="tablist" aria-label="Export format">
+          <button type="button" class="preview-tab active" data-format="lrc" role="tab"
+            aria-selected="true">.LRC</button>
+          <button type="button" class="preview-tab" data-format="srt" role="tab" aria-selected="false">.SRT</button>
+          <button type="button" class="preview-tab" data-format="vtt" role="tab" aria-selected="false">.VTT</button>
+          <button type="button" class="preview-tab" data-format="txt" role="tab" aria-selected="false">.TXT</button>
+        </div>
+        <div class="preview-meta-info" id="previewMetaInfo">0 lines</div>
       </div>
-      <span class="timecode"><b id="tcCurrent">00:00.000</b> <span id="tcTotal">/ 00:00.000</span></span>
-    </div>
-
-    <!-- lyric blocks track, sits directly above the waveform -->
-    <div class="blocks-track" id="blocksTrack">
-      <div class="blocks-inner" id="blocksInner"></div>
-      <div class="blocks-empty" id="blocksEmpty">Tagged lines will appear here as blocks</div>
-    </div>
-
-    <div class="waveform-wrap" id="waveformWrap">
-      <canvas id="waveformCanvas"></canvas>
-      <div class="waveform-hover-line" id="waveformHoverLine"><span class="hl-tag" id="hoverTimeTag">00:00.000</span></div>
-      <div class="waveform-playhead" id="waveformPlayhead"><span class="ph-grip"></span></div>
-      <div class="waveform-empty" id="waveformEmpty">Waveform appears once you load a song</div>
-    </div>
-
-    <div class="minimap" id="minimap">
-      <canvas id="minimapCanvas"></canvas>
-      <div class="minimap-window" id="minimapWindow"></div>
-    </div>
-
-    <div class="transport-controls">
-      <div class="transport-buttons">
-        <button class="iconbtn" id="backBtn" title="Back 2s" aria-label="Seek backward 2 seconds">
-          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M11 18V6l-8.5 6zM21 18V6l-8.5 6z"/></svg>
-        </button>
-        <button class="iconbtn play" id="playBtn" title="Play / Pause (Space)" aria-label="Play or Pause">
-          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
-        </button>
-        <button class="iconbtn" id="fwdBtn" title="Forward 2s" aria-label="Seek forward 2 seconds">
-          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M13 6v12l8.5-6zM3 6v12l8.5-6z"/></svg>
-        </button>
+      <div class="preview-body">
+        <textarea id="previewTextarea" class="preview-textarea" spellcheck="false"
+          placeholder="Formatted lyrics will appear here..."></textarea>
       </div>
-      <div class="speedgroup">
-        <span class="label">SPEED</span>
-        <div class="segmented" id="speedSeg">
-          <button data-speed="0.5">0.5×</button>
-          <button data-speed="0.75">0.75×</button>
-          <button data-speed="1" class="active">1×</button>
-          <button data-speed="1.25">1.25×</button>
+      <div class="modal-foot preview-modal-foot">
+        <span class="preview-scratch-hint">Scratchpad view — editing here does not alter underlying session data.</span>
+        <div class="preview-actions">
+          <button class="modal-action-btn secondary" id="previewDoneBtn">Close</button>
+          <button class="modal-action-btn primary" id="previewCopyBtn" title="Copy preview text to clipboard">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+            </svg>
+            <span>Copy to clipboard</span>
+          </button>
         </div>
       </div>
-      <div class="spectrum-wrap" id="spectrumWrap">
-        <div class="spectrum-idle-note" id="spectrumIdleNote"></div>
-      </div>
-    </div>
-
-  </div>
-</div>
-
-<audio id="player"></audio>
-<input type="file" id="sessionFileInput" accept=".json,application/json" style="display:none">
-<!-- ============ History Modal ============ -->
-<div class="modal-backdrop" id="historyModal" aria-hidden="true" style="display:none">
-  <div class="modal-card" role="dialog" aria-labelledby="historyTitle" aria-modal="true">
-    <div class="modal-head">
-      <div class="modal-title-wrap">
-        <span class="modal-badge">ARCHIVE</span>
-        <h2 id="historyTitle">Session History</h2>
-      </div>
-      <button class="modal-close-btn" id="historyCloseBtn" title="Close history" aria-label="Close modal">✕</button>
-    </div>
-    <p class="modal-hint">Past tagging sessions saved in this browser. Click any snapshot to resume exactly where you left off.</p>
-    <div class="history-list" id="historyList">
-      <!-- Populated dynamically by app.js -->
-    </div>
-    <div class="modal-foot">
-      <button class="modal-action-btn secondary" id="clearHistoryBtn" title="Clear all history snapshots">Clear All History</button>
-      <button class="modal-action-btn primary" id="historyDoneBtn">Done</button>
     </div>
   </div>
-</div>
 
-<!-- ============ Preview & Copy Modal ============ -->
-<div class="modal-backdrop" id="previewModal" aria-hidden="true" style="display:none">
-  <div class="modal-card preview-modal-card" role="dialog" aria-labelledby="previewTitle" aria-modal="true">
-    <div class="modal-head">
-      <div class="modal-title-wrap">
-        <span class="modal-badge">EXPORT PREVIEW</span>
-        <h2 id="previewTitle">Preview &amp; Copy</h2>
+  <!-- ============ Keyboard Shortcuts Modal ============ -->
+  <div class="modal-backdrop" id="shortcutsModal" aria-hidden="true" style="display:none">
+    <div class="modal-card shortcuts-modal-card" role="dialog" aria-labelledby="shortcutsTitle" aria-modal="true">
+      <div class="modal-head">
+        <div class="modal-title-wrap">
+          <span class="modal-badge">QUICK REFERENCE</span>
+          <h2 id="shortcutsTitle">Keyboard Shortcuts</h2>
+        </div>
+        <button class="modal-close-btn" id="shortcutsCloseBtn" title="Close shortcuts"
+          aria-label="Close modal">✕</button>
       </div>
-      <button class="modal-close-btn" id="previewCloseBtn" title="Close preview" aria-label="Close modal">✕</button>
-    </div>
-    <div class="preview-modal-toolbar">
-      <div class="preview-format-tabs" id="previewFormatTabs" role="tablist" aria-label="Export format">
-        <button type="button" class="preview-tab active" data-format="lrc" role="tab" aria-selected="true">.LRC</button>
-        <button type="button" class="preview-tab" data-format="srt" role="tab" aria-selected="false">.SRT</button>
-        <button type="button" class="preview-tab" data-format="vtt" role="tab" aria-selected="false">.VTT</button>
-        <button type="button" class="preview-tab" data-format="txt" role="tab" aria-selected="false">.TXT</button>
+      <div class="shortcuts-grid">
+        <div class="shortcut-item">
+          <div class="shortcut-keys"><kbd>Space</kbd> / <kbd>Enter</kbd></div>
+          <div class="shortcut-desc">Play or pause audio playback</div>
+        </div>
+        <div class="shortcut-item">
+          <div class="shortcut-keys"><kbd>S</kbd></div>
+          <div class="shortcut-desc">Mark <b>Start</b> timestamp on current active line</div>
+        </div>
+        <div class="shortcut-item">
+          <div class="shortcut-keys"><kbd>E</kbd></div>
+          <div class="shortcut-desc">Mark <b>End</b> timestamp on current active line</div>
+        </div>
+        <div class="shortcut-item">
+          <div class="shortcut-keys"><kbd>←</kbd> / <kbd>→</kbd></div>
+          <div class="shortcut-desc">Seek backward / forward 2s (Hold Shift for 5s)</div>
+        </div>
+        <div class="shortcut-item">
+          <div class="shortcut-keys"><kbd>+</kbd> / <kbd>−</kbd></div>
+          <div class="shortcut-desc">Zoom timeline scrubber view in or out</div>
+        </div>
+        <div class="shortcut-item">
+          <div class="shortcut-keys"><kbd>Ctrl</kbd> + <kbd>Z</kbd></div>
+          <div class="shortcut-desc">Undo previous timestamp capture action</div>
+        </div>
+        <div class="shortcut-item">
+          <div class="shortcut-keys"><kbd>?</kbd></div>
+          <div class="shortcut-desc">Open or close this shortcuts reference guide</div>
+        </div>
+        <div class="shortcut-item">
+          <div class="shortcut-keys"><kbd>Esc</kbd></div>
+          <div class="shortcut-desc">Close any open dialog or return focus to timeline</div>
+        </div>
       </div>
-      <div class="preview-meta-info" id="previewMetaInfo">0 lines</div>
+      <div class="modal-foot shortcuts-modal-foot">
+        <span class="preview-scratch-hint">Pro tip: Set speed to 0.75× for intricate or fast vocal rhythms.</span>
+        <button class="modal-action-btn primary" id="shortcutsDoneBtn">Got it</button>
+      </div>
     </div>
-    <div class="preview-body">
-      <textarea id="previewTextarea" class="preview-textarea" spellcheck="false" placeholder="Formatted lyrics will appear here..."></textarea>
-    </div>
-    <div class="modal-foot preview-modal-foot">
-      <span class="preview-scratch-hint">Scratchpad view — editing here does not alter underlying session data.</span>
-      <div class="preview-actions">
-        <button class="modal-action-btn secondary" id="previewDoneBtn">Close</button>
-        <button class="modal-action-btn primary" id="previewCopyBtn" title="Copy preview text to clipboard">
-          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-          <span>Copy to clipboard</span>
+  </div>
+
+  <!-- ============ Remove Audio Track Confirmation Modal ============ -->
+  <div class="modal-backdrop" id="removeAudioModal" aria-hidden="true" style="display:none">
+    <div class="modal-card confirm-modal-card" role="dialog" aria-labelledby="removeAudioTitle" aria-modal="true">
+      <div class="modal-head">
+        <div class="modal-title-wrap">
+          <span class="modal-badge danger">CONFIRM REMOVE</span>
+          <h2 id="removeAudioTitle">Remove Audio Track?</h2>
+        </div>
+        <button class="modal-close-btn" id="removeAudioCloseBtn" title="Cancel" aria-label="Close modal">✕</button>
+      </div>
+      <div class="confirm-modal-body">
+        <div class="confirm-icon-wrap danger">
+          <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path
+              d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M10 11v6M14 11v6" />
+          </svg>
+        </div>
+        <div class="confirm-text-wrap">
+          <p class="confirm-main-text">Are you sure you want to unload and remove this audio track?</p>
+          <p class="confirm-track-name" id="confirmTrackNameDisplay">Track: <b>demo.mp3</b></p>
+          <p class="confirm-sub-text">Playback and waveform visualization will be reset. Any lyrics and timestamp tags
+            you've created will remain intact in the console.</p>
+        </div>
+      </div>
+      <div class="modal-foot">
+        <button class="modal-action-btn secondary" id="removeAudioCancelBtn">Cancel</button>
+        <button class="modal-action-btn danger" id="removeAudioConfirmBtn">
+          <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+          </svg>
+          <span>Yes, Remove Track</span>
         </button>
       </div>
     </div>
   </div>
-</div>
 
-<!-- ============ Keyboard Shortcuts Modal ============ -->
-<div class="modal-backdrop" id="shortcutsModal" aria-hidden="true" style="display:none">
-  <div class="modal-card shortcuts-modal-card" role="dialog" aria-labelledby="shortcutsTitle" aria-modal="true">
-    <div class="modal-head">
-      <div class="modal-title-wrap">
-        <span class="modal-badge">QUICK REFERENCE</span>
-        <h2 id="shortcutsTitle">Keyboard Shortcuts</h2>
-      </div>
-      <button class="modal-close-btn" id="shortcutsCloseBtn" title="Close shortcuts" aria-label="Close modal">✕</button>
-    </div>
-    <div class="shortcuts-grid">
-      <div class="shortcut-item">
-        <div class="shortcut-keys"><kbd>Space</kbd> / <kbd>Enter</kbd></div>
-        <div class="shortcut-desc">Play or pause audio playback</div>
-      </div>
-      <div class="shortcut-item">
-        <div class="shortcut-keys"><kbd>S</kbd></div>
-        <div class="shortcut-desc">Mark <b>Start</b> timestamp on current active line</div>
-      </div>
-      <div class="shortcut-item">
-        <div class="shortcut-keys"><kbd>E</kbd></div>
-        <div class="shortcut-desc">Mark <b>End</b> timestamp on current active line</div>
-      </div>
-      <div class="shortcut-item">
-        <div class="shortcut-keys"><kbd>←</kbd> / <kbd>→</kbd></div>
-        <div class="shortcut-desc">Seek backward / forward 2s (Hold Shift for 5s)</div>
-      </div>
-      <div class="shortcut-item">
-        <div class="shortcut-keys"><kbd>+</kbd> / <kbd>−</kbd></div>
-        <div class="shortcut-desc">Zoom timeline scrubber view in or out</div>
-      </div>
-      <div class="shortcut-item">
-        <div class="shortcut-keys"><kbd>Ctrl</kbd> + <kbd>Z</kbd></div>
-        <div class="shortcut-desc">Undo previous timestamp capture action</div>
-      </div>
-      <div class="shortcut-item">
-        <div class="shortcut-keys"><kbd>?</kbd></div>
-        <div class="shortcut-desc">Open or close this shortcuts reference guide</div>
-      </div>
-      <div class="shortcut-item">
-        <div class="shortcut-keys"><kbd>Esc</kbd></div>
-        <div class="shortcut-desc">Close any open dialog or return focus to timeline</div>
-      </div>
-    </div>
-    <div class="modal-foot shortcuts-modal-foot">
-      <span class="preview-scratch-hint">Pro tip: Set speed to 0.75× for intricate or fast vocal rhythms.</span>
-      <button class="modal-action-btn primary" id="shortcutsDoneBtn">Got it</button>
-    </div>
-  </div>
-</div>
+  <div class="toast" id="toast"></div>
 
-<!-- ============ Remove Audio Track Confirmation Modal ============ -->
-<div class="modal-backdrop" id="removeAudioModal" aria-hidden="true" style="display:none">
-  <div class="modal-card confirm-modal-card" role="dialog" aria-labelledby="removeAudioTitle" aria-modal="true">
-    <div class="modal-head">
-      <div class="modal-title-wrap">
-        <span class="modal-badge danger">CONFIRM REMOVE</span>
-        <h2 id="removeAudioTitle">Remove Audio Track?</h2>
-      </div>
-      <button class="modal-close-btn" id="removeAudioCloseBtn" title="Cancel" aria-label="Close modal">✕</button>
-    </div>
-    <div class="confirm-modal-body">
-      <div class="confirm-icon-wrap danger">
-        <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M10 11v6M14 11v6"/>
-        </svg>
-      </div>
-      <div class="confirm-text-wrap">
-        <p class="confirm-main-text">Are you sure you want to unload and remove this audio track?</p>
-        <p class="confirm-track-name" id="confirmTrackNameDisplay">Track: <b>demo.mp3</b></p>
-        <p class="confirm-sub-text">Playback and waveform visualization will be reset. Any lyrics and timestamp tags you've created will remain intact in the console.</p>
-      </div>
-    </div>
-    <div class="modal-foot">
-      <button class="modal-action-btn secondary" id="removeAudioCancelBtn">Cancel</button>
-      <button class="modal-action-btn danger" id="removeAudioConfirmBtn">
-        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
-        </svg>
-        <span>Yes, Remove Track</span>
-      </button>
-    </div>
-  </div>
-</div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="spectrum.js"></script>
+  <script src="app.js"></script>
 
-<div class="toast" id="toast"></div>
+  <!-- Page Entrance Controller -->
+  <script>
+    (function () {
+      const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const overlay = document.getElementById('pageTransitionOverlay');
+      const backBtn = document.getElementById('backToHomeBtn');
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-<script src="spectrum.js"></script>
-<script src="app.js"></script>
+      function revealEditor() {
+        document.body.classList.add('editor-entrance-active');
 
-<!-- Page Entrance Controller -->
-<script>
-  (function () {
-    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const overlay = document.getElementById('pageTransitionOverlay');
-    const backBtn = document.getElementById('backToHomeBtn');
-
-    function revealEditor() {
-      document.body.classList.add('editor-entrance-active');
-
-      if (prefersReducedMotion) {
-        if (overlay) overlay.style.display = 'none';
-        document.body.classList.add('editor-entered');
-        return;
-      }
-
-      if (overlay) {
-        overlay.classList.add('fade-out');
-      }
-
-      // Allow 580ms for overlay fade and staggered section reveals, then fully release overlay
-      setTimeout(function () {
-        if (overlay) {
-          overlay.style.display = 'none';
-          overlay.style.pointerEvents = 'none';
-        }
-        document.body.classList.add('editor-entered');
-      }, 580);
-    }
-
-    if (backBtn) {
-      backBtn.addEventListener('click', function (e) {
-        e.preventDefault();
         if (prefersReducedMotion) {
-          window.location.href = '../index.html';
+          if (overlay) overlay.style.display = 'none';
+          document.body.classList.add('editor-entered');
           return;
         }
-        if (overlay) {
-          overlay.style.display = 'flex';
-          overlay.style.pointerEvents = 'auto';
-          requestAnimationFrame(function () {
-            overlay.classList.remove('fade-out');
-          });
-        }
-        setTimeout(function () {
-          window.location.href = '../index.html';
-        }, 450);
-      });
-    }
 
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', function () {
+        if (overlay) {
+          overlay.classList.add('fade-out');
+        }
+
+        // Allow 580ms for overlay fade and staggered section reveals, then fully release overlay
+        setTimeout(function () {
+          if (overlay) {
+            overlay.style.display = 'none';
+            overlay.style.pointerEvents = 'none';
+          }
+          document.body.classList.add('editor-entered');
+        }, 580);
+      }
+
+      if (backBtn) {
+        backBtn.addEventListener('click', function (e) {
+          e.preventDefault();
+          if (prefersReducedMotion) {
+            window.location.href = '../index.html';
+            return;
+          }
+          if (overlay) {
+            overlay.style.display = 'flex';
+            overlay.style.pointerEvents = 'auto';
+            requestAnimationFrame(function () {
+              overlay.classList.remove('fade-out');
+            });
+          }
+          setTimeout(function () {
+            window.location.href = '../index.html';
+          }, 450);
+        });
+      }
+
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', function () {
+          requestAnimationFrame(revealEditor);
+        });
+      } else {
         requestAnimationFrame(revealEditor);
-      });
-    } else {
-      requestAnimationFrame(revealEditor);
-    }
-  })();
-</script>
+      }
+    })();
+  </script>
 </body>
+
 </html>

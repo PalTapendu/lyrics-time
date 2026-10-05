@@ -1,4 +1,4 @@
-# Timing Console — Lyric Timestamp Tagger
+# Sync Lyrics & Script — Lyric Timestamp Tagger
 
 A tap-to-timestamp tool for tagging the exact Start (and, if you want,
 End) of every line or word in a song. Runs entirely on your own machine —
@@ -140,4 +140,4 @@ The dock at the bottom is always on screen and never scrolls away.
 
 ---
 
-**Timing Console** — created by **Tapendu Pal**.
+**SyncLines** — created by **Tapendu Pal**.

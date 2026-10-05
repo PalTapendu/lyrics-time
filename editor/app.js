@@ -1,30 +1,45 @@
 /* =================================================================
-   TIMING CONSOLE — app logic v3
+   SYNC LYRICS & SCRIPT — app logic v3
 ================================================================= */
 (function () {
   const $ = id => document.getElementById(id);
 
   /* ---------------- theme ---------------- */
   (function initTheme() {
-    const THEME_KEY = 'timing-console-theme';
+    const THEME_KEY = 'synclines-editor-theme';
     const root = document.documentElement;
     const themeBtn = $('themeBtn'), themeBtnLabel = $('themeBtnLabel');
     function apply(theme) {
-      if (theme === 'light') root.setAttribute('data-theme', 'light');
-      else root.removeAttribute('data-theme');
-      if (themeBtnLabel) themeBtnLabel.textContent = theme === 'light' ? 'Light' : 'Dark';
+      if (theme === 'dark') {
+        root.setAttribute('data-theme', 'dark');
+        if (themeBtnLabel) themeBtnLabel.textContent = 'Light';
+        if (themeBtn) {
+          themeBtn.title = 'Switch to light theme (Press to activate)';
+          themeBtn.setAttribute('aria-label', 'Switch to light theme');
+        }
+      } else {
+        root.setAttribute('data-theme', 'light');
+        if (themeBtnLabel) themeBtnLabel.textContent = 'Dark';
+        if (themeBtn) {
+          themeBtn.title = 'Switch to dark theme (Press to activate)';
+          themeBtn.setAttribute('aria-label', 'Switch to dark theme');
+        }
+      }
       if (window.TimingConsoleSpectrum) window.TimingConsoleSpectrum.updateColors();
     }
     let stored = null;
     try { stored = localStorage.getItem(THEME_KEY); } catch (e) { }
-    const light = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches;
-    apply(stored || (light ? 'light' : 'dark'));
-    themeBtn.addEventListener('click', () => {
-      const next = root.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
-      apply(next);
-      try { localStorage.setItem(THEME_KEY, next); } catch (e) { }
-      drawWaveform(); drawMinimap();
-    });
+    // Default to 'light' theme on initial load and navigation
+    apply(stored === 'dark' ? 'dark' : 'light');
+    if (themeBtn) {
+      themeBtn.addEventListener('click', () => {
+        const isDark = root.getAttribute('data-theme') === 'dark';
+        const next = isDark ? 'light' : 'dark';
+        apply(next);
+        try { localStorage.setItem(THEME_KEY, next); } catch (e) { }
+        drawWaveform(); drawMinimap();
+      });
+    }
   })();
 
   /* ---------------- refs ---------------- */
@@ -507,7 +522,7 @@
     }
 
     const blob = new Blob([wavBytes], { type: 'audio/wav' });
-    return new File([blob], 'Timing_Console_Demo_Track.wav', { type: 'audio/wav' });
+    return new File([blob], 'Sync_Lyrics_Script_Demo_Track.wav', { type: 'audio/wav' });
   }
 
   const loadDemoAudioBtn = $('loadDemoAudioBtn');
@@ -743,11 +758,19 @@
     const mid = h / 2, n = waveformPeaks.length;
     const vd = visibleDur(), playedT = player.currentTime || 0;
 
-    // Warm, calm golden acoustic gradient for played bars
+    // Acoustic gradient for played bars (adaptive for light and dark themes)
+    const isLight = document.documentElement.getAttribute('data-theme') === 'light';
     const playedGrad = ctx.createLinearGradient(0, 0, 0, h);
-    playedGrad.addColorStop(0, 'rgba(245, 223, 154, 0.95)');
-    playedGrad.addColorStop(0.5, 'rgba(253, 247, 236, 0.98)');
-    playedGrad.addColorStop(1, 'rgba(226, 179, 74, 0.90)');
+    if (isLight) {
+      // SyncLines Emerald & Gold Acoustic Gradient (derived from hero waveform)
+      playedGrad.addColorStop(0, '#10b981');
+      playedGrad.addColorStop(0.5, '#0f764a');
+      playedGrad.addColorStop(1, '#c89e4b');
+    } else {
+      playedGrad.addColorStop(0, 'rgba(245, 223, 154, 0.95)');
+      playedGrad.addColorStop(0.5, 'rgba(253, 247, 236, 0.98)');
+      playedGrad.addColorStop(1, 'rgba(226, 179, 74, 0.90)');
+    }
 
     for (let x = 0; x < w; x++) {
       const t0 = viewStart + (x / w) * vd;
@@ -2271,7 +2294,7 @@
 
   async function loadSessionFromObject(obj) {
     if (!obj || obj.kind !== 'timing-console-session' || !Array.isArray(obj.items)) {
-      showToast('That file doesn\u2019t look like a Timing Console session.');
+      showToast('That file doesn\u2019t look like a Sync Lyrics & Script session.');
       return;
     }
     stopLoop();
