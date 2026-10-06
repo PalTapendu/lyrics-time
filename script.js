@@ -201,10 +201,17 @@
   // Task 1: Choreographed Page-Load Assembly Timer
   // Releases entrance animation locks after full choreography settles (~1150ms)
   // so all subsequent interactive hover states, micro-interactions, and 3D tilts are free.
+  var isPageAssembled = false;
+  var assembleTime = 0;
+
   if (prefersReducedMotion) {
+    isPageAssembled = true;
+    assembleTime = 0;
     if (stage) stage.classList.add('page-assembled');
   } else {
     setTimeout(function () {
+      isPageAssembled = true;
+      assembleTime = performance.now() / 1000;
       if (stage) stage.classList.add('page-assembled');
     }, 1150);
   }
@@ -427,69 +434,91 @@
       consoleEl.classList.toggle('is-straight', straightProgress === 1.0);
     }
 
-    // Organic ambient floating & breathing wave (smoothly attenuated when straightening)
-    var idleY = prefersReducedMotion ? 0 : Math.sin(timeSec * 0.8) * 0.45;
-    var idleX = prefersReducedMotion ? 0 : Math.cos(timeSec * 0.6) * 0.25;
-    var idleFloatY = prefersReducedMotion ? 0 : Math.sin(timeSec * 1.2) * 2.5;
+    // Amplitude Ease-In Safety Net & Phase Sync at 1150ms handoff
+    var idleEase = 0;
+    var idleDeltaTime = 0;
+    if (isPageAssembled) {
+      if (prefersReducedMotion) {
+        idleEase = 1.0;
+        idleDeltaTime = 0;
+      } else {
+        idleDeltaTime = Math.max(0, timeSec - assembleTime);
+        var easeDuration = 0.45; // 450ms smooth ramp from 0 to full strength
+        if (idleDeltaTime >= easeDuration) {
+          idleEase = 1.0;
+        } else {
+          var t = idleDeltaTime / easeDuration;
+          idleEase = 1.0 - Math.pow(1.0 - t, 3); // Cubic ease-out
+        }
+      }
+    }
+
+    // Organic ambient floating & breathing wave (smoothly attenuated when straightening and ramped in at handoff)
+    var idleY = prefersReducedMotion ? 0 : Math.sin(idleDeltaTime * 0.8) * 0.45 * idleEase;
+    var idleX = prefersReducedMotion ? 0 : Math.sin(idleDeltaTime * 0.6) * 0.25 * idleEase;
+    var idleFloatY = prefersReducedMotion ? 0 : Math.sin(idleDeltaTime * 1.2) * 2.5 * idleEase;
 
     // When NOT hovered (blend = 1): Full 3D car-dashboard tilt (-10.84deg, -1.90deg, -1.07deg) + mouse parallax + ambient breathing float
     // When HOVERED (blend = 0): Smoothly straightens out to 0deg (front/straight) with 100% crystal-clear sharpness
-    var curTiltY = (-10.84 + currX * 2.2 + idleY) * blend;
-    var curTiltX = (-1.90 + (-currY * 1.8) + idleX) * blend;
+    var curTiltY = (-10.84 + (currX * 2.2) * idleEase + idleY) * blend;
+    var curTiltX = (-1.90 + (-currY * 1.8) * idleEase + idleX) * blend;
     var curTiltZ = (-1.07) * blend;
     var curTy = (idleFloatY) * blend;
 
-    if (consolePlane) {
-      var nextPlaneTransform = (straightProgress === 1.0)
-        ? 'rotateY(0deg) rotateX(0deg) rotateZ(0deg) translateY(0px)'
-        : 'rotateY(' + curTiltY.toFixed(3) + 'deg) rotateX(' + curTiltX.toFixed(3) + 'deg) rotateZ(' + curTiltZ.toFixed(3) + 'deg) translateY(' + curTy.toFixed(2) + 'px)';
+    // Gate: Skip inline transform writes to 3D console plane & shadows until entrance sequence finishes (page-assembled)
+    if (isPageAssembled) {
+      if (consolePlane) {
+        var nextPlaneTransform = (straightProgress === 1.0)
+          ? 'rotateY(0deg) rotateX(0deg) rotateZ(0deg) translateY(0px)'
+          : 'rotateY(' + curTiltY.toFixed(3) + 'deg) rotateX(' + curTiltX.toFixed(3) + 'deg) rotateZ(' + curTiltZ.toFixed(3) + 'deg) translateY(' + curTy.toFixed(2) + 'px)';
 
-      if (consolePlane._lastTransform !== nextPlaneTransform) {
-        consolePlane.style.transform = nextPlaneTransform;
-        consolePlane._lastTransform = nextPlaneTransform;
-      }
-    }
-
-    if (consoleShadow) {
-      var shadowRot = 1.5 * blend;
-      var shadowZ = -25 - 10 * blend;
-      var shadowScale = 1.0 - 0.02 * straightProgress;
-      var shadowOpacity = 1.0 - 0.15 * straightProgress;
-      var nextShadowTransform = 'translateZ(' + shadowZ.toFixed(1) + 'px) rotate(' + shadowRot.toFixed(2) + 'deg) scale(' + shadowScale.toFixed(3) + ')';
-      var nextShadowOpacity = shadowOpacity.toFixed(2);
-
-      if (consoleShadow._lastTransform !== nextShadowTransform) {
-        consoleShadow.style.transform = nextShadowTransform;
-        consoleShadow._lastTransform = nextShadowTransform;
-      }
-      if (consoleShadow._lastOpacity !== nextShadowOpacity) {
-        consoleShadow.style.opacity = nextShadowOpacity;
-        consoleShadow._lastOpacity = nextShadowOpacity;
-      }
-    }
-
-    if (glassExtrusion) {
-      var nextGlassTransform, nextGlassShadow;
-      if (straightProgress === 1.0) {
-        nextGlassTransform = 'translateZ(-2px) translate(0px, 0px)';
-        nextGlassShadow = '0 24px 55px rgba(50, 75, 55, 0.16), 0 4px 14px rgba(0, 0, 0, 0.05)';
-      } else {
-        var extX = 4 * blend;
-        var extY = 4 * blend;
-        var extZ = -2 - 9 * blend;
-        nextGlassTransform = 'translateZ(' + extZ.toFixed(1) + 'px) translate(' + extX.toFixed(2) + 'px, ' + extY.toFixed(2) + 'px)';
-        nextGlassShadow = blend > 0.5
-          ? '-18px 36px 65px rgba(50, 75, 55, 0.20), -4px 10px 22px rgba(0, 0, 0, 0.07)'
-          : '0 24px 55px rgba(50, 75, 55, 0.16), 0 4px 14px rgba(0, 0, 0, 0.05)';
+        if (consolePlane._lastTransform !== nextPlaneTransform) {
+          consolePlane.style.transform = nextPlaneTransform;
+          consolePlane._lastTransform = nextPlaneTransform;
+        }
       }
 
-      if (glassExtrusion._lastTransform !== nextGlassTransform) {
-        glassExtrusion.style.transform = nextGlassTransform;
-        glassExtrusion._lastTransform = nextGlassTransform;
+      if (consoleShadow) {
+        var shadowRot = 1.5 * blend;
+        var shadowZ = -25 - 10 * blend;
+        var shadowScale = 1.0 - 0.02 * straightProgress;
+        var shadowOpacity = 1.0 - 0.15 * straightProgress;
+        var nextShadowTransform = 'translateZ(' + shadowZ.toFixed(1) + 'px) rotate(' + shadowRot.toFixed(2) + 'deg) scale(' + shadowScale.toFixed(3) + ')';
+        var nextShadowOpacity = shadowOpacity.toFixed(2);
+
+        if (consoleShadow._lastTransform !== nextShadowTransform) {
+          consoleShadow.style.transform = nextShadowTransform;
+          consoleShadow._lastTransform = nextShadowTransform;
+        }
+        if (consoleShadow._lastOpacity !== nextShadowOpacity) {
+          consoleShadow.style.opacity = nextShadowOpacity;
+          consoleShadow._lastOpacity = nextShadowOpacity;
+        }
       }
-      if (glassExtrusion._lastShadow !== nextGlassShadow) {
-        glassExtrusion.style.boxShadow = nextGlassShadow;
-        glassExtrusion._lastShadow = nextGlassShadow;
+
+      if (glassExtrusion) {
+        var nextGlassTransform, nextGlassShadow;
+        if (straightProgress === 1.0) {
+          nextGlassTransform = 'translateZ(-2px) translate(0px, 0px)';
+          nextGlassShadow = '0 24px 55px rgba(50, 75, 55, 0.16), 0 4px 14px rgba(0, 0, 0, 0.05)';
+        } else {
+          var extX = 4 * blend;
+          var extY = 4 * blend;
+          var extZ = -2 - 9 * blend;
+          nextGlassTransform = 'translateZ(' + extZ.toFixed(1) + 'px) translate(' + extX.toFixed(2) + 'px, ' + extY.toFixed(2) + 'px)';
+          nextGlassShadow = blend > 0.5
+            ? '-18px 36px 65px rgba(50, 75, 55, 0.20), -4px 10px 22px rgba(0, 0, 0, 0.07)'
+            : '0 24px 55px rgba(50, 75, 55, 0.16), 0 4px 14px rgba(0, 0, 0, 0.05)';
+        }
+
+        if (glassExtrusion._lastTransform !== nextGlassTransform) {
+          glassExtrusion.style.transform = nextGlassTransform;
+          glassExtrusion._lastTransform = nextGlassTransform;
+        }
+        if (glassExtrusion._lastShadow !== nextGlassShadow) {
+          glassExtrusion.style.boxShadow = nextGlassShadow;
+          glassExtrusion._lastShadow = nextGlassShadow;
+        }
       }
     }
 
@@ -509,36 +538,39 @@
     // FLOATING ELEMENTS & HEADPHONES:
     // Move responsively with mouse cursor parallax (data-d depth, data-r rotation)
     // PLUS smooth continuous organic floating animation wave
-    pzElements.forEach(function (el) {
-      if (el.dataset.initTransform === undefined) {
-        el.dataset.initTransform = el.style.transform || '';
-      }
-      var depth = +el.dataset.d || 0;
-      var rot = +el.dataset.r || 0;
-      var baseT = el.dataset.initTransform ? (el.dataset.initTransform + ' ') : '';
+    // GATED: Only compute and write transforms once page entrance has assembled
+    if (isPageAssembled) {
+      pzElements.forEach(function (el) {
+        if (el.dataset.initTransform === undefined) {
+          el.dataset.initTransform = el.style.transform || '';
+        }
+        var depth = +el.dataset.d || 0;
+        var rot = +el.dataset.r || 0;
+        var baseT = el.dataset.initTransform ? (el.dataset.initTransform + ' ') : '';
 
-      var pzFloatY = prefersReducedMotion ? 0 : Math.sin(timeSec * 1.5 + depth * 0.4) * (2.2 + Math.abs(depth) * 0.18);
-      var pzFloatX = prefersReducedMotion ? 0 : Math.cos(timeSec * 1.2 + depth * 0.4) * (1.2 + Math.abs(depth) * 0.1);
-      var pzRot = (rot && !prefersReducedMotion) ? Math.sin(timeSec * 0.9 + depth * 0.2) * 0.35 : 0;
+        var pzFloatY = prefersReducedMotion ? 0 : Math.sin(idleDeltaTime * 1.5 + depth * 0.4) * (2.2 + Math.abs(depth) * 0.18) * idleEase;
+        var pzFloatX = prefersReducedMotion ? 0 : Math.cos(idleDeltaTime * 1.2 + depth * 0.4) * (1.2 + Math.abs(depth) * 0.1) * idleEase;
+        var pzRot = (rot && !prefersReducedMotion) ? Math.sin(idleDeltaTime * 0.9 + depth * 0.2) * 0.35 * idleEase : 0;
 
-      var tx = -currX * depth + pzFloatX;
-      var ty = -currY * depth * 0.6 + pzFloatY;
-      var tr = (rot ? currX * rot : 0) + pzRot;
+        var tx = (-currX * depth) * idleEase + pzFloatX;
+        var ty = (-currY * depth * 0.6) * idleEase + pzFloatY;
+        var tr = (rot ? currX * rot : 0) * idleEase + pzRot;
 
-      // Dynamic adaptive placement for annotations:
-      // In tilted state: sits closely and beautifully aligned to the 3D instrument card.
-      // In straight state: smoothly glides outward/away for generous breathing room.
-      if (el.id === 'hand-top') {
-        tx += (-36 * straightProgress);
-        ty += (-24 * straightProgress);
-      } else if (el.id === 'hand-bottom') {
-        tx += (-14 * straightProgress);
-        ty += (-6 * straightProgress);
-      }
+        // Dynamic adaptive placement for annotations:
+        // In tilted state: sits closely and beautifully aligned to the 3D instrument card.
+        // In straight state: smoothly glides outward/away for generous breathing room.
+        if (el.id === 'hand-top') {
+          tx += (-36 * straightProgress);
+          ty += (-24 * straightProgress);
+        } else if (el.id === 'hand-bottom') {
+          tx += (-14 * straightProgress);
+          ty += (-6 * straightProgress);
+        }
 
-      el.style.transform = baseT + 'translate(' + tx.toFixed(2) + 'px, ' + ty.toFixed(2) + 'px)' +
-        (tr ? ' rotate(' + tr.toFixed(2) + 'deg)' : '');
-    });
+        el.style.transform = baseT + 'translate(' + tx.toFixed(2) + 'px, ' + ty.toFixed(2) + 'px)' +
+          (tr ? ' rotate(' + tr.toFixed(2) + 'deg)' : '');
+      });
+    }
 
     if (glow) {
       glow.style.transform = 'translate(' + (glowX - 220) + 'px, ' + (glowY - 220) + 'px)';

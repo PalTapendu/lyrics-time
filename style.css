@@ -3128,12 +3128,12 @@ body[data-theme="piano"],
 @keyframes heroGraphicScaleIn {
   0% {
     opacity: 0;
-    transform: translateY(24px) scale(0.94);
+    transform: translateY(24px) scale(0.94) rotateY(-10deg) rotateX(4deg) rotateZ(-1.5deg);
   }
 
   100% {
     opacity: 1;
-    transform: translateY(0) scale(1);
+    transform: translateY(0) scale(1) rotateY(-10deg) rotateX(4deg) rotateZ(-1.5deg);
   }
 }
 

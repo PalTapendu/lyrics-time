@@ -116,3 +116,12 @@
 - **Files Touched**: `index.html`, `piano.js`, `script.js`, `style.css`
 - **Change Type**: Functional/logic change, architectural optimization & new feature panel
 - **Affected Docs**: `brain/pages-and-routing.md` and `brain/components.md` (now reflect three active SPA views: `#view-hero1`, `#view-hero2`, `#view-piano`, and dynamic `scene.js` loading).
+
+---
+
+## [2026-10-06] - Seamless Entrance Animation Handoff & Amplitude Ease-In Fix
+- **Date**: 2026-10-06
+- **Summary**: Eliminated 1150ms entrance-to-ambient motion snap by gating mainLoop() idle-transform writes until page assembly, aligning heroGraphicScaleIn keyframes with headphone resting rotation, and smoothly ramping idle amplitude over 450ms.
+- **Files Touched**: `script.js`, `style.css`
+- **Change Type**: Bug fix & animation choreography polish
+- **Affected Docs**: `brain/animations-and-transitions.md` (now reflects `isPageAssembled` gating and cubic ease-in idle motion ramp).
