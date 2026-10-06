@@ -12,6 +12,7 @@
     rel="stylesheet">
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="piano.css">
+  <link rel="prefetch" href="editor/index.html">
 </head>
 
 <body data-theme="hero1">
@@ -94,7 +95,12 @@
       <div class="side-divider"></div>
 
       <!-- 2. Navigation Actions Zone -->
-      <div class="side-nav-zone">
+      <div class="side-nav-zone" id="side-nav-zone">
+        <!-- Persistent Sliding Active Tab Indicator -->
+        <div class="side-active-indicator" id="side-active-indicator" aria-hidden="true">
+          <span class="side-indicator-bar"></span>
+        </div>
+
         <!-- Sync Lyrics & Script Tool Tab -->
         <div id="side-home-btn" class="side-btn active" title="Sync Lyrics & Script" aria-label="Sync Lyrics & Script">
           <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
@@ -980,7 +986,7 @@
   <div class="hero-toast" id="heroToast" aria-live="polite"></div>
 
   <!-- Premium Page Transition Overlay (Handoff to Editor) -->
-  <div class="page-transition-overlay" id="pageTransitionOverlay" aria-hidden="true" style="display:none;">
+  <div class="page-transition-overlay" id="pageTransitionOverlay" aria-hidden="true">
     <div class="trans-glow-disc"></div>
     <div class="trans-badge">
       <div class="trans-brand-eyebrow">SYNCLINES STUDIO</div>

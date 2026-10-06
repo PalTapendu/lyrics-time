@@ -742,7 +742,7 @@
   }
 
   // Spoken vocals removed per user specification: pure peaceful acoustic piano & chords only
-  function speakLyric() {}
+  function speakLyric() { }
 
   // Piano Note & Song Sync Tracker
   var nextPianoNoteIdx = 0;
@@ -941,7 +941,7 @@
         if (!isPlaying) {
           togglePlayState();
         } else {
-          heroAudio.play().catch(function () {});
+          heroAudio.play().catch(function () { });
         }
       }
 
@@ -1155,7 +1155,57 @@
         sidePianoBtn.classList.remove('active');
       }
     }
+
+    // 3. Smoothly animate persistent sliding sidebar active indicator
+    syncSidebarIndicator(product);
   }
+
+  function syncSidebarIndicator(product) {
+    var indicator = document.getElementById('side-active-indicator');
+    var firstBtn = document.getElementById('side-home-btn');
+    if (!indicator || !firstBtn) return;
+
+    var targetBtn = null;
+    if (product === 'lyrics') {
+      targetBtn = document.getElementById('side-home-btn');
+    } else if (product === 'visualizer') {
+      targetBtn = document.getElementById('side-visualizer-btn');
+    } else if (product === 'piano') {
+      targetBtn = document.getElementById('side-piano-btn');
+    } else if (product === 'account') {
+      targetBtn = document.getElementById('side-account-btn');
+    }
+
+    if (targetBtn) {
+      var deltaY = targetBtn.offsetTop - firstBtn.offsetTop;
+      if (prefersReducedMotion) {
+        indicator.style.transition = 'none';
+        indicator.style.transform = 'translate3d(0, ' + deltaY + 'px, 0)';
+        indicator.style.opacity = '1';
+      } else {
+        indicator.style.transition = 'transform 0.38s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease, background-color 0.38s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.38s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.38s cubic-bezier(0.4, 0, 0.2, 1)';
+        indicator.style.transform = 'translate3d(0, ' + deltaY + 'px, 0)';
+        indicator.style.opacity = '1';
+      }
+    } else {
+      indicator.style.opacity = '0';
+    }
+  }
+
+  window.addEventListener('resize', function () {
+    syncSidebarIndicator(currentActiveProduct);
+  });
+
+  try {
+    window.matchMedia('(prefers-reduced-motion: reduce)').addEventListener('change', function (e) {
+      prefersReducedMotion = e.matches;
+      syncSidebarIndicator(currentActiveProduct);
+    });
+  } catch (err) {}
+
+  requestAnimationFrame(function () {
+    syncSidebarIndicator(currentActiveProduct);
+  });
 
   /* =====================================================================
      VIEW SWITCHER ARCHITECTURE (Single Persistent Shell)
@@ -1420,14 +1470,19 @@
     }
     var overlay = document.getElementById('pageTransitionOverlay');
     if (overlay) {
-      overlay.style.display = 'flex';
       overlay.setAttribute('aria-hidden', 'false');
-      void overlay.offsetWidth;
       overlay.classList.add('is-active');
     }
+
+    var targetBtn = (e && e.currentTarget) || mainUploadBtn;
+    if (targetBtn && targetBtn.style) {
+      targetBtn.style.transform = 'scale(0.96)';
+      targetBtn.style.opacity = '0.85';
+    }
+
     setTimeout(function () {
       window.location.href = 'editor/index.html';
-    }, 520);
+    }, 380);
   }
 
   // SyncLines Hero 1 Upload Button: Always navigates to editor
@@ -1516,12 +1571,30 @@
   function openAccountModal() {
     if (accountModal) accountModal.classList.add('is-open');
     if (sideAccountBtn) sideAccountBtn.classList.add('active');
+    syncSidebarIndicator('account');
   }
 
   function closeAccountModal() {
     if (accountModal) accountModal.classList.remove('is-open');
     if (sideAccountBtn) sideAccountBtn.classList.remove('active');
+    syncSidebarIndicator(currentActiveProduct);
   }
+
+  window.addEventListener('pageshow', function () {
+    var overlay = document.getElementById('pageTransitionOverlay');
+    if (overlay) {
+      overlay.classList.remove('is-active');
+      overlay.setAttribute('aria-hidden', 'true');
+    }
+    if (mainUploadBtn && mainUploadBtn.style) {
+      mainUploadBtn.style.transform = '';
+      mainUploadBtn.style.opacity = '';
+    }
+    if (topUploadBtn && topUploadBtn.style) {
+      topUploadBtn.style.transform = '';
+      topUploadBtn.style.opacity = '';
+    }
+  });
 
   if (sideAccountBtn) {
     sideAccountBtn.addEventListener('click', function () {
