@@ -2434,13 +2434,21 @@ body {
   transform: translate3d(-44px, 0, 0) scale(0.985);
 }
 
-#view-hero2 {
+#view-hero2,
+#view-piano {
   background: #060d09;
   transform: translate3d(44px, 0, 0) scale(0.985);
 }
 
+#view-piano {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 #view-hero1.is-active,
 #view-hero2.is-active,
+#view-piano.is-active,
 .view-panel.is-active {
   opacity: 1 !important;
   visibility: visible !important;
@@ -2455,7 +2463,8 @@ body {
   transform: translate3d(-44px, 0, 0) scale(0.985);
 }
 
-#view-hero2:not(.is-active) {
+#view-hero2:not(.is-active),
+#view-piano:not(.is-active) {
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
@@ -2477,7 +2486,10 @@ body[data-theme="hero1"],
 
 html[data-theme="hero2"],
 body[data-theme="hero2"],
-[data-theme="hero2"] #stage {
+html[data-theme="piano"],
+body[data-theme="piano"],
+[data-theme="hero2"] #stage,
+[data-theme="piano"] #stage {
   background: #060d09 !important;
   background-color: #060d09 !important;
 }
@@ -3849,7 +3861,8 @@ body[data-theme="hero2"],
     border-radius: 14px !important;
   }
 
-  body.is-tablet #view-hero1 {
+  body.is-tablet #view-hero1,
+  body.is-tablet #view-piano {
     position: relative !important;
     width: 100% !important;
     min-width: 0 !important;
@@ -4013,6 +4026,12 @@ body[data-theme="hero2"],
     left: 0 !important;
     top: 0 !important;
     overflow: visible !important;
+  }
+
+  #view-hero1:not(.is-active),
+  #view-hero2:not(.is-active),
+  #view-piano:not(.is-active) {
+    display: none !important;
   }
 
   /* Sticky Mobile Header */
@@ -4427,16 +4446,21 @@ body[data-theme="hero2"],
     transform: none !important;
   }
 
-  /* Hero 2 (Visualizer) on Mobile */
-  #view-hero2,
-  body.is-mobile #view-hero2 {
+  /* Hero 2 (Visualizer) & Piano on Mobile */
+  #view-hero2.is-active,
+  #view-piano.is-active,
+  body.is-mobile #view-hero2.is-active,
+  body.is-mobile #view-piano.is-active {
     position: relative !important;
     width: 100% !important;
     min-width: 0 !important;
     height: auto !important;
-    min-height: 100vh !important;
+    min-height: calc(100vh - 120px) !important;
     padding: 20px 12px 100px 12px !important;
     transform: none !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
   }
 
   #grid-canvas,

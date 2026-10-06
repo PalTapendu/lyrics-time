@@ -108,8 +108,11 @@
 - **Change Type**: Responsive UI redesign, bug fix & cross-platform visual polish
 - **Affected Docs**: `brain/theming-system.md`, `brain/animations-and-transitions.md`, `brain/components.md`
 
+---
 
-
-
-
-
+## [2026-10-06] - Dedicated Piano Feature View, Mute Enforcement & Audio Visualizer Lazy-Loading
+- **Date**: 2026-10-06
+- **Summary**: Implemented dedicated Under Development panel (#view-piano) for the Piano tab with strict mute-by-default enforcement, and deferred Audio Visualizer (scene.js) execution to on-demand lazy load with a smooth first-time transition overlay.
+- **Files Touched**: `index.html`, `piano.js`, `script.js`, `style.css`
+- **Change Type**: Functional/logic change, architectural optimization & new feature panel
+- **Affected Docs**: `brain/pages-and-routing.md` and `brain/components.md` (now reflect three active SPA views: `#view-hero1`, `#view-hero2`, `#view-piano`, and dynamic `scene.js` loading).

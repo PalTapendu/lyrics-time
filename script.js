@@ -1319,6 +1319,73 @@
   var currentActiveView = 'hero1';
   window.__isHero1ViewActive = true;
 
+  // Lazy loading state for Audio Visualizer (scene.js)
+  var isVisualizerLoaded = false;
+  var isVisualizerLoading = false;
+
+  function loadVisualizerScene(callback) {
+    if (isVisualizerLoaded) {
+      if (callback) callback();
+      return;
+    }
+    if (isVisualizerLoading) {
+      var checkInterval = setInterval(function () {
+        if (isVisualizerLoaded) {
+          clearInterval(checkInterval);
+          if (callback) callback();
+        }
+      }, 50);
+      return;
+    }
+
+    isVisualizerLoading = true;
+    var overlay = document.getElementById('pageTransitionOverlay');
+    var transTitle = overlay ? overlay.querySelector('.trans-title') : null;
+    var originalTitle = transTitle ? transTitle.textContent : '';
+
+    if (overlay) {
+      if (transTitle) transTitle.textContent = 'Loading Audio Visualizer Engine...';
+      overlay.setAttribute('aria-hidden', 'false');
+      overlay.classList.add('is-active');
+    }
+
+    var startTime = performance.now();
+    var minDisplayMs = 380; // Smooth handoff, matches editor transition timing
+
+    var script = document.createElement('script');
+    script.src = 'scene.js';
+    script.async = true;
+
+    function finishLoad(err) {
+      var elapsed = performance.now() - startTime;
+      var remaining = Math.max(0, minDisplayMs - elapsed);
+
+      setTimeout(function () {
+        isVisualizerLoaded = !err;
+        isVisualizerLoading = false;
+
+        if (overlay) {
+          overlay.classList.remove('is-active');
+          overlay.setAttribute('aria-hidden', 'true');
+          if (transTitle && originalTitle) transTitle.textContent = originalTitle;
+        }
+
+        if (callback) callback(err);
+      }, remaining);
+    }
+
+    script.onload = function () {
+      finishLoad(null);
+    };
+
+    script.onerror = function (e) {
+      console.error('Failed to dynamically load scene.js', e);
+      finishLoad(e || new Error('Failed to load scene.js'));
+    };
+
+    document.body.appendChild(script);
+  }
+
   function triggerHeroToast(message) {
     if (!heroToast) return;
     heroToast.textContent = message;
@@ -1330,12 +1397,14 @@
   }
 
   function switchView(targetView, productHint) {
+    try { window.scrollTo(0, 0); } catch (e) {}
     var viewHero1 = document.getElementById('view-hero1');
     var viewHero2 = document.getElementById('view-hero2');
+    var viewPiano = document.getElementById('view-piano');
     var html = document.documentElement;
     var body = document.body;
 
-    if (targetView === 'hero2') {
+    function applyHero2View() {
       currentActiveView = 'hero2';
       window.__isHero1ViewActive = false;
       html.setAttribute('data-theme', 'hero2');
@@ -1344,6 +1413,10 @@
       if (viewHero1) {
         viewHero1.classList.remove('is-active');
         viewHero1.setAttribute('aria-hidden', 'true');
+      }
+      if (viewPiano) {
+        viewPiano.classList.remove('is-active');
+        viewPiano.setAttribute('aria-hidden', 'true');
       }
       if (viewHero2) {
         viewHero2.classList.add('is-active');
@@ -1367,7 +1440,59 @@
       }
 
       triggerHeroToast('Audio Visualizer Engine active • 60 FPS 3D Grid');
+    }
+
+    if (targetView === 'hero2') {
+      if (!isVisualizerLoaded) {
+        updateActiveProduct('visualizer');
+        loadVisualizerScene(function () {
+          applyHero2View();
+        });
+      } else {
+        applyHero2View();
+      }
+    } else if (targetView === 'piano') {
+      currentActiveView = 'piano';
+      window.__isHero1ViewActive = false;
+      html.setAttribute('data-theme', 'hero2');
+      body.setAttribute('data-theme', 'hero2');
+
+      if (viewHero1) {
+        viewHero1.classList.remove('is-active');
+        viewHero1.setAttribute('aria-hidden', 'true');
+      }
+      if (viewHero2) {
+        viewHero2.classList.remove('is-active');
+        viewHero2.setAttribute('aria-hidden', 'true');
+      }
+      if (viewPiano) {
+        viewPiano.classList.add('is-active');
+        viewPiano.setAttribute('aria-hidden', 'false');
+      }
+
+      updateActiveProduct('piano');
+
+      // Pause visualizer canvas loop when switching to piano view
+      if (window.VisualizerScene) {
+        window.VisualizerScene.pause();
+      }
+
+      // Enforce muted state whenever piano view becomes active
+      if (window.resetPianoMute) {
+        window.resetPianoMute();
+      }
+
+      if (window.location.hash !== '#piano') {
+        try {
+          history.pushState({ view: 'piano' }, '', '#piano');
+        } catch (err) {
+          window.location.hash = 'piano';
+        }
+      }
+
+      triggerHeroToast('Live Harmonic Piano: Feature in development');
     } else {
+      // targetView === 'hero1'
       currentActiveView = 'hero1';
       window.__isHero1ViewActive = true;
       html.setAttribute('data-theme', 'hero1');
@@ -1376,6 +1501,10 @@
       if (viewHero2) {
         viewHero2.classList.remove('is-active');
         viewHero2.setAttribute('aria-hidden', 'true');
+      }
+      if (viewPiano) {
+        viewPiano.classList.remove('is-active');
+        viewPiano.setAttribute('aria-hidden', 'true');
       }
       if (viewHero1) {
         viewHero1.classList.add('is-active');
@@ -1389,7 +1518,7 @@
         window.VisualizerScene.pause();
       }
 
-      if (window.location.hash === '#visualizer') {
+      if (window.location.hash === '#visualizer' || window.location.hash === '#piano') {
         try {
           history.pushState({ view: 'hero1' }, '', window.location.pathname + window.location.search);
         } catch (err) {
@@ -1407,6 +1536,8 @@
   window.addEventListener('popstate', function () {
     if (window.location.hash === '#visualizer') {
       switchView('hero2');
+    } else if (window.location.hash === '#piano') {
+      switchView('piano');
     } else {
       switchView('hero1', 'lyrics');
     }
@@ -1415,33 +1546,10 @@
   // Check initial hash on load
   if (window.location.hash === '#visualizer') {
     switchView('hero2');
+  } else if (window.location.hash === '#piano') {
+    switchView('piano');
   } else {
     updateActiveProduct('lyrics');
-  }
-
-  /* =====================================================================
-     LIVE HARMONIC PIANO ACTIVATION CONTROLLER
-     - Switches to Hero 1 if currently in Hero 2
-     - Sets active highlight on both dropdown and sidebar
-     - Pulses mini piano widget with glowing animation
-     - Unmutes synth and plays a welcoming acoustic harmonic chord
-     ===================================================================== */
-  function activateLivePianoTool() {
-    switchView('hero1', 'piano');
-    updateActiveProduct('piano');
-
-    if (window.activateLivePiano) {
-      window.activateLivePiano();
-    } else {
-      var widget = document.getElementById('mini-piano');
-      if (widget) {
-        widget.classList.remove('piano-focused-pulse');
-        void widget.offsetWidth;
-        widget.classList.add('piano-focused-pulse');
-      }
-    }
-
-    showToast('Live Harmonic Piano: Acoustic synthesizer ready • Play notes or chords');
   }
 
   /* =====================================================================
@@ -1471,18 +1579,31 @@
      TRIGGER POINTS: LIVE HARMONIC PIANO
      1. Sidebar Piano icon ("#side-piano-btn")
      2. Products dropdown Piano item ("#dropdown-piano-btn")
+     3. Back button in #view-piano ("#piano-back-btn")
      ===================================================================== */
   if (sidePianoBtn) {
     sidePianoBtn.addEventListener('click', function (e) {
       e.preventDefault();
-      activateLivePianoTool();
+      if (currentActiveView === 'piano') {
+        switchView('hero1', 'lyrics');
+      } else {
+        switchView('piano');
+      }
     });
   }
 
   if (dropdownPianoBtn) {
     dropdownPianoBtn.addEventListener('click', function (e) {
       e.preventDefault();
-      activateLivePianoTool();
+      switchView('piano');
+    });
+  }
+
+  var pianoBackBtn = document.getElementById('piano-back-btn');
+  if (pianoBackBtn) {
+    pianoBackBtn.addEventListener('click', function (e) {
+      e.preventDefault();
+      switchView('hero1', 'lyrics');
     });
   }
 

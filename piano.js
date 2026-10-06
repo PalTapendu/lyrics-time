@@ -899,14 +899,11 @@
 
   // Expose live piano activation API for dropdown & sidebar product selectors
   window.activateLivePiano = function() {
-    isMuted = false;
+    // Enforce muted state: never auto-unmute or play audible audio tones on activation
+    isMuted = true;
     updateMuteUI();
-    if (!audioCtx) initAudio();
-    if (audioCtx && audioCtx.state === 'suspended') {
-      audioCtx.resume();
-    }
     
-    // Focus pulse animation on widget
+    // Visual-only focus pulse animation on widget
     const widget = document.getElementById('mini-piano');
     if (widget) {
       widget.classList.remove('piano-focused-pulse');
@@ -916,11 +913,12 @@
         widget.classList.remove('piano-focused-pulse');
       }, 3400);
     }
+  };
 
-    // Play harmonious welcome chord/arpeggio (C4 -> E4 -> G4)
-    setTimeout(() => pressKey('C4', true, false), 80);
-    setTimeout(() => pressKey('E4', true, false), 260);
-    setTimeout(() => pressKey('G4', true, false), 440);
+  // Expose helper to enforce muted state on view transitions
+  window.resetPianoMute = function() {
+    isMuted = true;
+    updateMuteUI();
   };
 
   init();
