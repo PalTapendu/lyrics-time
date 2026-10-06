@@ -68,3 +68,48 @@
 - **Change Type**: Motion choreography, visual polish & UX timing optimization
 - **Affected Docs**: `brain/animations-and-transitions.md` and `brain/pages-and-routing.md` (now reflect sliding rail indicator, 380ms depth transitions, and staged editor reveal).
 
+---
+
+## [2026-10-06] - View-Aware Animation Loop Performance Fix
+- **Summary**: Made `script.js`'s `mainLoop()` and `piano.js`'s `animationLoop()` view-aware via `window.__isHero1ViewActive`, skipping inactive DOM writes and canvas rendering during Hero 2 to eliminate loop contention.
+- **Files Modified**: `script.js`, `piano.js`
+- **Change Type**: Performance optimization & bug fix
+- **Affected Docs**: `brain/animations-and-transitions.md` and `brain/pages-and-routing.md` (documenting `window.__isHero1ViewActive` and conditional rAF execution).
+
+---
+
+## [2026-10-06] - Acoustic Audio Pre-warming via Idle Callback
+- **Summary**: Pre-synthesized `buildDreamsAcousticTrack()` in background idle time after page load, eliminating the synchronous 30s PCM WAV generation delay on first Play button click.
+- **Files Modified**: `script.js`
+- **Change Type**: Performance optimization & latency fix
+- **Affected Docs**: `brain/business-logic.md` (documents audio generation lifecycle and caching).
+
+---
+
+## [2026-10-06] - 3D Card Hover-Flattening Sub-Pixel Text Sharpness Fix
+- **Summary**: Added `will-change: transform` to `.console-plane`, removed redundant static per-frame transform/shadow style writes in `mainLoop()`, aligned `.is-straight` toggle to exact `straightProgress === 1.0`, and accelerated zero-Z child transitions to eliminate sub-pixel text blur when flattened.
+- **Files Modified**: `style.css`, `script.js`
+- **Change Type**: Bug fix & sub-pixel rendering optimization
+- **Affected Docs**: `brain/animations-and-transitions.md` (documents console 3D tilt, hover straightening, and layer compositing).
+
+---
+
+## [2026-10-06] - Revert Headphone Image Optimization & Format Fallbacks
+- **Summary**: Reverted headphone images to their original full-resolution uncompressed PNGs and removed unused WebP files to eliminate visible mid-animation resolution and quality shifts.
+- **Files Modified**: `headphone_complete.png`, `headphone_front.png`, `index.html`
+- **Change Type**: Visual regression fix & asset revert
+- **Affected Docs**: `brain/directory-map.md` (file sizes for headphone assets match original specifications).
+
+---
+
+## [2026-10-06] - Perfect Screen Fit, Zero Black Borders & Full Responsive Architecture (Laptop, Tablet & Mobile)
+- **Summary**: Resolved letterboxing black bars on laptop, tablet, and mobile displays. Fixed CSS specificity bug on `#view-hero1` that caused a permanent 44px left offset, eliminated `#stage` hardcoded `#060d09` black background in favor of unified full-bleed theme gradients, upgraded `fitStage()` with fluid native layouts and touch scrubbing for mobile (<768px) and tablet portrait (<1024px), added compact 3-column stats grid and floating mobile navigation dock.
+- **Files Modified**: `style.css`, `script.js`, `piano.js`, `brain/changelog.md`, `.gitignore`
+- **Change Type**: Responsive UI redesign, bug fix & cross-platform visual polish
+- **Affected Docs**: `brain/theming-system.md`, `brain/animations-and-transitions.md`, `brain/components.md`
+
+
+
+
+
+

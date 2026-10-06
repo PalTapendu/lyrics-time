@@ -868,7 +868,7 @@
     const dt = Math.min((now - lastFrameTime) / 1000, 0.05);
     lastFrameTime = now;
 
-    if (!document.hidden) {
+    if (!document.hidden && window.__isHero1ViewActive) {
       updateMelody(dt);
       renderCanvas(dt);
     }

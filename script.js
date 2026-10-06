@@ -127,15 +127,48 @@
     }
   });
 
-  // 4. SCALE-TO-FIT FOR 1819x865 VIEWPORT (Responsive, zero scroll, perfect fit)
+  // 4. RESPONSIVE ADAPTIVE ENGINE (Laptop, Tablet & Phone Perfect Fit)
   var stage = document.getElementById('stage');
   function fitStage() {
-    var scaleX = window.innerWidth / 1819;
-    var scaleY = window.innerHeight / 865;
+    if (!stage) return;
+    var winW = window.innerWidth;
+    var winH = window.innerHeight;
+
+    // Mobile Phone (< 768px): Fluid native mobile layout, zero rigid scaling
+    if (winW < 768) {
+      document.body.classList.add('is-mobile');
+      document.body.classList.remove('is-tablet', 'is-desktop');
+      stage.style.transform = '';
+      stage.style.left = '';
+      stage.style.top = '';
+      stage.style.width = '';
+      stage.style.height = '';
+      return;
+    }
+
+    // Tablet Portrait (< 1024px and height > width): Fluid tablet layout
+    if (winW < 1024 && winH > winW) {
+      document.body.classList.add('is-tablet');
+      document.body.classList.remove('is-mobile', 'is-desktop');
+      stage.style.transform = '';
+      stage.style.left = '';
+      stage.style.top = '';
+      stage.style.width = '';
+      stage.style.height = '';
+      return;
+    }
+
+    // Laptop, Desktop & Tablet Landscape: Scale-to-fit with seamless background
+    document.body.classList.add('is-desktop');
+    document.body.classList.remove('is-mobile', 'is-tablet');
+    var scaleX = winW / 1819;
+    var scaleY = winH / 865;
     var scale = Math.min(scaleX, scaleY);
+    stage.style.width = '1819px';
+    stage.style.height = '865px';
     stage.style.transform = 'scale(' + scale + ')';
-    var left = Math.max(0, (window.innerWidth - 1819 * scale) / 2);
-    var top = Math.max(0, (window.innerHeight - 865 * scale) / 2);
+    var left = Math.max(0, (winW - 1819 * scale) / 2);
+    var top = Math.max(0, (winH - 865 * scale) / 2);
     stage.style.left = left + 'px';
     stage.style.top = top + 'px';
   }
@@ -367,6 +400,13 @@
     var dt = Math.min(0.05, timeSec - lastTimestamp);
     lastTimestamp = timeSec;
 
+    // View-aware optimization: skip per-frame Hero 1 DOM mutations when not on hero1
+    if (currentActiveView !== 'hero1') {
+      if (isModalOpen) renderVideoModalVisualizer(timeSec);
+      requestAnimationFrame(mainLoop);
+      return;
+    }
+
     // Smooth lerp mouse coordinates (lerp ~0.08)
     currX += (mouseX - currX) * 0.08;
     currY += (mouseY - currY) * 0.08;
@@ -384,7 +424,7 @@
 
     // Toggle .is-straight class on #console for CSS-level crisp zero-Z flattening & glare elimination
     if (consoleEl) {
-      consoleEl.classList.toggle('is-straight', straightProgress > 0.4);
+      consoleEl.classList.toggle('is-straight', straightProgress === 1.0);
     }
 
     // Organic ambient floating & breathing wave (smoothly attenuated when straightening)
@@ -400,10 +440,13 @@
     var curTy = (idleFloatY) * blend;
 
     if (consolePlane) {
-      if (straightProgress === 1.0) {
-        consolePlane.style.transform = 'rotateY(0deg) rotateX(0deg) rotateZ(0deg) translateY(0px)';
-      } else {
-        consolePlane.style.transform = 'rotateY(' + curTiltY.toFixed(3) + 'deg) rotateX(' + curTiltX.toFixed(3) + 'deg) rotateZ(' + curTiltZ.toFixed(3) + 'deg) translateY(' + curTy.toFixed(2) + 'px)';
+      var nextPlaneTransform = (straightProgress === 1.0)
+        ? 'rotateY(0deg) rotateX(0deg) rotateZ(0deg) translateY(0px)'
+        : 'rotateY(' + curTiltY.toFixed(3) + 'deg) rotateX(' + curTiltX.toFixed(3) + 'deg) rotateZ(' + curTiltZ.toFixed(3) + 'deg) translateY(' + curTy.toFixed(2) + 'px)';
+
+      if (consolePlane._lastTransform !== nextPlaneTransform) {
+        consolePlane.style.transform = nextPlaneTransform;
+        consolePlane._lastTransform = nextPlaneTransform;
       }
     }
 
@@ -412,30 +455,55 @@
       var shadowZ = -25 - 10 * blend;
       var shadowScale = 1.0 - 0.02 * straightProgress;
       var shadowOpacity = 1.0 - 0.15 * straightProgress;
-      consoleShadow.style.transform = 'translateZ(' + shadowZ.toFixed(1) + 'px) rotate(' + shadowRot.toFixed(2) + 'deg) scale(' + shadowScale.toFixed(3) + ')';
-      consoleShadow.style.opacity = shadowOpacity.toFixed(2);
+      var nextShadowTransform = 'translateZ(' + shadowZ.toFixed(1) + 'px) rotate(' + shadowRot.toFixed(2) + 'deg) scale(' + shadowScale.toFixed(3) + ')';
+      var nextShadowOpacity = shadowOpacity.toFixed(2);
+
+      if (consoleShadow._lastTransform !== nextShadowTransform) {
+        consoleShadow.style.transform = nextShadowTransform;
+        consoleShadow._lastTransform = nextShadowTransform;
+      }
+      if (consoleShadow._lastOpacity !== nextShadowOpacity) {
+        consoleShadow.style.opacity = nextShadowOpacity;
+        consoleShadow._lastOpacity = nextShadowOpacity;
+      }
     }
 
     if (glassExtrusion) {
+      var nextGlassTransform, nextGlassShadow;
       if (straightProgress === 1.0) {
-        glassExtrusion.style.transform = 'translateZ(-2px) translate(0px, 0px)';
-        glassExtrusion.style.boxShadow = '0 24px 55px rgba(50, 75, 55, 0.16), 0 4px 14px rgba(0, 0, 0, 0.05)';
+        nextGlassTransform = 'translateZ(-2px) translate(0px, 0px)';
+        nextGlassShadow = '0 24px 55px rgba(50, 75, 55, 0.16), 0 4px 14px rgba(0, 0, 0, 0.05)';
       } else {
         var extX = 4 * blend;
         var extY = 4 * blend;
         var extZ = -2 - 9 * blend;
-        glassExtrusion.style.transform = 'translateZ(' + extZ.toFixed(1) + 'px) translate(' + extX.toFixed(2) + 'px, ' + extY.toFixed(2) + 'px)';
-        glassExtrusion.style.boxShadow = blend > 0.5
+        nextGlassTransform = 'translateZ(' + extZ.toFixed(1) + 'px) translate(' + extX.toFixed(2) + 'px, ' + extY.toFixed(2) + 'px)';
+        nextGlassShadow = blend > 0.5
           ? '-18px 36px 65px rgba(50, 75, 55, 0.20), -4px 10px 22px rgba(0, 0, 0, 0.07)'
           : '0 24px 55px rgba(50, 75, 55, 0.16), 0 4px 14px rgba(0, 0, 0, 0.05)';
+      }
+
+      if (glassExtrusion._lastTransform !== nextGlassTransform) {
+        glassExtrusion.style.transform = nextGlassTransform;
+        glassExtrusion._lastTransform = nextGlassTransform;
+      }
+      if (glassExtrusion._lastShadow !== nextGlassShadow) {
+        glassExtrusion.style.boxShadow = nextGlassShadow;
+        glassExtrusion._lastShadow = nextGlassShadow;
       }
     }
 
     if (mainCard) {
-      var glarePctX = Math.max(0, Math.min(100, 50 + currX * 25));
-      var glarePctY = Math.max(0, Math.min(100, 40 + currY * 25));
-      mainCard.style.setProperty('--glare-x', glarePctX.toFixed(1) + '%');
-      mainCard.style.setProperty('--glare-y', glarePctY.toFixed(1) + '%');
+      var glarePctX = Math.max(0, Math.min(100, 50 + currX * 25)).toFixed(1) + '%';
+      var glarePctY = Math.max(0, Math.min(100, 40 + currY * 25)).toFixed(1) + '%';
+      if (mainCard._lastGlareX !== glarePctX) {
+        mainCard.style.setProperty('--glare-x', glarePctX);
+        mainCard._lastGlareX = glarePctX;
+      }
+      if (mainCard._lastGlareY !== glarePctY) {
+        mainCard.style.setProperty('--glare-y', glarePctY);
+        mainCard._lastGlareY = glarePctY;
+      }
     }
 
     // FLOATING ELEMENTS & HEADPHONES:
@@ -741,6 +809,25 @@
     }
   }
 
+  // Pre-generate acoustic audio track in idle time so Play button response is instantaneous
+  function scheduleAudioPrewarm() {
+    if ('requestIdleCallback' in window) {
+      window.requestIdleCallback(function () {
+        initHeroAudio();
+      }, { timeout: 2500 });
+    } else {
+      setTimeout(initHeroAudio, 1400);
+    }
+  }
+
+  if (document.readyState === 'complete') {
+    scheduleAudioPrewarm();
+  } else {
+    window.addEventListener('load', function () {
+      scheduleAudioPrewarm();
+    });
+  }
+
   // Spoken vocals removed per user specification: pure peaceful acoustic piano & chords only
   function speakLyric() { }
 
@@ -827,8 +914,10 @@
 
   function seekFromEvent(e) {
     if (!wfContainer) return;
+    var clientX = (e.touches && e.touches[0] ? e.touches[0].clientX : e.clientX);
+    if (clientX === undefined) return;
     var rect = wfContainer.getBoundingClientRect();
-    var clickX = e.clientX - rect.left;
+    var clickX = clientX - rect.left;
     var pct = Math.max(0, Math.min(1, clickX / rect.width));
     updatePlayhead(pct);
     var targetSec = playheadPercent * totalSeconds;
@@ -852,6 +941,20 @@
     });
 
     window.addEventListener('mouseup', function () {
+      isScrubbing = false;
+    });
+
+    wfContainer.addEventListener('touchstart', function (e) {
+      isScrubbing = true;
+      seekFromEvent(e);
+    }, { passive: true });
+
+    window.addEventListener('touchmove', function (e) {
+      if (!isScrubbing) return;
+      seekFromEvent(e);
+    }, { passive: true });
+
+    window.addEventListener('touchend', function () {
       isScrubbing = false;
     });
   }
@@ -1214,6 +1317,7 @@
      - Pauses/resumes requestAnimationFrame in scene.js
      ===================================================================== */
   var currentActiveView = 'hero1';
+  window.__isHero1ViewActive = true;
 
   function triggerHeroToast(message) {
     if (!heroToast) return;
@@ -1233,6 +1337,7 @@
 
     if (targetView === 'hero2') {
       currentActiveView = 'hero2';
+      window.__isHero1ViewActive = false;
       html.setAttribute('data-theme', 'hero2');
       body.setAttribute('data-theme', 'hero2');
 
@@ -1264,6 +1369,7 @@
       triggerHeroToast('Audio Visualizer Engine active • 60 FPS 3D Grid');
     } else {
       currentActiveView = 'hero1';
+      window.__isHero1ViewActive = true;
       html.setAttribute('data-theme', 'hero1');
       body.setAttribute('data-theme', 'hero1');
 
