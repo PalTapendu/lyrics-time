@@ -125,3 +125,23 @@
 - **Files Touched**: `script.js`, `style.css`
 - **Change Type**: Bug fix & animation choreography polish
 - **Affected Docs**: `brain/animations-and-transitions.md` (now reflects `isPageAssembled` gating and cubic ease-in idle motion ramp).
+
+---
+
+## [2026-10-07] - Headphone Ambient Float Continuous Motion Restoration
+- **Date**: 2026-10-07
+- **Summary**: Restored `.hp-rig` continuous CSS ambient floating motion (`headphoneFloat 6s ease-in-out infinite`) upon page assembly (#stage.page-assembled) by separating it from the one-shot release kill-list (`animation: none !important`). Ensured seamless handoff with zero snap as `heroGraphicScaleIn` 100% keyframe and `headphoneFloat` 0%/100% keyframes are mathematically aligned at `transform: translateY(0px) rotateY(-10deg) rotateX(4deg) rotateZ(-1.5deg)`. Maintained audio playback beat precedence via `#stage.playing .hp-rig, #stage.page-assembled.playing .hp-rig`.
+- **Files Touched**: `style.css`
+- **Change Type**: Bug fix & CSS animation handoff polish
+- **Affected Docs**: `brain/animations-and-transitions.md`
+
+---
+
+## [2026-10-07] - Eliminate Entrance-to-Idle Dead Freeze & Sudden Motion Snap
+- **Date**: 2026-10-07
+- **Summary**: Synchronized entrance assembly timer to 1000ms (matching the ~960-1020ms completion of hero entrance keyframes) to eliminate the dead freeze, and upgraded idleEase ramp to a Hermite Smoothstep curve (650ms, zero initial velocity) to eliminate the sudden snap/jerk into ambient motion.
+- **Files Touched**: `script.js`
+- **Change Type**: Bug fix & animation handoff polish
+- **Affected Docs**: `brain/animations-and-transitions.md`
+
+

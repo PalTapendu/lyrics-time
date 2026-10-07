@@ -31,13 +31,13 @@ All animation in the project falls into these categories:
 if (prefersReducedMotion) {
   stage.classList.add('page-assembled');
 } else {
-  setTimeout(() => stage.classList.add('page-assembled'), 1150);
+  setTimeout(() => stage.classList.add('page-assembled'), 1000);
 }
 ```
 
 ### How Elements Animate
-- Before `page-assembled`: elements have entrance keyframe animations running (slide-up, fade-in, scale-in).
-- After `page-assembled`: entrance animations finish; interactive hover/tilt/parallax are now unlocked.
+- Before `page-assembled`: elements have choreographed entrance keyframe animations running (slide-up, fade-in, scale-in).
+- After `page-assembled`: entrance animations finish; static elements release animation locks (`animation: none !important`), while continuous animated elements (specifically `.hp-rig` headphone rig) seamlessly switch over to their ambient loop (`headphoneFloat 6s ease-in-out infinite`).
 - CSS uses staggered `animation-delay` on each element group for the choreographed sequence.
 
 ### Stagger Groups (approximate delays, style.css)

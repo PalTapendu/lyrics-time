@@ -199,8 +199,8 @@
   var prefersReducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   // Task 1: Choreographed Page-Load Assembly Timer
-  // Releases entrance animation locks after full choreography settles (~1150ms)
-  // so all subsequent interactive hover states, micro-interactions, and 3D tilts are free.
+  // Releases entrance animation locks right as the entrance choreography completes (~1000ms)
+  // so the landing pop-in flows directly and fluidly into ambient floating motion with zero freeze.
   var isPageAssembled = false;
   var assembleTime = 0;
 
@@ -211,9 +211,8 @@
   } else {
     setTimeout(function () {
       isPageAssembled = true;
-      assembleTime = performance.now() / 1000;
       if (stage) stage.classList.add('page-assembled');
-    }, 1150);
+    }, 1000);
   }
   var isPlaying = false;
   var isConsoleHovered = false;
@@ -434,7 +433,7 @@
       consoleEl.classList.toggle('is-straight', straightProgress === 1.0);
     }
 
-    // Amplitude Ease-In Safety Net & Phase Sync at 1150ms handoff
+    // Amplitude Ease-In Safety Net & Phase Sync at entrance completion handoff (~1000ms)
     var idleEase = 0;
     var idleDeltaTime = 0;
     if (isPageAssembled) {
@@ -442,13 +441,16 @@
         idleEase = 1.0;
         idleDeltaTime = 0;
       } else {
+        if (assembleTime === 0) {
+          assembleTime = timeSec;
+        }
         idleDeltaTime = Math.max(0, timeSec - assembleTime);
-        var easeDuration = 0.45; // 450ms smooth ramp from 0 to full strength
-        if (idleDeltaTime >= easeDuration) {
+        var rampDuration = 0.65; // 650ms smooth organic ease-in
+        if (idleDeltaTime >= rampDuration) {
           idleEase = 1.0;
         } else {
-          var t = idleDeltaTime / easeDuration;
-          idleEase = 1.0 - Math.pow(1.0 - t, 3); // Cubic ease-out
+          var t = idleDeltaTime / rampDuration;
+          idleEase = t * t * (3.0 - 2.0 * t); // Smoothstep (zero initial velocity, zero terminal acceleration)
         }
       }
     }

@@ -3313,11 +3313,20 @@ body[data-theme="piano"],
 #stage.page-assembled .hero-stats .stat-divider,
 #stage.page-assembled .pz[data-d="-8"],
 #stage.page-assembled #console,
-#stage.page-assembled .hp-rig,
 #stage.page-assembled #hand-top,
 #stage.page-assembled #hand-bottom {
   animation: none !important;
   opacity: 1 !important;
+}
+
+#stage.page-assembled .hp-rig {
+  animation: headphoneFloat 6s ease-in-out infinite;
+  opacity: 1;
+}
+
+#stage.playing .hp-rig,
+#stage.page-assembled.playing .hp-rig {
+  animation: headphoneBeat 1.1s ease-in-out infinite alternate;
 }
 
 /* ==========================================================================
