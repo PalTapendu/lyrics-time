@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Privacy Policy — SyncLines</title>
+  <meta name="description"
+    content="SyncLines Privacy Policy: 100% client-side Web Audio processing. Zero cloud audio uploads, local-only browser storage, and zero tracking by default.">
+  <link rel="canonical" href="https://synclines.app/privacy.html">
+  <meta name="robots" content="index, follow">
+
+  <!-- FAVICONS -->
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32x32.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png">
+  <link rel="manifest" href="site.webmanifest">
+  <meta name="theme-color" content="#060d09">
+
+  <!-- GOOGLE FONTS -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
+    rel="stylesheet">
+
+  <style>
+    :root {
+      --bg-dark: #060d09;
+      --card-bg: #09130d;
+      --border-color: rgba(228, 180, 80, 0.2);
+      --text-main: #fdf7ec;
+      --text-muted: #8ca395;
+      --accent-emerald: #00ffb0;
+      --accent-gold: #e2b34a;
+      --font-display: 'Outfit', -apple-system, sans-serif;
+      --font-body: 'Plus Jakarta Sans', -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      background-image: 
+        radial-gradient(ellipse 900px 500px at 50% 10%, rgba(10, 88, 54, 0.18), transparent 70%),
+        radial-gradient(ellipse 700px 400px at 50% 90%, rgba(226, 179, 74, 0.06), transparent 70%);
+      color: var(--text-main);
+      font-family: var(--font-body);
+      line-height: 1.7;
+      padding: 2rem 1.25rem 4rem;
+    }
+
+    .container {
+      max-width: 780px;
+      margin: 0 auto;
+    }
+
+    .top-nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 3rem;
+      padding-bottom: 1.25rem;
+      border-bottom: 1px solid rgba(228, 180, 80, 0.14);
+    }
+
+    .brand-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      color: var(--text-main);
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 1.15rem;
+    }
+
+    .brand-badge {
+      width: 36px;
+      height: 26px;
+      background: rgba(226, 179, 74, 0.1);
+      border: 1px solid rgba(228, 180, 80, 0.3);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .back-link {
+      color: var(--accent-gold);
+      text-decoration: none;
+      font-size: 0.88rem;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: opacity 0.2s;
+    }
+
+    .back-link:hover {
+      opacity: 0.85;
+    }
+
+    .header-section {
+      margin-bottom: 2.5rem;
+    }
+
+    .pill-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--accent-emerald);
+      background: rgba(0, 255, 176, 0.08);
+      border: 1px solid rgba(0, 255, 176, 0.22);
+      padding: 4px 12px;
+      border-radius: 999px;
+      margin-bottom: 1rem;
+    }
+
+    h1 {
+      font-family: var(--font-display);
+      font-size: clamp(2rem, 5vw, 2.75rem);
+      font-weight: 800;
+      line-height: 1.2;
+      color: #ffffff;
+      margin-bottom: 0.5rem;
+    }
+
+    .last-updated {
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .policy-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 20px;
+      padding: 2.5rem 2rem;
+      box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5);
+      margin-bottom: 2rem;
+    }
+
+    .section-block {
+      margin-bottom: 2.25rem;
+    }
+
+    .section-block:last-child {
+      margin-bottom: 0;
+    }
+
+    h2 {
+      font-family: var(--font-display);
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: var(--accent-gold);
+      margin-bottom: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    p {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      margin-bottom: 1rem;
+    }
+
+    ul {
+      list-style: none;
+      padding: 0;
+      margin-bottom: 1rem;
+    }
+
+    li {
+      position: relative;
+      padding-left: 1.4rem;
+      margin-bottom: 0.6rem;
+      color: var(--text-muted);
+      font-size: 0.92rem;
+    }
+
+    li::before {
+      content: '▹';
+      position: absolute;
+      left: 0;
+      color: var(--accent-emerald);
+      font-weight: 700;
+    }
+
+    code {
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      color: #79f7c3;
+      background: rgba(0, 255, 176, 0.08);
+      padding: 2px 6px;
+      border-radius: 4px;
+      border: 1px solid rgba(0, 255, 176, 0.15);
+    }
+
+    .highlight-box {
+      background: rgba(226, 179, 74, 0.07);
+      border: 1px solid rgba(228, 180, 80, 0.25);
+      border-radius: 12px;
+      padding: 1.25rem;
+      margin: 1rem 0;
+    }
+
+    .highlight-box p {
+      color: #ded6c8;
+      margin: 0;
+      font-size: 0.92rem;
+    }
+
+    .footer {
+      text-align: center;
+      margin-top: 3rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid rgba(228, 180, 80, 0.12);
+      color: #62776a;
+      font-size: 0.82rem;
+    }
+
+    .footer a {
+      color: var(--accent-gold);
+      text-decoration: none;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <nav class="top-nav" aria-label="Privacy Navigation">
+      <a href="./" class="brand-link" aria-label="SyncLines Home">
+        <div class="brand-badge">
+          <svg width="24" height="16" viewBox="0 0 46 30" stroke="#e8c76a" stroke-width="3" stroke-linecap="round" aria-hidden="true">
+            <path d="M3 15h0M9 9v12M15 4v22M21 11v8M27 2v26M33 8v14M39 12v6M44 15h0" />
+          </svg>
+        </div>
+        <span>SyncLines</span>
+      </a>
+      <a href="./" class="back-link">← Return to Studio</a>
+    </nav>
+
+    <header class="header-section">
+      <div class="pill-eyebrow">
+        <span>TRANSPARENCY &amp; LOCAL PRIVACY</span>
+      </div>
+      <h1>Privacy Policy</h1>
+      <p class="last-updated">Effective Date: October 12, 2026</p>
+    </header>
+
+    <main class="policy-card" role="main">
+      <section class="section-block">
+        <h2>1. 100% Local Processing (Zero Cloud Uploads)</h2>
+        <p>
+          SyncLines is built from the ground up as a fully client-side web application. When you open or drag-and-drop an audio file (such as MP3, WAV, FLAC, M4A, or OGG) or paste lyric text into the editor:
+        </p>
+        <div class="highlight-box">
+          <p>
+            <strong>Your files never leave your computer.</strong> All audio decoding, spectrum analysis, waveform peak computation, and subtitle formatting (.LRC, .SRT, .VTT, .TXT) are performed strictly inside your browser via the Web Audio API and JavaScript. No audio is ever uploaded to any server.
+          </p>
+        </div>
+      </section>
+
+      <section class="section-block">
+        <h2>2. Browser Storage (localStorage &amp; File Handles)</h2>
+        <p>
+          To ensure you do not lose your work if your tab refreshes, SyncLines uses standard in-browser <code>localStorage</code> and the native browser File System Access API. The data stored includes:
+        </p>
+        <ul>
+          <li><code>synclines-editor-theme</code>: Remembers your interface theme preference (Light or Dark).</li>
+          <li><code>timing-console-autosave</code>: Temporarily caches your current song title, lyric rows, and timestamps.</li>
+          <li><code>timing-console-history</code>: Saves references to your recent session files for 1-click reopening.</li>
+          <li><code>timing-console-clicks</code>: Remembers whether rhythmic audio click feedback is toggled on or off.</li>
+          <li><code>timing-console-dock-h</code>: Remembers your preferred height for the docked waveform player.</li>
+        </ul>
+        <p>
+          <strong>How to clear this data:</strong> You can purge all stored project data at any time by clicking "Clear Session" within the editor, or by clearing your browser's site data/cookies under your browser's privacy settings.
+        </p>
+      </section>
+
+      <section class="section-block">
+        <h2>3. Third-Party CDNs &amp; Resources</h2>
+        <p>
+          SyncLines fetches static font files and libraries from reputable public CDNs:
+        </p>
+        <ul>
+          <li><strong>Google Fonts:</strong> Typefaces (Outfit, Plus Jakarta Sans, JetBrains Mono, Caveat) are loaded from Google servers to render typography.</li>
+          <li><strong>Cloudflare cdnjs:</strong> Open-source helper libraries (Three.js and GSAP) are loaded from Cloudflare to drive GPU-accelerated canvas spectrum animations.</li>
+        </ul>
+        <p>
+          These CDNs receive standard anonymous HTTP request metadata (such as IP address and user-agent) necessary to serve the static font and script assets.
+        </p>
+      </section>
+
+      <section class="section-block">
+        <h2>4. Optional Analytics</h2>
+        <p>
+          By default, SyncLines operates with <strong>zero analytics, zero telemetry, and zero tracking cookies</strong>. If the site operator enables optional Google Analytics 4 (GA4), IP anonymization is enforced and only general aggregated usage telemetry (such as page views and browser types) is recorded. You may block analytics using any standard content blocker or browser privacy extension.
+        </p>
+      </section>
+
+      <section class="section-block">
+        <h2>5. Contact &amp; Questions</h2>
+        <p>
+          If you have questions regarding this privacy policy or the client-side architecture of SyncLines, contact the project maintainer:
+        </p>
+        <p>
+          <code>CONTACT_EMAIL</code> (or submit an issue via the official repository).
+        </p>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <p>© <span class="current-year">2026</span> SyncLines — Created by Tapendu Pal · <a href="./">Home</a> · <a href="editor/index.html">Editor</a></p>
+    </footer>
+  </div>
+
+  <script>
+    (function () {
+      var curYear = new Date().getFullYear();
+      var yearEls = document.querySelectorAll('.current-year');
+      for (var i = 0; i < yearEls.length; i++) {
+        yearEls[i].textContent = curYear;
+      }
+    })();
+  </script>
+</body>
+
+</html>

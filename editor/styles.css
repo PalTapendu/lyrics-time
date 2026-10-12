@@ -424,6 +424,31 @@ body {
   height: 100%;
 }
 
+.skip-link {
+  position: fixed;
+  top: -120px;
+  left: 20px;
+  z-index: 999999;
+  background: #0a5836;
+  color: #ffffff;
+  padding: 10px 18px;
+  border-radius: 8px;
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: top 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.skip-link:focus,
+.skip-link:focus-visible {
+  top: 16px;
+  outline: 2px solid #10b981;
+  outline-offset: 2px;
+}
+
 body {
   min-height: 100vh;
   background-color: var(--bg-core);
@@ -3530,6 +3555,34 @@ footer.hint-foot {
   font-size: 12px;
   margin-top: var(--space-6);
   line-height: 1.8;
+}
+
+footer.hint-foot .editor-footer-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 6px;
+  flex-wrap: wrap;
+}
+
+footer.hint-foot .foot-link {
+  color: var(--text-muted);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.15s ease;
+}
+
+footer.hint-foot .foot-link:hover {
+  color: var(--accent);
+}
+
+footer.hint-foot .foot-sep {
+  color: var(--border-soft);
+}
+
+footer.hint-foot .foot-privacy-note {
+  margin: 4px 0;
 }
 
 footer.hint-foot .credit-line b {

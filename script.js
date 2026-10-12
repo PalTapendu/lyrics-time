@@ -134,8 +134,8 @@
     var winW = window.innerWidth;
     var winH = window.innerHeight;
 
-    // Mobile Phone (< 768px): Fluid native mobile layout, zero rigid scaling
-    if (winW < 768) {
+    // Mobile Phone (< 768px or landscape phone height <= 500px with width < 1024px): Fluid native mobile layout
+    if (winW < 768 || (winH <= 500 && winW < 1024)) {
       document.body.classList.add('is-mobile');
       document.body.classList.remove('is-tablet', 'is-desktop');
       stage.style.transform = '';
@@ -146,8 +146,8 @@
       return;
     }
 
-    // Tablet Portrait (< 1024px and height > width): Fluid tablet layout
-    if (winW < 1024 && winH > winW) {
+    // Tablet (<= 1024px or portrait orientation up to 1100px): Fluid tablet layout
+    if (winW <= 1024 || (winW <= 1100 && winH > winW)) {
       document.body.classList.add('is-tablet');
       document.body.classList.remove('is-mobile', 'is-desktop');
       stage.style.transform = '';
@@ -158,22 +158,47 @@
       return;
     }
 
-    // Laptop, Desktop & Tablet Landscape: Scale-to-fit with seamless background
+    // Laptop, Desktop & Ultrawide: Pinned shell, available-area scaling with seamless background
     document.body.classList.add('is-desktop');
     document.body.classList.remove('is-mobile', 'is-tablet');
-    var scaleX = winW / 1819;
-    var scaleY = winH / 865;
+
+    var sidebarW = 76;
+    var topbarH = 78;
+    var footerH = 32;
+    var availW = Math.max(320, winW - sidebarW);
+    var availH = Math.max(320, winH - topbarH - footerH);
+
+    // Reference content artboard dimensions (excluding sidebar 76px and topbar 78px)
+    var contentArtW = 1819 - sidebarW; // 1743px
+    var contentArtH = 865 - topbarH;   // 787px
+
+    var scaleX = availW / contentArtW;
+    var scaleY = availH / contentArtH;
     var scale = Math.min(scaleX, scaleY);
+
     stage.style.width = '1819px';
     stage.style.height = '865px';
     stage.style.transform = 'scale(' + scale + ')';
-    var left = Math.max(0, (winW - 1819 * scale) / 2);
-    var top = Math.max(0, (winH - 865 * scale) / 2);
+
+    // Center content in the available area
+    var extraW = Math.max(0, availW - contentArtW * scale);
+    var extraH = Math.max(0, availH - contentArtH * scale);
+    var offsetX = extraW / 2;
+    var offsetY = extraH / 2;
+
+    // Anchor: point (sidebarW, topbarH) inside stage aligns with (sidebarW + offsetX, topbarH + offsetY) in viewport
+    var left = sidebarW * (1 - scale) + offsetX;
+    var top = topbarH * (1 - scale) + offsetY;
+
     stage.style.left = left + 'px';
     stage.style.top = top + 'px';
   }
   fitStage();
   window.addEventListener('resize', fitStage);
+  window.addEventListener('orientationchange', fitStage);
+  if (window.visualViewport) {
+    window.visualViewport.addEventListener('resize', fitStage);
+  }
 })();
 
 // ==========================================================================
@@ -208,10 +233,12 @@
     isPageAssembled = true;
     assembleTime = 0;
     if (stage) stage.classList.add('page-assembled');
+    document.body.classList.add('page-assembled');
   } else {
     setTimeout(function () {
       isPageAssembled = true;
       if (stage) stage.classList.add('page-assembled');
+      document.body.classList.add('page-assembled');
     }, 1000);
   }
   var isPlaying = false;
@@ -229,12 +256,13 @@
   };
 
   function getStageRect() {
-    return stage.getBoundingClientRect();
+    return stage ? stage.getBoundingClientRect() : { left: 0, top: 0, width: 1819, height: 865 };
   }
 
   function getRelativeCoord(e) {
     var r = getStageRect();
     var scale = r.width / 1819;
+    if (!scale || isNaN(scale) || scale <= 0) scale = 1;
     return {
       x: (e.clientX - r.left) / scale,
       y: (e.clientY - r.top) / scale
@@ -433,37 +461,39 @@
       consoleEl.classList.toggle('is-straight', straightProgress === 1.0);
     }
 
-    // Amplitude Ease-In Safety Net & Phase Sync at entrance completion handoff (~1000ms)
-    var idleEase = 0;
+    // Velocity continuity & amplitude ramp at entrance completion handoff (~1000ms)
+    var mouseEase = 0;
     var idleDeltaTime = 0;
     if (isPageAssembled) {
       if (prefersReducedMotion) {
-        idleEase = 1.0;
+        mouseEase = 1.0;
         idleDeltaTime = 0;
       } else {
         if (assembleTime === 0) {
           assembleTime = timeSec;
         }
         idleDeltaTime = Math.max(0, timeSec - assembleTime);
-        var rampDuration = 0.65; // 650ms smooth organic ease-in
+        var rampDuration = 0.50; // 500ms smooth blend for cursor parallax
         if (idleDeltaTime >= rampDuration) {
-          idleEase = 1.0;
+          mouseEase = 1.0;
         } else {
           var t = idleDeltaTime / rampDuration;
-          idleEase = t * t * (3.0 - 2.0 * t); // Smoothstep (zero initial velocity, zero terminal acceleration)
+          mouseEase = t * t * (3.0 - 2.0 * t); // Smoothstep for cursor parallax
         }
       }
     }
 
-    // Organic ambient floating & breathing wave (smoothly attenuated when straightening and ramped in at handoff)
-    var idleY = prefersReducedMotion ? 0 : Math.sin(idleDeltaTime * 0.8) * 0.45 * idleEase;
-    var idleX = prefersReducedMotion ? 0 : Math.sin(idleDeltaTime * 0.6) * 0.25 * idleEase;
-    var idleFloatY = prefersReducedMotion ? 0 : Math.sin(idleDeltaTime * 1.2) * 2.5 * idleEase;
+    // Organic ambient floating & breathing wave:
+    // Velocity continuity: starts at translateY(0px) at idleDeltaTime = 0 (exact resting position),
+    // and carries upward momentum (-Math.sin, ~3.5 px/s) unbroken from the entrance pop-in into the float.
+    var idleY = prefersReducedMotion ? 0 : Math.sin(idleDeltaTime * 0.8) * 0.45;
+    var idleX = prefersReducedMotion ? 0 : Math.sin(idleDeltaTime * 0.6) * 0.25;
+    var idleFloatY = prefersReducedMotion ? 0 : -Math.sin(idleDeltaTime * 1.4) * 2.5;
 
     // When NOT hovered (blend = 1): Full 3D car-dashboard tilt (-10.84deg, -1.90deg, -1.07deg) + mouse parallax + ambient breathing float
     // When HOVERED (blend = 0): Smoothly straightens out to 0deg (front/straight) with 100% crystal-clear sharpness
-    var curTiltY = (-10.84 + (currX * 2.2) * idleEase + idleY) * blend;
-    var curTiltX = (-1.90 + (-currY * 1.8) * idleEase + idleX) * blend;
+    var curTiltY = (-10.84 + (currX * 2.2) * mouseEase + idleY) * blend;
+    var curTiltX = (-1.90 + (-currY * 1.8) * mouseEase + idleX) * blend;
     var curTiltZ = (-1.07) * blend;
     var curTy = (idleFloatY) * blend;
 
@@ -550,13 +580,18 @@
         var rot = +el.dataset.r || 0;
         var baseT = el.dataset.initTransform ? (el.dataset.initTransform + ' ') : '';
 
-        var pzFloatY = prefersReducedMotion ? 0 : Math.sin(idleDeltaTime * 1.5 + depth * 0.4) * (2.2 + Math.abs(depth) * 0.18) * idleEase;
-        var pzFloatX = prefersReducedMotion ? 0 : Math.cos(idleDeltaTime * 1.2 + depth * 0.4) * (1.2 + Math.abs(depth) * 0.1) * idleEase;
-        var pzRot = (rot && !prefersReducedMotion) ? Math.sin(idleDeltaTime * 0.9 + depth * 0.2) * 0.35 * idleEase : 0;
+        // Continuous harmonic floating without velocity stall:
+        // Starts at exactly 0px at idleDeltaTime = 0, carrying upward drift in harmony with entrance pop-in.
+        var depthCos = Math.cos(depth * 0.35);
+        var depthSin = Math.sin(depth * 0.35);
 
-        var tx = (-currX * depth) * idleEase + pzFloatX;
-        var ty = (-currY * depth * 0.6) * idleEase + pzFloatY;
-        var tr = (rot ? currX * rot : 0) * idleEase + pzRot;
+        var pzFloatY = prefersReducedMotion ? 0 : -Math.sin(idleDeltaTime * 1.4) * (2.2 + Math.abs(depth) * 0.15) * Math.abs(depthCos);
+        var pzFloatX = prefersReducedMotion ? 0 : Math.sin(idleDeltaTime * 1.1) * (1.2 + Math.abs(depth) * 0.1) * depthSin;
+        var pzRot = (rot && !prefersReducedMotion) ? Math.sin(idleDeltaTime * 0.8) * 0.35 * depthSin : 0;
+
+        var tx = (-currX * depth) * mouseEase + pzFloatX;
+        var ty = (-currY * depth * 0.6) * mouseEase + pzFloatY;
+        var tr = (rot ? currX * rot : 0) * mouseEase + pzRot;
 
         // Dynamic adaptive placement for annotations:
         // In tilted state: sits closely and beautifully aligned to the 3D instrument card.
@@ -1473,13 +1508,21 @@
         }
       }
 
+      document.title = 'Audio Visualizer — SyncLines Pro Engine';
+      var themeMeta = document.getElementById('themeColorMeta');
+      if (themeMeta) themeMeta.setAttribute('content', '#060d09');
+
       triggerHeroToast('Audio Visualizer Engine active • 60 FPS 3D Grid');
     }
 
     if (targetView === 'hero2') {
       if (!isVisualizerLoaded) {
         updateActiveProduct('visualizer');
-        loadVisualizerScene(function () {
+        loadVisualizerScene(function (err) {
+          if (err) {
+            triggerHeroToast('Audio Visualizer could not be loaded. Please check your internet connection.');
+            return;
+          }
           applyHero2View();
         });
       } else {
@@ -1524,6 +1567,10 @@
         }
       }
 
+      document.title = 'Live Harmonic Piano — SyncLines Studio';
+      var themeMetaPiano = document.getElementById('themeColorMeta');
+      if (themeMetaPiano) themeMetaPiano.setAttribute('content', '#060d09');
+
       triggerHeroToast('Live Harmonic Piano: Feature in development');
     } else {
       // targetView === 'hero1'
@@ -1560,6 +1607,10 @@
         }
       }
 
+      document.title = 'SyncLines — Precision Audio-to-Lyric Sync Engine';
+      var themeMetaHome = document.getElementById('themeColorMeta');
+      if (themeMetaHome) themeMetaHome.setAttribute('content', '#0a5836');
+
       if (!productHint || productHint === 'lyrics') {
         showToast('Sync Lyrics & Script: Precision microsecond lyric aligner active');
       }
@@ -1572,6 +1623,10 @@
       switchView('hero2');
     } else if (window.location.hash === '#piano') {
       switchView('piano');
+    } else if (window.location.hash === '#features') {
+      openDemoModal();
+    } else if (window.location.hash === '#pricing') {
+      openPricingModal();
     } else {
       switchView('hero1', 'lyrics');
     }
@@ -1905,6 +1960,9 @@
       if (demoModal && demoModal.style.display !== 'none') {
         closeDemoModal();
       }
+      if (pricingModal && pricingModal.style.display !== 'none') {
+        closePricingModal();
+      }
       if (accountModal && accountModal.classList.contains('is-open')) {
         closeAccountModal();
       }
@@ -1913,6 +1971,98 @@
       }
     }
   });
+
+  /* =====================================================================
+     PRICING MODAL CONTROLLER & NAV BINDINGS
+     ===================================================================== */
+  var pricingModal = document.getElementById('pricingModal');
+  var pricingCloseBtn = document.getElementById('pricingCloseBtn');
+  var pricingDismissBtn = document.getElementById('pricingDismissBtn');
+  var pricingLaunchBtn = document.getElementById('pricingLaunchBtn');
+  var navPricingLink = document.getElementById('nav-pricing-link');
+  var navFeaturesLink = document.getElementById('nav-features-link');
+  var navShareLink = document.getElementById('nav-share-link');
+  var footerVisualizerLink = document.getElementById('footerVisualizerLink');
+
+  function openPricingModal() {
+    if (pricingModal) {
+      pricingModal.style.display = 'flex';
+      pricingModal.setAttribute('aria-hidden', 'false');
+    }
+  }
+
+  function closePricingModal() {
+    if (pricingModal) {
+      pricingModal.style.display = 'none';
+      pricingModal.setAttribute('aria-hidden', 'true');
+    }
+  }
+
+  if (navFeaturesLink) {
+    navFeaturesLink.addEventListener('click', function (e) {
+      e.preventDefault();
+      openDemoModal();
+    });
+  }
+
+  if (navPricingLink) {
+    navPricingLink.addEventListener('click', function (e) {
+      e.preventDefault();
+      openPricingModal();
+    });
+  }
+
+  if (pricingCloseBtn) pricingCloseBtn.addEventListener('click', closePricingModal);
+  if (pricingDismissBtn) pricingDismissBtn.addEventListener('click', closePricingModal);
+  if (pricingLaunchBtn) pricingLaunchBtn.addEventListener('click', navigateToEditor);
+  if (pricingModal) {
+    pricingModal.addEventListener('click', function (e) {
+      if (e.target === pricingModal) closePricingModal();
+    });
+  }
+
+  if (footerVisualizerLink) {
+    footerVisualizerLink.addEventListener('click', function (e) {
+      e.preventDefault();
+      switchView('hero2');
+    });
+  }
+
+  if (navShareLink) {
+    navShareLink.addEventListener('click', function (e) {
+      e.preventDefault();
+      var shareData = {
+        title: 'SyncLines — Precision Audio-to-Lyric Sync Engine',
+        text: 'Free client-side audio timestamp tagger and lyric sync tool. 100% local Web Audio.',
+        url: window.location.href.split('#')[0]
+      };
+      if (navigator.share) {
+        navigator.share(shareData).catch(function () {});
+      } else if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(window.location.href.split('#')[0]).then(function () {
+          showToast('Link copied to clipboard!');
+        }).catch(function () {
+          showToast('Share: ' + window.location.href.split('#')[0]);
+        });
+      } else {
+        showToast('Share: ' + window.location.href.split('#')[0]);
+      }
+    });
+  }
+
+  // Check initial hash for #features or #pricing
+  if (window.location.hash === '#features') {
+    openDemoModal();
+  } else if (window.location.hash === '#pricing') {
+    openPricingModal();
+  }
+
+  // Dynamic current year injection for copyright notices
+  var curYear = new Date().getFullYear();
+  var yearElements = document.querySelectorAll('.current-year, #currentYear');
+  for (var yi = 0; yi < yearElements.length; yi++) {
+    yearElements[yi].textContent = curYear;
+  }
 
 })();
 

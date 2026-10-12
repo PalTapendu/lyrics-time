@@ -1,0 +1,20 @@
+# SyncLines Robots Exclusion Standard
+# https://synclines.app
+
+User-agent: *
+Allow: /
+Allow: /editor/
+Allow: /privacy.html
+Allow: /assets/
+Allow: /*.css$
+Allow: /*.js$
+Allow: /*.png$
+Allow: /*.svg$
+
+# Internal documentation and duplicate/legacy paths
+Disallow: /brain/
+Disallow: /visualizer/
+Disallow: /Lyics_Time_Antigravity/
+
+# Sitemap location
+Sitemap: https://synclines.app/sitemap.xml

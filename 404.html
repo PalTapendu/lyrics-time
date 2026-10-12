@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Page Not Found (404) — SyncLines</title>
+  <meta name="description" content="The requested page could not be found on SyncLines.">
+  <meta name="robots" content="noindex, follow">
+
+  <!-- FAVICONS -->
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32x32.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png">
+  <link rel="manifest" href="site.webmanifest">
+  <meta name="theme-color" content="#060d09">
+
+  <!-- GOOGLE FONTS -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
+    rel="stylesheet">
+
+  <style>
+    :root {
+      --bg-dark: #060d09;
+      --card-bg: #09130d;
+      --border-color: rgba(228, 180, 80, 0.22);
+      --text-main: #fdf7ec;
+      --text-muted: #8ca395;
+      --accent-emerald: #00ffb0;
+      --accent-gold: #e2b34a;
+      --btn-green: #0a5836;
+      --font-display: 'Outfit', -apple-system, sans-serif;
+      --font-body: 'Plus Jakarta Sans', -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      background-image: 
+        radial-gradient(ellipse 900px 600px at 50% 25%, rgba(10, 88, 54, 0.22), transparent 70%),
+        radial-gradient(ellipse 700px 500px at 50% 75%, rgba(226, 179, 74, 0.08), transparent 70%);
+      color: var(--text-main);
+      font-family: var(--font-body);
+      min-height: 100vh;
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+      text-align: center;
+    }
+
+    .error-card {
+      max-width: 580px;
+      width: 100%;
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 24px;
+      padding: 3rem 2.25rem;
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.65), 0 0 1px rgba(255, 255, 255, 0.12);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .error-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 10%;
+      right: 10%;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--accent-gold), transparent);
+      opacity: 0.7;
+    }
+
+    .brand-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 58px;
+      height: 40px;
+      background: rgba(226, 179, 74, 0.1);
+      border: 1px solid rgba(228, 180, 80, 0.35);
+      border-radius: 12px;
+      margin-bottom: 1.5rem;
+    }
+
+    .pill-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--accent-gold);
+      background: rgba(226, 179, 74, 0.12);
+      border: 1px solid rgba(228, 180, 80, 0.25);
+      padding: 4px 12px;
+      border-radius: 999px;
+      margin-bottom: 1.25rem;
+    }
+
+    .dot-beacon {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #ff5252;
+      box-shadow: 0 0 8px #ff5252;
+    }
+
+    .error-code {
+      font-family: var(--font-display);
+      font-size: clamp(4.5rem, 12vw, 6.5rem);
+      font-weight: 800;
+      line-height: 1;
+      letter-spacing: -2px;
+      color: var(--text-main);
+      background: linear-gradient(180deg, #ffffff 30%, #a4b8ab 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 0.5rem;
+    }
+
+    .error-title {
+      font-family: var(--font-display);
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--accent-emerald);
+      margin-bottom: 1rem;
+    }
+
+    .error-desc {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      line-height: 1.6;
+      margin-bottom: 2.25rem;
+    }
+
+    .error-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      justify-content: center;
+    }
+
+    @media (min-width: 480px) {
+      .error-actions {
+        flex-direction: row;
+      }
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 0.8rem 1.4rem;
+      border-radius: 12px;
+      font-family: var(--font-body);
+      font-size: 0.9rem;
+      font-weight: 600;
+      text-decoration: none;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .btn-primary {
+      background: linear-gradient(180deg, #128352 0%, #0a5836 100%);
+      color: #ffffff;
+      border: 1px solid rgba(0, 255, 176, 0.4);
+      box-shadow: 0 4px 18px rgba(10, 88, 54, 0.45);
+    }
+
+    .btn-primary:hover {
+      background: linear-gradient(180deg, #169b61 0%, #0d6c43 100%);
+      transform: translateY(-1px);
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text-main);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(228, 180, 80, 0.35);
+      color: var(--accent-gold);
+    }
+
+    .foot-note {
+      margin-top: 2rem;
+      font-size: 0.78rem;
+      color: #63776b;
+      font-family: var(--font-mono);
+    }
+  </style>
+</head>
+
+<body>
+  <main class="error-card" role="main">
+    <div class="brand-badge">
+      <svg width="34" height="22" viewBox="0 0 46 30" stroke="#e8c76a" stroke-width="3" stroke-linecap="round" aria-hidden="true">
+        <path d="M3 15h0M9 9v12M15 4v22M21 11v8M27 2v26M33 8v14M39 12v6M44 15h0" />
+      </svg>
+    </div>
+
+    <div class="pill-eyebrow">
+      <span class="dot-beacon"></span>
+      <span>TIMELINE ERROR</span>
+    </div>
+
+    <h1 class="error-code">404</h1>
+    <h2 class="error-title">Frequency Not Found</h2>
+    <p class="error-desc">
+      The requested track, session, or studio link does not exist on this timeline. Perhaps the URL was mistyped or moved.
+    </p>
+
+    <div class="error-actions">
+      <a href="./" class="btn btn-primary">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+          <polyline points="9 22 9 12 15 12 15 22"></polyline>
+        </svg>
+        <span>Return to Home</span>
+      </a>
+      <a href="editor/index.html" class="btn btn-secondary">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4 6h10" />
+          <path d="M4 12h7" />
+          <path d="M4 18h10" />
+          <path d="M17 17a2.5 2.5 0 1 0 2.5-2.5H17V6l4-1v3" />
+        </svg>
+        <span>Open Sync Editor</span>
+      </a>
+    </div>
+
+    <div class="foot-note">
+      SyncLines PRO v8 · 100% Client-Side Audio Studio
+    </div>
+  </main>
+</body>
+
+</html>

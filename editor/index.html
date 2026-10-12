@@ -5,7 +5,79 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="color-scheme" content="light dark">
-  <title>Sync Lyrics & Script — Lyric Timestamp Tagger</title>
+  <!-- PRIMARY SEO -->
+  <title>Sync Lyrics &amp; Script &mdash; In-Browser Audio Timestamp Tagger</title>
+  <meta name="description" content="Tap-to-timestamp lyric and script editor. Scrub waveforms, tag words in real time, and export studio-ready .LRC, .SRT, .VTT, and .TXT. Runs 100% in your browser.">
+  <link rel="canonical" href="https://synclines.app/editor/">
+  <meta name="robots" content="index, follow">
+
+  <!-- FAVICONS & MANIFEST -->
+  <link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
+  <link rel="icon" type="image/png" sizes="32x32" href="../assets/favicon-32x32.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="../assets/apple-touch-icon.png">
+  <link rel="manifest" href="../site.webmanifest">
+  <meta name="theme-color" content="#0a5836">
+
+  <!-- OPEN GRAPH / FACEBOOK -->
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="SyncLines">
+  <meta property="og:title" content="Sync Lyrics &amp; Script &mdash; In-Browser Audio Timestamp Tagger">
+  <meta property="og:description" content="Tap-to-timestamp lyric and script editor. Scrub waveforms, tag words in real time, and export studio-ready .LRC, .SRT, .VTT, and .TXT. Runs 100% in your browser.">
+  <meta property="og:url" content="https://synclines.app/editor/">
+  <meta property="og:image" content="https://synclines.app/assets/synclines-preview.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="SyncLines Audio-to-Lyric Timing Console Interface">
+
+  <!-- TWITTER CARDS -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Sync Lyrics &amp; Script &mdash; In-Browser Audio Timestamp Tagger">
+  <meta name="twitter:description" content="Tap-to-timestamp lyric and script editor. Scrub waveforms, tag words in real time, and export studio-ready .LRC, .SRT, .VTT, and .TXT. Runs 100% in your browser.">
+  <meta name="twitter:image" content="https://synclines.app/assets/synclines-preview.png">
+
+  <!-- SCHEMA.ORG STRUCTURED DATA (JSON-LD) -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebApplication",
+        "@id": "https://synclines.app/editor/#app",
+        "name": "Sync Lyrics & Script",
+        "url": "https://synclines.app/editor/",
+        "applicationCategory": "MultimediaApplication",
+        "operatingSystem": "All modern browsers (Web Audio API)",
+        "browserRequirements": "Requires JavaScript and Web Audio API",
+        "description": "Browser-based tap-to-timestamp lyric and script editor with real-time waveform scrubbing and multi-format exports.",
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "USD"
+        }
+      },
+      {
+        "@type": "BreadcrumbList",
+        "@id": "https://synclines.app/editor/#breadcrumb",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Home",
+            "item": "https://synclines.app/"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "Sync Lyrics & Script Editor",
+            "item": "https://synclines.app/editor/"
+          }
+        ]
+      }
+    ]
+  }
+  </script>
+
+  <!-- FONTS & STYLES -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link
@@ -265,6 +337,7 @@
 </head>
 
 <body>
+  <a href="#editorMain" class="skip-link">Skip to editor content</a>
 
   <!-- Premium Page Transition Overlay (Handoff from Hero) -->
   <div class="page-transition-overlay" id="pageTransitionOverlay" aria-hidden="true">
@@ -292,7 +365,7 @@
   <canvas id="ambientCanvas" class="ambient-canvas" aria-hidden="true"></canvas>
 
   <div class="shell">
-    <div class="wrap">
+    <div class="wrap" id="editorMain" role="main">
       <header class="topbar">
         <div class="brand">
           <a href="../index.html" class="glyph-container" id="backToHomeBtn" title="Return to Home Landing"
@@ -552,9 +625,18 @@
         </div>
       </section>
 
-      <footer class="hint-foot">
-        Everything stays on this machine — no uploads, no server, no account.<br>
-        <span class="credit-line">SyncLines — created by <b>Tapendu Pal</b></span>
+      <footer class="hint-foot" role="contentinfo">
+        <nav class="editor-footer-nav" aria-label="Footer Navigation">
+          <a href="../index.html" class="foot-link">Home</a>
+          <span class="foot-sep">·</span>
+          <a href="./index.html" class="foot-link" aria-current="page">Sync Lyrics &amp; Script Editor</a>
+          <span class="foot-sep">·</span>
+          <a href="../index.html#visualizer" class="foot-link">Audio Visualizer</a>
+          <span class="foot-sep">·</span>
+          <a href="../privacy.html" class="foot-link">Privacy Policy</a>
+        </nav>
+        <p class="foot-privacy-note">Everything stays on this machine — 100% local Web Audio, no uploads, no server, no account.</p>
+        <span class="credit-line">© <span class="current-year">2026</span> SyncLines — Created by <b>Tapendu Pal</b></span>
       </footer>
     </div>
   </div>
@@ -806,6 +888,71 @@
   <script src="spectrum.js"></script>
   <script src="app.js"></script>
 
+  <!-- User-Facing Friendly Error & Resiliency Handlers -->
+  <script>
+    (function () {
+      // 1. Audio Element Playback & Decode Error Handling
+      var playerEl = document.getElementById('player');
+      var toastEl = document.getElementById('toast');
+
+      function showEditorToast(msg) {
+        if (!toastEl) return;
+        toastEl.textContent = msg;
+        toastEl.classList.add('show');
+        clearTimeout(showEditorToast._t);
+        showEditorToast._t = setTimeout(function () {
+          toastEl.classList.remove('show');
+        }, 4000);
+      }
+
+      if (playerEl) {
+        playerEl.addEventListener('error', function () {
+          var err = playerEl.error;
+          var msg = 'Audio playback could not start. Please verify the audio file is not corrupt.';
+          if (err) {
+            if (err.code === MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED) {
+              msg = 'Unsupported audio format. Please convert your file to standard MP3, WAV, or AAC.';
+            } else if (err.code === MediaError.MEDIA_ERR_DECODE) {
+              msg = 'Audio decode error. The audio track appears to be corrupted.';
+            } else if (err.code === MediaError.MEDIA_ERR_NETWORK) {
+              msg = 'Network error while attempting to read audio data.';
+            }
+          }
+          showEditorToast(msg);
+        });
+      }
+
+      // 2. Web Audio API Availability Check
+      if (!window.AudioContext && !window.webkitAudioContext) {
+        console.warn('Web Audio API is not supported in this browser environment.');
+        showEditorToast('Web Audio API is unavailable in this browser. Some visualizer features may be limited.');
+      }
+
+      // 3. Audio File Size & Format Validation Interceptor
+      var audioInput = document.getElementById('audioFileInput');
+      if (audioInput) {
+        audioInput.addEventListener('change', function () {
+          var file = audioInput.files && audioInput.files[0];
+          if (file) {
+            var MAX_RECOMMENDED_BYTES = 250 * 1024 * 1024; // 250MB
+            if (file.size > MAX_RECOMMENDED_BYTES) {
+              showEditorToast('Notice: Large audio file (' + Math.round(file.size / (1024 * 1024)) + 'MB). Waveform generation may take a few moments.');
+            }
+          }
+        });
+      }
+
+      // 4. Safe LocalStorage Quota Exceeded Wrapper
+      try {
+        var testKey = '__synclines_test__';
+        localStorage.setItem(testKey, testKey);
+        localStorage.removeItem(testKey);
+      } catch (storageErr) {
+        console.warn('LocalStorage is restricted or quota exceeded.', storageErr);
+      }
+    })();
+  </script>
+
   <!-- Page Entrance Controller -->
   <script>
     (function () {
@@ -871,6 +1018,68 @@
         });
       } else {
         requestAnimationFrame(revealEditor);
+      }
+
+      // Dynamic current year
+      var curYear = new Date().getFullYear();
+      var yearEls = document.querySelectorAll('.current-year');
+      for (var yi = 0; yi < yearEls.length; yi++) {
+        yearEls[yi].textContent = curYear;
+      }
+    })();
+  </script>
+
+  <!-- OPTIONAL GOOGLE ANALYTICS 4 (OFF by default — loads ONLY when GA_MEASUREMENT_ID is provided) -->
+  <script>
+    (function () {
+      // SET YOUR MEASUREMENT ID HERE (e.g., 'G-XXXXXXXXXX'). LEAVE EMPTY TO DISABLE COMPLETELY.
+      var GA_MEASUREMENT_ID = '';
+
+      if (!GA_MEASUREMENT_ID || GA_MEASUREMENT_ID === 'G-XXXXXXXXXX') {
+        return; // Zero tracking by default. Nothing is fetched or executed.
+      }
+
+      var CONSENT_KEY = 'synclines-analytics-consent';
+      var consentChoice = localStorage.getItem(CONSENT_KEY);
+
+      function loadGA4() {
+        var script = document.createElement('script');
+        script.async = true;
+        script.src = 'https://www.googletagmanager.com/gtag/js?id=' + encodeURIComponent(GA_MEASUREMENT_ID);
+        document.head.appendChild(script);
+
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){ dataLayer.push(arguments); }
+        window.gtag = gtag;
+        gtag('js', new Date());
+        gtag('config', GA_MEASUREMENT_ID, {
+          anonymize_ip: true,
+          cookie_flags: 'SameSite=None;Secure'
+        });
+      }
+
+      if (consentChoice === 'granted') {
+        loadGA4();
+      } else if (consentChoice !== 'denied') {
+        var banner = document.createElement('div');
+        banner.id = 'ga-consent-banner';
+        banner.style.cssText = 'position:fixed;bottom:16px;right:16px;z-index:9999;max-width:340px;background:#09130d;border:1px solid rgba(228,180,80,0.3);border-radius:12px;padding:14px;box-shadow:0 12px 32px rgba(0,0,0,0.7);color:#e8dfce;font-family:"Plus Jakarta Sans",sans-serif;font-size:12px;line-height:1.5;';
+        banner.innerHTML = '<div style="margin-bottom:10px;">We use anonymous telemetry with IP masking to measure studio performance. Accept tracking?</div>' +
+          '<div style="display:flex;gap:8px;justify-content:flex-end;">' +
+          '<button id="ga-deny-btn" style="background:transparent;border:1px solid rgba(255,255,255,0.2);color:#8ca395;padding:4px 10px;border-radius:6px;cursor:pointer;font-size:11px;">Decline</button>' +
+          '<button id="ga-accept-btn" style="background:#0a5836;border:1px solid #00ffb0;color:#fff;padding:4px 12px;border-radius:6px;cursor:pointer;font-size:11px;font-weight:600;">Accept</button>' +
+          '</div>';
+        document.body.appendChild(banner);
+
+        document.getElementById('ga-accept-btn').addEventListener('click', function () {
+          localStorage.setItem(CONSENT_KEY, 'granted');
+          banner.remove();
+          loadGA4();
+        });
+        document.getElementById('ga-deny-btn').addEventListener('click', function () {
+          localStorage.setItem(CONSENT_KEY, 'denied');
+          banner.remove();
+        });
       }
     })();
   </script>

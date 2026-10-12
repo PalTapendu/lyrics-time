@@ -232,10 +232,13 @@ body {
    LEFT SIDEBAR: Sleek Studio Vertical Bar (4K Crisp Edition)
    ========================================================================== */
 #side {
+  position: fixed;
   left: 0;
   top: 0;
+  bottom: 0;
   width: 76px;
-  height: 865px;
+  height: 100vh;
+  height: 100dvh;
   background: var(--shell-sidebar-bg);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
@@ -247,7 +250,7 @@ body {
   flex-direction: column;
   align-items: center;
   padding-top: 0;
-  z-index: 50;
+  z-index: 100;
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
   transform: translateZ(0);
@@ -395,6 +398,7 @@ body {
    TOP HEADER BAR (4K Precision Edition)
    ========================================================================== */
 #top {
+  position: fixed;
   left: 76px;
   top: 0;
   right: 0;
@@ -408,7 +412,7 @@ body {
   align-items: center;
   justify-content: space-between;
   padding: 0 36px 0 28px;
-  z-index: 50;
+  z-index: 100;
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
   transform: translateZ(0);
@@ -1722,13 +1726,19 @@ body {
 
 @keyframes headphoneFloat {
 
-  0%,
-  100% {
+  0% {
     transform: translateY(0px) rotateY(-10deg) rotateX(4deg) rotateZ(-1.5deg);
+    animation-timing-function: cubic-bezier(0.25, 0.95, 0.5, 1);
   }
 
   50% {
     transform: translateY(-8px) rotateY(-8.5deg) rotateX(5deg) rotateZ(-0.8deg);
+    animation-timing-function: cubic-bezier(0.42, 0, 0.58, 1);
+  }
+
+  100% {
+    transform: translateY(0px) rotateY(-10deg) rotateX(4deg) rotateZ(-1.5deg);
+    animation-timing-function: cubic-bezier(0.42, 0, 0.58, 1);
   }
 }
 
@@ -2471,12 +2481,11 @@ body {
   transform: translate3d(44px, 0, 0) scale(0.985);
 }
 
-/* Background theme swap on #stage, html & body between Hero 1 and Hero 2 - 100% Seamless Full Bleed */
+/* Background theme swap on html & body between Hero 1 and Hero 2 - 100% Seamless Full Bleed */
 html,
 body,
 html[data-theme="hero1"],
-body[data-theme="hero1"],
-[data-theme="hero1"] #stage {
+body[data-theme="hero1"] {
   background:
     radial-gradient(1000px 600px at 15% 15%, #ffffff, transparent 70%),
     radial-gradient(1200px 800px at 85% 75%, #f4ece0, transparent 75%),
@@ -2487,11 +2496,17 @@ body[data-theme="hero1"],
 html[data-theme="hero2"],
 body[data-theme="hero2"],
 html[data-theme="piano"],
-body[data-theme="piano"],
-[data-theme="hero2"] #stage,
-[data-theme="piano"] #stage {
+body[data-theme="piano"] {
   background: #060d09 !important;
   background-color: #060d09 !important;
+}
+
+#stage,
+[data-theme="hero1"] #stage,
+[data-theme="hero2"] #stage,
+[data-theme="piano"] #stage {
+  background: transparent !important;
+  background-color: transparent !important;
 }
 
 /* ==========================================================================
@@ -2979,11 +2994,40 @@ body[data-theme="piano"],
   font-size: 1.15rem;
 }
 
+.demo-feat-item h3,
 .demo-feat-item h4 {
   font-size: 0.88rem;
   font-weight: 600;
   color: #fdf7ec;
   margin-bottom: 0.2rem;
+}
+
+/* ==========================================================================
+   ACCESSIBILITY: Skip to Content Link
+   ========================================================================== */
+.skip-link {
+  position: fixed;
+  top: -120px;
+  left: 20px;
+  z-index: 99999;
+  background: #063a23;
+  color: #ffffff;
+  padding: 10px 18px;
+  border-radius: 8px;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: top 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.skip-link:focus,
+.skip-link:focus-visible {
+  top: 16px;
+  outline: 2px solid #10b981;
+  outline-offset: 2px;
 }
 
 .demo-feat-item p {
@@ -3275,11 +3319,11 @@ body[data-theme="piano"],
 }
 
 #console {
-  animation: heroConsoleIn 0.62s var(--ease-out) 0.34s both;
+  animation: heroConsoleIn 0.62s cubic-bezier(0.18, 0.92, 0.35, 1) 0.34s both;
 }
 
 .hp-rig {
-  animation: heroGraphicScaleIn 0.58s var(--ease-out) 0.44s both;
+  animation: heroGraphicScaleIn 0.58s cubic-bezier(0.18, 0.92, 0.35, 1) 0.44s both;
 }
 
 #hand-top {
@@ -3291,6 +3335,20 @@ body[data-theme="piano"],
 }
 
 /* Release animations after full assembly so hover/active interactions are unhindered */
+.page-assembled #side-logo,
+.page-assembled #brand-home,
+.page-assembled #top .brand-title,
+.page-assembled #top .brand-tag,
+.page-assembled #products-dropdown-wrapper,
+.page-assembled #products-dropdown-wrap,
+.page-assembled #top .nav-links a,
+.page-assembled #top .nav-link,
+.page-assembled #top .nav-pricing,
+.page-assembled #top .engine-status,
+.page-assembled #top .header-divider,
+.page-assembled #top-upload-btn,
+.page-assembled #side .side-divider,
+.page-assembled #side .side-btn,
 #stage.page-assembled #side-logo,
 #stage.page-assembled #brand-home,
 #stage.page-assembled #top .brand-title,
@@ -4130,15 +4188,15 @@ body[data-theme="piano"],
     right: 12px !important;
     top: auto !important;
     width: calc(100% - 24px) !important;
-    max-width: 380px !important;
+    max-width: 420px !important;
     margin: 0 auto !important;
-    height: 52px !important;
-    border-radius: 20px !important;
+    height: 60px !important;
+    border-radius: 22px !important;
     flex-direction: row !important;
     justify-content: space-around !important;
     align-items: center !important;
     z-index: 9999 !important;
-    padding: 0 6px !important;
+    padding: 0 8px !important;
     border: 1px solid var(--shell-sidebar-border) !important;
     box-shadow: 0 12px 32px rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(255, 255, 255, 0.15) !important;
     backdrop-filter: blur(24px) !important;
@@ -4159,19 +4217,24 @@ body[data-theme="piano"],
     width: 100% !important;
     justify-content: space-around !important;
     align-items: center !important;
-    gap: 2px !important;
+    gap: 4px !important;
   }
 
   #side .side-btn {
-    width: 38px !important;
-    height: 38px !important;
-    border-radius: 10px !important;
+    width: 44px !important;
+    height: 44px !important;
+    min-width: 44px !important;
+    min-height: 44px !important;
+    border-radius: 12px !important;
     flex-shrink: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
   }
 
   #side .side-btn svg {
-    width: 17px !important;
-    height: 17px !important;
+    width: 20px !important;
+    height: 20px !important;
   }
 
   /* Hero 1 Panel on Mobile */
@@ -4521,4 +4584,214 @@ body[data-theme="piano"],
   .visualizer-taskbar .taskbar-actions {
     display: none !important;
   }
+}
+
+/* ==========================================================================
+   PHASE 3: BRAND LINK, SHARE BUTTON, SITE FOOTER & PRICING MODAL STYLES
+   ========================================================================== */
+.brand-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  cursor: pointer;
+  color: inherit;
+}
+
+.nav-share-link {
+  background: none;
+  border: none;
+  font-family: inherit;
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: var(--shell-nav-link-color, #27392d);
+  cursor: pointer;
+  padding: 0.4rem 0.6rem;
+  border-radius: 6px;
+  transition: color 0.15s ease;
+  line-height: normal;
+}
+
+.nav-share-link:hover {
+  color: var(--shell-nav-link-hover, #0b7044);
+}
+
+[data-theme="hero2"] .nav-share-link {
+  color: var(--shell-nav-link-color, #92a49b);
+}
+
+[data-theme="hero2"] .nav-share-link:hover {
+  color: #e2b34a;
+}
+
+/* --- Site Footer --- */
+.site-footer {
+  width: 100%;
+  font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
+  box-sizing: border-box;
+}
+
+@media (min-width: 1025px) {
+  .site-footer {
+    position: fixed;
+    left: 76px;
+    right: 0;
+    bottom: 0;
+    height: 32px;
+    padding: 0 1.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    z-index: 95;
+    background: rgba(255, 255, 255, 0.65);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-top: 1px solid rgba(22, 38, 28, 0.08);
+    color: #4b6152;
+    font-size: 0.73rem;
+  }
+
+  [data-theme="hero2"] .site-footer {
+    background: rgba(6, 12, 9, 0.78);
+    border-top: 1px solid rgba(228, 180, 80, 0.14);
+    color: #8da496;
+  }
+
+  .site-footer .footer-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+  }
+
+  .site-footer .footer-nav {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .site-footer .footer-link {
+    color: inherit;
+    text-decoration: none;
+    transition: color 0.15s ease;
+  }
+
+  .site-footer .footer-link:hover {
+    color: #0b7044;
+  }
+
+  [data-theme="hero2"] .site-footer .footer-link:hover {
+    color: #e2b34a;
+  }
+
+  .site-footer .footer-sep {
+    opacity: 0.4;
+  }
+}
+
+@media (max-width: 1024px) {
+  .site-footer {
+    padding: 2rem 1.25rem 5.5rem;
+    text-align: center;
+    border-top: 1px solid rgba(22, 38, 28, 0.09);
+    color: #647569;
+    font-size: 0.8rem;
+    background: transparent;
+  }
+
+  [data-theme="hero2"] .site-footer {
+    border-top: 1px solid rgba(228, 180, 80, 0.14);
+    color: #8da496;
+  }
+
+  .site-footer .footer-inner {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    align-items: center;
+  }
+
+  .site-footer .footer-nav {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .site-footer .footer-link {
+    color: inherit;
+    text-decoration: none;
+    font-weight: 500;
+  }
+
+  .site-footer .footer-link:hover {
+    color: #0b7044;
+  }
+
+  [data-theme="hero2"] .site-footer .footer-link:hover {
+    color: #e2b34a;
+  }
+
+  .site-footer .footer-sep {
+    opacity: 0.35;
+  }
+}
+
+/* --- Pricing Modal --- */
+#pricingModal.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  z-index: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+}
+
+.pricing-card-hero {
+  text-align: center;
+  padding: 1.25rem 1rem;
+  margin-bottom: 1.5rem;
+  background: rgba(226, 179, 74, 0.06);
+  border: 1px solid rgba(228, 180, 80, 0.2);
+  border-radius: 14px;
+}
+
+.pricing-price-tag {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 4px;
+  font-family: 'Outfit', sans-serif;
+  color: #00ffb0;
+}
+
+.pricing-price-tag .price-currency {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #e2b34a;
+}
+
+.pricing-price-tag .price-val {
+  font-size: 3.2rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.pricing-price-tag .price-period {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.9rem;
+  color: #7c9186;
+  margin-left: 6px;
+}
+
+.pricing-tagline {
+  font-size: 0.88rem;
+  color: #9db2a5;
+  margin-top: 0.5rem;
+  margin-bottom: 0;
 }

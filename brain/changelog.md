@@ -144,4 +144,14 @@
 - **Change Type**: Bug fix & animation handoff polish
 - **Affected Docs**: `brain/animations-and-transitions.md`
 
+---
+
+## [2026-10-07] - True Velocity & Rate-of-Change Continuity at Entrance Handoff
+- **Date**: 2026-10-07
+- **Summary**: Eliminated residual hesitation/pause by aligning entrance finishing velocity with initial ambient floating momentum (upward ~3.5 px/s via -Math.sin wave on console and cubic-bezier(0.25, 0.95, 0.5, 1) on headphoneFloat), and separating mouse parallax ease-in from ambient harmonic motion.
+- **Files Touched**: `script.js`, `style.css`
+- **Change Type**: Motion design, physics continuity & bug fix
+- **Affected Docs**: `brain/animations-and-transitions.md`
+
+
 

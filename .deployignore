@@ -1,0 +1,5 @@
+# Deployment exclusions for static hosts (Cloudflare Pages, Netlify, Vercel)
+brain/
+Lyics_Time_Antigravity/
+.git*
+*.md
