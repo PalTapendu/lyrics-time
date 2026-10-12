@@ -3169,15 +3169,19 @@ body[data-theme="piano"] {
   }
 }
 
-@keyframes heroGraphicScaleIn {
+/* hpFloatEntrance: entrance pop-in that lands at the exact 0% frame of headphoneFloat,
+   enabling a seamless CSS chain: grow IN → immediately continue floating */
+@keyframes hpFloatEntrance {
   0% {
     opacity: 0;
     transform: translateY(24px) scale(0.94) rotateY(-10deg) rotateX(4deg) rotateZ(-1.5deg);
+    animation-timing-function: cubic-bezier(0.18, 0.92, 0.35, 1);
   }
 
   100% {
     opacity: 1;
-    transform: translateY(0) scale(1) rotateY(-10deg) rotateX(4deg) rotateZ(-1.5deg);
+    /* Lands at headphoneFloat 0% = translateY(0px) + base 3D orientation */
+    transform: translateY(0px) rotateY(-10deg) rotateX(4deg) rotateZ(-1.5deg);
   }
 }
 
@@ -3323,7 +3327,11 @@ body[data-theme="piano"] {
 }
 
 .hp-rig {
-  animation: heroGraphicScaleIn 0.58s cubic-bezier(0.18, 0.92, 0.35, 1) 0.44s both;
+  /* Chain: entrance pop-in (0.58s, delay 0.44s) → seamlessly into continuous float.
+     fill-mode 'both' holds opacity:0 before the delay, then the float picks up. */
+  animation:
+    hpFloatEntrance 0.58s cubic-bezier(0.18, 0.92, 0.35, 1) 0.44s both,
+    headphoneFloat 6s ease-in-out 1.02s infinite;
 }
 
 #hand-top {
@@ -3334,7 +3342,10 @@ body[data-theme="piano"] {
   animation: heroFadeIn 0.52s var(--ease-out) 0.62s both;
 }
 
-/* Release animations after full assembly so hover/active interactions are unhindered */
+/* Release shell-chrome entrance animations after page is assembled so hover/active
+   interactions are unhindered. Hero copy (title, sub, buttons, stats) are intentionally
+   NOT included: fill-mode:both already holds them at final opacity, and since
+   page-assembled is now set on frame 1 we must not kill their mid-flight animations. */
 .page-assembled #side-logo,
 .page-assembled #brand-home,
 .page-assembled #top .brand-title,
@@ -3360,25 +3371,15 @@ body[data-theme="piano"] {
 #stage.page-assembled #top .header-divider,
 #stage.page-assembled #top-upload-btn,
 #stage.page-assembled #side .side-divider,
-#stage.page-assembled #side .side-btn,
-#stage.page-assembled .hero-left .eyebrow-pill,
-#stage.page-assembled .hero-left #title #t1,
-#stage.page-assembled .hero-left #title #t2,
-#stage.page-assembled .hero-left .hero-sub,
-#stage.page-assembled .hero-left #main-upload-btn,
-#stage.page-assembled .hero-left #watch-demo-btn,
-#stage.page-assembled .hero-stats .stat-item,
-#stage.page-assembled .hero-stats .stat-divider,
-#stage.page-assembled .pz[data-d="-8"],
-#stage.page-assembled #console,
-#stage.page-assembled #hand-top,
-#stage.page-assembled #hand-bottom {
+#stage.page-assembled #side .side-btn {
   animation: none !important;
   opacity: 1 !important;
 }
 
+/* page-assembled: do NOT reset .hp-rig animation here.
+   The chained hpFloatEntrance → headphoneFloat is already running from t=0.
+   Only the playing override needs to intervene. */
 #stage.page-assembled .hp-rig {
-  animation: headphoneFloat 6s ease-in-out infinite;
   opacity: 1;
 }
 
