@@ -4,22 +4,16 @@
       <stop offset="0%" stop-color="#0e4b30"/>
       <stop offset="100%" stop-color="#06291a"/>
     </linearGradient>
-    <linearGradient id="favBars" x1="0" y1="1" x2="0" y2="0">
-      <stop offset="0%" stop-color="#34d399"/>
-      <stop offset="100%" stop-color="#ffffff"/>
-    </linearGradient>
   </defs>
-  <!-- Squircle rounded background -->
+  <!-- Squircle background — matches side-logo button radius -->
   <rect x="2" y="2" width="44" height="44" rx="12" fill="url(#favBg)" stroke="#1f8a5b" stroke-width="1.5"/>
-  <!-- SyncLines Precision 8-Bar Waveform Signature -->
-  <g stroke="url(#favBars)" stroke-width="3.2" stroke-linecap="round">
-    <line x1="8" y1="24" x2="8" y2="24"/>
-    <line x1="13" y1="18" x2="13" y2="30"/>
-    <line x1="18" y1="12" x2="18" y2="36"/>
-    <line x1="23" y1="19" x2="23" y2="29"/>
-    <line x1="28" y1="9" x2="28" y2="39"/>
-    <line x1="33" y1="16" x2="33" y2="32"/>
-    <line x1="38" y1="20" x2="38" y2="28"/>
-    <line x1="42" y1="24" x2="42" y2="24"/>
+  <!--
+    Logo waveform: exact same path as the in-app logo (viewBox 46×30),
+    scaled to fit inside the 44×44 squircle with uniform padding.
+    Scale: 38/46 ≈ 0.826 (width), 24/30 = 0.8 (height). Use 0.8 for both.
+    Translate: center 46*0.8=36.8 → pad (44-36.8)/2+2 = 5.6; 30*0.8=24 → pad (44-24)/2+2 = 12
+  -->
+  <g transform="translate(5.6, 12) scale(0.8)" stroke="#ffffff" stroke-width="3.5" stroke-linecap="round">
+    <path d="M3 15h0M9 9v12M15 4v22M21 11v8M27 2v26M33 8v14M39 12v6M44 15h0"/>
   </g>
 </svg>
