@@ -1071,7 +1071,8 @@ body {
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
-  padding-bottom: 0px;
+  padding-bottom: 0.16em;
+  margin-bottom: -0.16em;
   overflow: visible;
 }
 
@@ -1081,7 +1082,8 @@ body {
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
-  padding-bottom: 0px;
+  padding-bottom: 0.08em;
+  margin-bottom: -0.08em;
   overflow: visible;
 }
 
