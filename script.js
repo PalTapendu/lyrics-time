@@ -127,77 +127,97 @@
     }
   });
 
-  // 4. RESPONSIVE ADAPTIVE ENGINE (Laptop, Tablet & Phone Perfect Fit)
+  // 4. RESPONSIVE ADAPTIVE ENGINE (Rule-Based Responsive System)
   var stage = document.getElementById('stage');
-  function fitStage() {
-    if (!stage) return;
+  var illustrationContainer = document.getElementById('hero-illustration-container');
+  var illustrationScaler = document.getElementById('hero-illustration-scaler');
+
+  function updateResponsiveState() {
     var winW = window.innerWidth;
     var winH = window.innerHeight;
 
-    // Mobile Phone (< 768px or landscape phone height <= 500px with width < 1024px): Fluid native mobile layout
+    // Mobile Phone (< 768px or landscape phone height <= 500px with width < 1024px)
     if (winW < 768 || (winH <= 500 && winW < 1024)) {
       document.body.classList.add('is-mobile');
       document.body.classList.remove('is-tablet', 'is-desktop');
-      stage.style.transform = '';
-      stage.style.left = '';
-      stage.style.top = '';
-      stage.style.width = '';
-      stage.style.height = '';
-      return;
-    }
-
-    // Tablet (<= 1024px or portrait orientation up to 1100px): Fluid tablet layout
-    if (winW <= 1024 || (winW <= 1100 && winH > winW)) {
+    } else if (winW < 1024) {
+      // Tablet (< 1024px)
       document.body.classList.add('is-tablet');
       document.body.classList.remove('is-mobile', 'is-desktop');
-      stage.style.transform = '';
-      stage.style.left = '';
-      stage.style.top = '';
-      stage.style.width = '';
-      stage.style.height = '';
-      return;
+    } else {
+      // Laptop, Desktop & Ultrawide (>= 1024px)
+      document.body.classList.add('is-desktop');
+      document.body.classList.remove('is-mobile', 'is-tablet');
     }
 
-    // Laptop, Desktop & Ultrawide: Pinned shell, available-area scaling with seamless background
-    document.body.classList.add('is-desktop');
-    document.body.classList.remove('is-mobile', 'is-tablet');
-
-    var sidebarW = 76;
-    var topbarH = 78;
-    var footerH = 32;
-    var availW = Math.max(320, winW - sidebarW);
-    var availH = Math.max(320, winH - topbarH - footerH);
-
-    // Reference content artboard dimensions (excluding sidebar 76px and topbar 78px)
-    var contentArtW = 1819 - sidebarW; // 1743px
-    var contentArtH = 865 - topbarH;   // 787px
-
-    var scaleX = availW / contentArtW;
-    var scaleY = availH / contentArtH;
-    var scale = Math.min(scaleX, scaleY);
-
-    stage.style.width = '1819px';
-    stage.style.height = '865px';
-    stage.style.transform = 'scale(' + scale + ')';
-
-    // Center content in the available area
-    var extraW = Math.max(0, availW - contentArtW * scale);
-    var extraH = Math.max(0, availH - contentArtH * scale);
-    var offsetX = extraW / 2;
-    var offsetY = extraH / 2;
-
-    // Anchor: point (sidebarW, topbarH) inside stage aligns with (sidebarW + offsetX, topbarH + offsetY) in viewport
-    var left = sidebarW * (1 - scale) + offsetX;
-    var top = topbarH * (1 - scale) + offsetY;
-
-    stage.style.left = left + 'px';
-    stage.style.top = top + 'px';
+    fitHeroIllustration();
   }
-  fitStage();
-  window.addEventListener('resize', fitStage);
-  window.addEventListener('orientationchange', fitStage);
+
+  function fitHeroIllustration() {
+    if (!illustrationContainer || !illustrationScaler) {
+      illustrationContainer = document.getElementById('hero-illustration-container');
+      illustrationScaler = document.getElementById('hero-illustration-scaler');
+    }
+    if (!illustrationContainer || !illustrationScaler) return;
+
+    var cw = illustrationContainer.clientWidth;
+    if (!cw) return;
+
+    var refW = 980;
+    var refH = 700;
+    var winW = window.innerWidth;
+    var isDesktop = winW >= 1024;
+    var scale;
+
+    if (isDesktop) {
+      // In 2-column mode, compute scale based on available column width and available viewport height
+      var topEl = document.getElementById('top');
+      var topH = topEl ? topEl.offsetHeight : 64;
+      var footerEl = document.getElementById('site-footer');
+      var footerH = footerEl ? footerEl.offsetHeight : 36;
+      var availH = Math.max(340, window.innerHeight - topH - footerH - 36);
+
+      var scaleW = cw / refW;
+      var scaleH = availH / refH;
+      scale = Math.min(scaleW, scaleH);
+      if (winW >= 1440 && availH >= 660) {
+        scale = Math.max(0.92, scale);
+      }
+    } else {
+      // In stacked column mode, scale by available container width
+      scale = cw / refW;
+    }
+
+    // Keep scale within sensible ergonomic bounds
+    scale = Math.max(0.32, Math.min(1.05, scale));
+
+    var scaledW = Math.round(refW * scale);
+    var scaledH = Math.round(refH * scale);
+
+    // Set container height to match scaled height so there is no awkward whitespace
+    illustrationContainer.style.height = scaledH + 'px';
+
+    // Center scaler horizontally inside container with rock-solid matrix translate + scale
+    var offsetX = Math.max(0, (cw - scaledW) / 2);
+    illustrationScaler.style.transformOrigin = '0 0';
+    illustrationScaler.style.left = '0';
+    illustrationScaler.style.top = '0';
+    illustrationScaler.style.transform = 'translate(' + offsetX.toFixed(1) + 'px, 0px) scale(' + scale.toFixed(4) + ')';
+  }
+
+  updateResponsiveState();
+  window.addEventListener('resize', updateResponsiveState);
+  window.addEventListener('orientationchange', updateResponsiveState);
   if (window.visualViewport) {
-    window.visualViewport.addEventListener('resize', fitStage);
+    window.visualViewport.addEventListener('resize', updateResponsiveState);
+  }
+  if (window.ResizeObserver) {
+    try {
+      var ro = new ResizeObserver(function () {
+        fitHeroIllustration();
+      });
+      if (illustrationContainer) ro.observe(illustrationContainer);
+    } catch (e) { }
   }
 })();
 
@@ -244,7 +264,8 @@
   var isConsoleHovered = false;
   var straightProgress = 0.0;
   var mouseX = 0, mouseY = 0, currX = 0, currY = 0;
-  var targetGlowX = 1400, targetGlowY = 300, glowX = 1400, glowY = 300;
+  var initW = typeof window !== 'undefined' ? (window.innerWidth || 1200) : 1200;
+  var targetGlowX = Math.min(600, initW * 0.5), targetGlowY = 300, glowX = Math.min(600, initW * 0.5), glowY = 300;
   var totalSeconds = 30.0; // Total 30.0s timeline
   var playheadPercent = 11.5 / 30.0; // Starts at row 2 (00:11.500)
   var lastTimestamp = 0;
@@ -253,39 +274,44 @@
   window.isHeroSongPlaying = function () {
     return isPlaying;
   };
+  window.__debugHover = function () {
+    return { isConsoleHovered: isConsoleHovered, straightProgress: straightProgress };
+  };
 
   function getStageRect() {
-    return stage ? stage.getBoundingClientRect() : { left: 0, top: 0, width: 1819, height: 865 };
+    return stage ? stage.getBoundingClientRect() : { left: 0, top: 0, width: window.innerWidth, height: window.innerHeight };
   }
 
   function getRelativeCoord(e) {
-    var r = getStageRect();
-    var scale = r.width / 1819;
-    if (!scale || isNaN(scale) || scale <= 0) scale = 1;
     return {
-      x: (e.clientX - r.left) / scale,
-      y: (e.clientY - r.top) / scale
+      x: e.clientX,
+      y: e.clientY
     };
   }
 
-  // Mouse Parallax & Console Hover Tracker
+  // Mouse Parallax & Console Hover Tracker (Derived from actual bounding rect)
   window.addEventListener('mousemove', function (e) {
-    var p = getRelativeCoord(e);
-    targetGlowX = p.x;
-    targetGlowY = p.y;
-    mouseX = Math.max(-1, Math.min(1, (p.x / 1819) * 2 - 1));
-    mouseY = Math.max(-1, Math.min(1, (p.y / 865) * 2 - 1));
+    var winW = window.innerWidth || 1920;
+    var winH = window.innerHeight || 1080;
+    mouseX = Math.max(-1, Math.min(1, (e.clientX / winW) * 2 - 1));
+    mouseY = Math.max(-1, Math.min(1, (e.clientY / winH) * 2 - 1));
+    targetGlowX = e.clientX;
+    targetGlowY = e.clientY;
 
-    // Console bounds in stage coordinates (left: 850, top: 198, w: 805, h: 534)
-    // 32px hysteresis buffer prevents boundary flicker during rotation
-    var buffer = isConsoleHovered ? 28 : -8;
-    var inConsole = (
-      p.x >= (848 - buffer) &&
-      p.x <= (1655 + buffer) &&
-      p.y >= (195 - buffer) &&
-      p.y <= (732 + buffer)
-    );
-    isConsoleHovered = inConsole;
+    // Derived from element's actual bounding rect on screen with hysteresis buffer
+    var targetCard = mainCard || consoleEl;
+    if (targetCard) {
+      var r = targetCard.getBoundingClientRect();
+      var buffer = isConsoleHovered ? 28 : -8;
+      var inConsole = (
+        r.width > 0 && r.height > 0 &&
+        e.clientX >= (r.left - buffer) &&
+        e.clientX <= (r.right + buffer) &&
+        e.clientY >= (r.top - buffer) &&
+        e.clientY <= (r.bottom + buffer)
+      );
+      isConsoleHovered = inConsole;
+    }
   });
 
   document.addEventListener('mouseleave', function () {
@@ -310,7 +336,8 @@
   // Update Scrubber Playhead Position
   function updatePlayhead(percent) {
     playheadPercent = Math.max(0, Math.min(1, percent));
-    var wfWidth = 650;
+    var wfContainer = document.querySelector('.waveform-panel');
+    var wfWidth = (wfContainer && wfContainer.clientWidth) ? wfContainer.clientWidth : 650;
     var xPos = playheadPercent * wfWidth;
     if (ph) {
       ph.style.transform = 'translateX(' + xPos + 'px)';
@@ -353,7 +380,7 @@
     });
   }
 
-  // Ambient Particles in Canvas Background (4K Retina HiDPI Edition)
+  // Ambient Particles in Canvas Background (Full Viewport Fluid Edition)
   var bgCanvas = document.getElementById('bg');
   var bgCtx = bgCanvas ? bgCanvas.getContext('2d') : null;
   var dpr = Math.min(window.devicePixelRatio || 1, 2.5);
@@ -361,10 +388,12 @@
   function setupCanvasResolution() {
     if (!bgCanvas || !bgCtx) return;
     dpr = Math.min(window.devicePixelRatio || 1, 2.5);
-    bgCanvas.width = Math.round(1819 * dpr);
-    bgCanvas.height = Math.round(865 * dpr);
-    bgCanvas.style.width = '1819px';
-    bgCanvas.style.height = '865px';
+    var w = window.innerWidth;
+    var h = window.innerHeight;
+    bgCanvas.width = Math.round(w * dpr);
+    bgCanvas.height = Math.round(h * dpr);
+    bgCanvas.style.width = '100%';
+    bgCanvas.style.height = '100%';
     bgCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
   }
   setupCanvasResolution();
@@ -377,8 +406,8 @@
     for (var i = 0; i < 30; i++) {
       var isSmall = i >= 18;
       particles.push({
-        x: Math.random() * 1819,
-        y: Math.random() * 865,
+        x: Math.random() * (window.innerWidth || 1920),
+        y: Math.random() * (window.innerHeight || 1080),
         r: isSmall ? 1.5 + Math.random() * 2 : 28 + Math.random() * 45,
         color: isSmall ? '255,245,210' : colors[i % colors.length],
         alpha: isSmall ? 0.65 : 0.04 + Math.random() * 0.05,
@@ -392,14 +421,16 @@
 
   function renderBackgroundParticles(timeSec) {
     if (!bgCtx) return;
-    bgCtx.clearRect(0, 0, 1819, 865);
+    var w = window.innerWidth;
+    var h = window.innerHeight;
+    bgCtx.clearRect(0, 0, w, h);
     particles.forEach(function (p) {
       p.x += p.vx;
       p.y += p.vy + (p.isSmall ? 0 : Math.sin(timeSec * 0.5 + p.phase) * 0.15);
-      if (p.x < -150) p.x = 1969;
-      if (p.x > 1969) p.x = -150;
-      if (p.y < -150) p.y = 1015;
-      if (p.y > 1015) p.y = -150;
+      if (p.x < -150) p.x = w + 150;
+      if (p.x > w + 150) p.x = -150;
+      if (p.y < -150) p.y = h + 150;
+      if (p.y > h + 150) p.y = -150;
 
       // Mouse repulsion
       var dx = p.x - glowX, dy = p.y - glowY;
@@ -457,7 +488,7 @@
 
     // Toggle .is-straight class on #console for CSS-level crisp zero-Z flattening & glare elimination
     if (consoleEl) {
-      consoleEl.classList.toggle('is-straight', straightProgress === 1.0);
+      consoleEl.classList.toggle('is-straight', straightProgress >= 0.70);
     }
 
     // Continuous ramp: mouseEase grows from 0 at page load to 1 over 1.2s,
@@ -466,7 +497,7 @@
     var mouseRampDuration = 1.20;
     var mouseEase = prefersReducedMotion ? 1.0 :
       (idleDeltaTime >= mouseRampDuration ? 1.0 :
-        (function(t){ return t * t * (3.0 - 2.0 * t); })(idleDeltaTime / mouseRampDuration));
+        (function (t) { return t * t * (3.0 - 2.0 * t); })(idleDeltaTime / mouseRampDuration));
 
     // Organic ambient floating & breathing wave:
     // Velocity continuity: starts at translateY(0px) at idleDeltaTime = 0 (exact resting position),
@@ -588,7 +619,9 @@
     });
 
     if (glow) {
-      glow.style.transform = 'translate(' + (glowX - 220) + 'px, ' + (glowY - 220) + 'px)';
+      var stageW = stage ? stage.clientWidth : (window.innerWidth || 1200);
+      var clampedGlowX = Math.min(Math.max(0, stageW - 240), Math.max(0, glowX - 220));
+      glow.style.transform = 'translate(' + clampedGlowX.toFixed(1) + 'px, ' + (glowY - 220).toFixed(1) + 'px)';
     }
 
     if (isPlaying) {
@@ -1351,7 +1384,7 @@
       prefersReducedMotion = e.matches;
       syncSidebarIndicator(currentActiveProduct);
     });
-  } catch (err) {}
+  } catch (err) { }
 
   requestAnimationFrame(function () {
     syncSidebarIndicator(currentActiveProduct);
@@ -1444,7 +1477,7 @@
   }
 
   function switchView(targetView, productHint) {
-    try { window.scrollTo(0, 0); } catch (e) {}
+    try { window.scrollTo(0, 0); } catch (e) { }
     var viewHero1 = document.getElementById('view-hero1');
     var viewHero2 = document.getElementById('view-hero2');
     var viewPiano = document.getElementById('view-piano');
@@ -1589,7 +1622,7 @@
       var themeMetaHome = document.getElementById('themeColorMeta');
       if (themeMetaHome) themeMetaHome.setAttribute('content', '#0a5836');
 
-      if (!productHint || productHint === 'lyrics') {
+      if (productHint === 'explicit-click') {
         showToast('Sync Lyrics & Script: Precision microsecond lyric aligner active');
       }
     }
@@ -2015,7 +2048,7 @@
         url: window.location.href.split('#')[0]
       };
       if (navigator.share) {
-        navigator.share(shareData).catch(function () {});
+        navigator.share(shareData).catch(function () { });
       } else if (navigator.clipboard && navigator.clipboard.writeText) {
         navigator.clipboard.writeText(window.location.href.split('#')[0]).then(function () {
           showToast('Link copied to clipboard!');
