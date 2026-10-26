@@ -4,4 +4,5 @@ Lyics_Time_Antigravity/
 .git*
 *.md
 qa/
+tools/
 scratch/

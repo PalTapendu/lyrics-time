@@ -1278,9 +1278,7 @@
   var btnUploadHero = document.getElementById('btn-upload-hero');
   var heroToast = document.getElementById('heroToast');
 
-  // Upload Buttons
-  var topUploadBtn = document.getElementById('top-upload-btn');
-  var mainUploadBtn = document.getElementById('main-upload-btn');
+  // Upload buttons already declared above (topUploadBtn, mainUploadBtn)
 
   /* =====================================================================
      ACTIVE PRODUCT STATE & DYNAMIC HIGHLIGHT MANAGEMENT
@@ -1519,11 +1517,16 @@
         }
       }
 
-      document.title = 'Audio Visualizer — SyncLines Pro Engine';
+      document.title = 'Audio Visualizer — SyncLines Studio';
       var themeMeta = document.getElementById('themeColorMeta');
       if (themeMeta) themeMeta.setAttribute('content', '#060d09');
 
-      triggerHeroToast('Audio Visualizer Engine active • 60 FPS 3D Grid');
+      var metaDesc = document.getElementById('pageMetaDescription') || document.querySelector('meta[name="description"]');
+      if (metaDesc) {
+        metaDesc.setAttribute('content', 'Transform your audio into reactive video visualizers right in your browser. Choose styles, customize visuals, and export MP4 videos with 100% local privacy.');
+      }
+
+      triggerHeroToast('Audio Visualizer Studio active • Reactive 3D motion');
     }
 
     if (targetView === 'hero2') {
@@ -1582,6 +1585,11 @@
       var themeMetaPiano = document.getElementById('themeColorMeta');
       if (themeMetaPiano) themeMetaPiano.setAttribute('content', '#060d09');
 
+      var metaDescPiano = document.getElementById('pageMetaDescription') || document.querySelector('meta[name="description"]');
+      if (metaDescPiano) {
+        metaDescPiano.setAttribute('content', 'Interactive Live Harmonic Piano tool for audio pitch reference and harmonic scale auditioning.');
+      }
+
       triggerHeroToast('Live Harmonic Piano: Feature in development');
     } else {
       // targetView === 'hero1'
@@ -1622,6 +1630,11 @@
       var themeMetaHome = document.getElementById('themeColorMeta');
       if (themeMetaHome) themeMetaHome.setAttribute('content', '#0a5836');
 
+      var metaDescHome = document.getElementById('pageMetaDescription') || document.querySelector('meta[name="description"]');
+      if (metaDescHome) {
+        metaDescHome.setAttribute('content', 'SyncLines is a client-side audio sync engine. Tap to align lyrics with microsecond precision, scrub waveforms, and export .LRC, .SRT, .VTT, and .TXT locally.');
+      }
+
       if (productHint === 'explicit-click') {
         showToast('Sync Lyrics & Script: Precision microsecond lyric aligner active');
       }
@@ -1630,8 +1643,11 @@
 
   // Handle browser Back / Forward navigation
   window.addEventListener('popstate', function () {
-    if (window.location.hash === '#visualizer') {
+    if (window.location.hash.startsWith('#visualizer')) {
       switchView('hero2');
+      if (window.location.hash !== '#visualizer') {
+        handleVisualizerUpload();
+      }
     } else if (window.location.hash === '#piano') {
       switchView('piano');
     } else if (window.location.hash === '#features') {
@@ -1644,8 +1660,11 @@
   });
 
   // Check initial hash on load
-  if (window.location.hash === '#visualizer') {
+  if (window.location.hash.startsWith('#visualizer')) {
     switchView('hero2');
+    if (window.location.hash !== '#visualizer') {
+      handleVisualizerUpload();
+    }
   } else if (window.location.hash === '#piano') {
     switchView('piano');
   } else {
@@ -1817,29 +1836,191 @@
     mainUploadBtn.addEventListener('click', navigateToEditor);
   }
 
-  // Top Header Upload Button: Context-aware (Hero 1 -> Editor, Hero 2 -> Coming Soon modal)
-  if (topUploadBtn) {
-    topUploadBtn.addEventListener('click', function (e) {
-      if (currentActiveView === 'hero2') {
-        if (e) e.preventDefault();
-        openVisualizerComingSoonModal();
-      } else {
-        navigateToEditor(e);
+  /* =====================================================================
+     STUDIO LAZY LOADER & WIRING (Prompt 2)
+     ===================================================================== */
+  var isStudioScriptLoading = false;
+  var isStudioScriptLoaded = false;
+
+  function loadStudioModules(callback) {
+    if (isStudioScriptLoaded) {
+      if (callback) callback(null);
+      return;
+    }
+    if (isStudioScriptLoading) {
+      var pollInterval = setInterval(function () {
+        if (isStudioScriptLoaded) {
+          clearInterval(pollInterval);
+          if (callback) callback(null);
+        }
+      }, 40);
+      return;
+    }
+    isStudioScriptLoading = true;
+
+    // Inject studio.css if not present
+    if (!document.getElementById('studio-styles-css')) {
+      var link = document.createElement('link');
+      link.id = 'studio-styles-css';
+      link.rel = 'stylesheet';
+      link.href = 'studio/studio.css';
+      document.head.appendChild(link);
+    }
+
+    // Sequentially load Studio modules
+    var studioScripts = [
+      'studio/config.js',
+      'studio/store.js',
+      'studio/storage.js',
+      'studio/ui.js',
+      'studio/router.js',
+      'studio/vendor/mp4-muxer.js',
+      'studio/engine/audio_analysis.js',
+      'studio/engine/limiter.js',
+      'studio/engine/style_registry.js',
+      'studio/engine/styles/classic_bars.js',
+      'studio/engine/lyrics_parser.js',
+      'studio/engine/lyrics_renderer.js',
+      'studio/engine/renderer.js',
+      'studio/engine/export_engine.js',
+      'studio/upload.js',
+      'studio/styles.js',
+      'studio/customization.js',
+      'studio/settings.js',
+      'studio/render.js',
+      'studio/studio.js'
+    ];
+
+    // Parallel fetch with strict execution order (s.async = false)
+    var remaining = studioScripts.length;
+    var hasError = false;
+
+    for (var i = 0; i < studioScripts.length; i++) {
+      (function (src) {
+        var s = document.createElement('script');
+        s.src = src;
+        s.async = false;
+        s.onload = function () {
+          remaining--;
+          if (remaining === 0 && !hasError) {
+            isStudioScriptLoaded = true;
+            isStudioScriptLoading = false;
+            bindStudioPlaceholderButtons();
+            if (callback) callback(null);
+          }
+        };
+        s.onerror = function (err) {
+          if (!hasError) {
+            hasError = true;
+            isStudioScriptLoading = false;
+            console.error('[SyncLines Studio] Failed loading module:', src, err);
+            if (callback) callback(err);
+          }
+        };
+        document.body.appendChild(s);
+      })(studioScripts[i]);
+    }
+  }
+
+  function prefetchStudioIfActive() {
+    var isPreview = false;
+    try {
+      var params = new URLSearchParams(window.location.search);
+      isPreview = (params.get('studio') === 'preview') ||
+        (sessionStorage.getItem('synclines-studio-preview') === 'true');
+    } catch (e) { }
+
+    var isEnabled = (window.StudioConfig && window.StudioConfig.isStudioActive) ?
+      window.StudioConfig.isStudioActive() : isPreview;
+
+    if (isEnabled) {
+      loadStudioModules();
+    }
+  }
+
+  function handleVisualizerUpload(e) {
+    if (e && typeof e.preventDefault === 'function') e.preventDefault();
+
+    if (!isStudioScriptLoaded) {
+      triggerHeroToast('Opening Studio...');
+    }
+
+    loadStudioModules(function (err) {
+      if (err) {
+        console.error('[SyncLines Studio] Module load error:', err);
+        triggerHeroToast('Studio could not be loaded. Please check your connection.');
+        return;
+      }
+      if (window.Studio && typeof window.Studio.open === 'function') {
+        window.Studio.open();
+      } else if (window.StudioUploadModal && typeof window.StudioUploadModal.open === 'function') {
+        window.StudioUploadModal.open();
       }
     });
   }
 
-  // Audio Visualizer Hero 2 Upload Button: Task 4 requirement - Opens Coming Soon modal, NEVER opens editor
-  if (btnUploadHero) {
-    btnUploadHero.addEventListener('click', function (e) {
-      if (e) e.preventDefault();
-      openVisualizerComingSoonModal();
+  function bindStudioPlaceholderButtons() {
+    var placeholderUploadBtn = document.getElementById('studio-placeholder-upload-btn');
+    var changeAudioBtn = document.getElementById('studio-btn-change-audio');
+    var backToStylesBtn = document.getElementById('studio-btn-back-to-styles');
+    var tryAnotherBtn = document.getElementById('studio-btn-try-another');
+
+    if (placeholderUploadBtn && !placeholderUploadBtn._bound) {
+      placeholderUploadBtn._bound = true;
+      placeholderUploadBtn.addEventListener('click', handleVisualizerUpload);
+    }
+    if (changeAudioBtn && !changeAudioBtn._bound) {
+      changeAudioBtn._bound = true;
+      changeAudioBtn.addEventListener('click', handleVisualizerUpload);
+    }
+    if (backToStylesBtn && !backToStylesBtn._bound) {
+      backToStylesBtn._bound = true;
+      backToStylesBtn.addEventListener('click', function () {
+        if (window.Studio && window.Studio.getRouter()) {
+          window.Studio.getRouter().navigate('#visualizer/styles');
+        }
+      });
+    }
+    if (tryAnotherBtn && !tryAnotherBtn._bound) {
+      tryAnotherBtn._bound = true;
+      tryAnotherBtn.addEventListener('click', function () {
+        if (window.Studio && window.Studio.getStore()) {
+          window.Studio.getStore().dispatch({ type: 'TRY_ANOTHER_STYLE' });
+        }
+        if (window.Studio && window.Studio.getRouter()) {
+          window.Studio.getRouter().navigate('#visualizer/styles');
+        }
+      });
+    }
+  }
+
+  // Top Header Upload Button: Context-aware (Hero 1 -> Editor, Hero 2 -> Studio Upload or Coming Soon modal)
+  if (topUploadBtn) {
+    topUploadBtn.addEventListener('click', function (e) {
+      if (currentActiveView === 'hero2') {
+        handleVisualizerUpload(e);
+      } else {
+        navigateToEditor(e);
+      }
+    });
+    topUploadBtn.addEventListener('pointerenter', function () {
+      if (currentActiveView === 'hero2') prefetchStudioIfActive();
     });
   }
 
-  // Demo Modal inside Hero 2 - Explicitly opens editor
+  // Audio Visualizer Hero 2 Upload Button:
+  if (btnUploadHero) {
+    btnUploadHero.addEventListener('click', handleVisualizerUpload);
+    btnUploadHero.addEventListener('pointerenter', prefetchStudioIfActive);
+  }
+
+  // Demo Modal inside Hero 2 - Triggers Audio Visualizer Upload flow
   if (demoLaunchBtn) {
-    demoLaunchBtn.addEventListener('click', navigateToEditor);
+    demoLaunchBtn.addEventListener('click', function (e) {
+      if (e) e.preventDefault();
+      closeDemoModal();
+      handleVisualizerUpload();
+    });
   }
 
   /* =====================================================================

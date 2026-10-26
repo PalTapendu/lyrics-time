@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <!-- PRIMARY SEO -->
   <title>SyncLines &mdash; Precision Audio-to-Lyric Sync Engine</title>
-  <meta name="description"
+  <meta name="description" id="pageMetaDescription"
     content="SyncLines is a client-side audio sync engine. Tap to align lyrics with microsecond precision, scrub waveforms, and export .LRC, .SRT, .VTT, and .TXT locally.">
   <link rel="canonical" href="https://synclines.app/">
   <meta name="robots" content="index, follow">
@@ -111,7 +111,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link
-    href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Caveat:wght@500;700&display=swap"
+    href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Noto+Sans+Devanagari:wght@400;600;700&family=Outfit:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Caveat:wght@500;700&display=swap"
     rel="stylesheet">
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="piano.css">
@@ -220,7 +220,7 @@
 
       <!-- Audio Visualizer (Oscilloscope Frequency Monitor Icon) -->
       <div id="side-visualizer-btn" class="side-btn" role="tab" tabindex="0" aria-selected="false"
-        title="Audio Visualizer" aria-label="Audio Visualizer Tool">
+        title="Audio Visualizer" aria-label="Audio Visualizer Studio Tool">
         <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
           stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <rect x="2.5" y="3.5" width="19" height="14" rx="3.5" />
@@ -321,10 +321,10 @@
           </a>
 
           <!-- 2. Audio Visualizer (Middle position, with NEW badge) -->
-          <a href="javascript:void(0)" class="dropdown-item" id="dropdown-visualizer-btn">
+          <a href="javascript:void(0)" class="dropdown-item" id="dropdown-visualizer-btn" aria-label="Audio Visualizer Studio">
             <div class="dropdown-item-icon-box visualizer-icon-box">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                stroke-linecap="round" stroke-linejoin="round">
+                stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                 <rect x="2.5" y="3.5" width="19" height="14" rx="3.5" />
                 <path d="M6 11.5h2l2-4.5 3 8.5 2.5-6 2 2h2.5" />
                 <line x1="8" y1="21" x2="16" y2="21" />
@@ -336,7 +336,7 @@
                 <span class="dropdown-item-title">Audio Visualizer</span>
                 <span class="dropdown-badge-new">NEW</span>
               </div>
-              <span class="dropdown-item-desc">Real-time spectrum & reactive audio waveform visualizer</span>
+              <span class="dropdown-item-desc">Reactive motion visualizers &amp; local MP4 video export</span>
             </div>
           </a>
 
@@ -736,65 +736,855 @@
       <!-- Cursor glow follower -->
       <div class="cursor-glow" id="cursor-glow" aria-hidden="true"></div>
 
-      <!-- Hero Section -->
-      <section class="hero" id="hero">
-        <div class="hero-copy" id="hero-copy">
-          <!-- Eyebrow Pill Badge -->
-          <div class="hero-eyebrow" id="hero-eyebrow">
-            <span class="eyebrow-beacon"></span>
-            <span class="eyebrow-text">NEXT-GEN AUDIO SYNC ENGINE</span>
-            <span class="eyebrow-sep">/</span>
-            <span class="eyebrow-sub">ZERO LATENCY</span>
-          </div>
-
-          <h2 class="hero-h1" id="hero-title">TIMING<br>CONSOLE</h2>
-
-          <p class="hero-sub" id="hero-sub">
-            Precision timing for the next generation of music production.
-            Tap-to-sync lyrics, scrub live waveforms, and export studio-ready timestamps with microsecond accuracy.
-          </p>
-
-          <!-- CTA Buttons with Button-in-Button Architecture -->
-          <div class="hero-btns" id="hero-btns">
-            <button class="btn btn-upload btn-lg btn-island" id="btn-upload-hero">
-              <span class="btn-text">UPLOAD YOUR MUSIC</span>
-              <span class="btn-icon-bubble">
-                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"
-                  stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M5 12h14M12 5l7 7-7 7" />
-                </svg>
-              </span>
-            </button>
-
-            <button class="btn btn-demo btn-lg btn-island" id="btn-demo">
-              <span class="btn-icon-bubble demo-bubble">
-                <svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor">
-                  <path d="M8 5v14l11-7z" />
-                </svg>
-              </span>
-              <span class="btn-text">WATCH DEMO</span>
-            </button>
-          </div>
-
-          <!-- Telemetry Stats Strip -->
-          <div class="hero-stats-strip" id="hero-stats">
-            <div class="stat-item">
-              <span class="stat-val">0<span class="stat-unit">ms</span></span>
-              <span class="stat-lbl">Cloud Latency</span>
+      <!-- SUB-VIEW 1: LANDING HERO (Active on #visualizer by default) -->
+      <div id="studio-landing-subview" class="studio-subview is-active" aria-hidden="false">
+        <section class="hero" id="hero">
+          <div class="hero-copy" id="hero-copy">
+            <!-- Eyebrow Pill Badge -->
+            <div class="hero-eyebrow" id="hero-eyebrow">
+              <span class="eyebrow-beacon"></span>
+              <span class="eyebrow-text">AUDIO VISUALIZER STUDIO</span>
+              <span class="eyebrow-sep">/</span>
+              <span class="eyebrow-sub">PREVIEW BETA</span>
             </div>
-            <div class="stat-divider"></div>
-            <div class="stat-item">
-              <span class="stat-val">100<span class="stat-unit">%</span></span>
-              <span class="stat-lbl">Local Privacy</span>
+
+            <h2 class="hero-h1" id="hero-title" role="heading" aria-level="1">AUDIO<br>VISUALIZER</h2>
+
+            <p class="hero-sub" id="hero-sub">
+              Upload a song, choose a reactive visualizer style, and export high-definition video directly on your device.
+              Zero cloud uploads &mdash; 100% private and browser-powered.
+            </p>
+
+            <!-- CTA Buttons with Button-in-Button Architecture -->
+            <div class="hero-btns" id="hero-btns">
+              <button class="btn btn-upload btn-lg btn-island" id="btn-upload-hero" aria-label="Upload your music to launch Audio Visualizer Studio">
+                <span class="btn-text">UPLOAD YOUR MUSIC</span>
+                <span class="btn-icon-bubble">
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"
+                    stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M5 12h14M12 5l7 7-7 7" />
+                  </svg>
+                </span>
+              </button>
+
+              <button class="btn btn-demo btn-lg btn-island" id="btn-demo" aria-label="Watch Audio Visualizer demo preview">
+                <span class="btn-icon-bubble demo-bubble">
+                  <svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor" aria-hidden="true">
+                    <path d="M8 5v14l11-7z" />
+                  </svg>
+                </span>
+                <span class="btn-text">WATCH DEMO</span>
+              </button>
             </div>
-            <div class="stat-divider"></div>
-            <div class="stat-item">
-              <span class="stat-val">.LRC <span class="stat-unit">/ .SRT</span></span>
-              <span class="stat-lbl">Universal Export</span>
+
+            <!-- Telemetry Stats Strip -->
+            <div class="hero-stats-strip" id="hero-stats">
+              <div class="stat-item">
+                <span class="stat-val">100<span class="stat-unit">%</span></span>
+                <span class="stat-lbl">Local &amp; Private</span>
+              </div>
+              <div class="stat-divider"></div>
+              <div class="stat-item">
+                <span class="stat-val">MP4 <span class="stat-unit">Video</span></span>
+                <span class="stat-lbl">Browser Render</span>
+              </div>
+              <div class="stat-divider"></div>
+              <div class="stat-item">
+                <span class="stat-val">4 <span class="stat-unit">Aspects</span></span>
+                <span class="stat-lbl">16:9 • 9:16 • 1:1 • 4:5</span>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div><!-- /#studio-landing-subview -->
+
+      <!-- SUB-VIEW 2: STYLE STUDIO (Active on #visualizer/styles) -->
+      <div id="studio-styles-subview" class="studio-subview" aria-hidden="true">
+        <div class="studio-view-header">
+          <div class="studio-breadcrumb">
+            <span>Visualizer Studio</span>
+            <span class="sep">/</span>
+            <span class="current">Choose Style</span>
+          </div>
+          <div class="studio-header-actions">
+            <button type="button" class="studio-btn studio-btn-ghost studio-btn-sm" id="studio-btn-shortcuts" title="Keyboard Shortcuts (?)">⌨️ Shortcuts</button>
+            <button type="button" class="studio-btn studio-btn-ghost studio-btn-sm" id="studio-btn-clear-my-data" title="Clear all stored audio &amp; presets">Clear Data</button>
+            <button type="button" class="studio-btn studio-btn-secondary studio-btn-sm" id="studio-btn-change-audio">Change Audio</button>
+          </div>
+        </div>
+
+        <div class="studio-subview-intro">
+          <h2 class="studio-subview-heading" tabindex="-1">Visualizer Style Catalog</h2>
+          <p class="studio-subview-lead">Pick a visualizer style to generate your reactive motion video. All styles process 100% locally in your browser.</p>
+        </div>
+
+        <!-- 1. Top Uploaded Audio Summary Card -->
+        <div id="studio-styles-audio-banner" class="studio-styles-audio-banner"></div>
+
+        <!-- 2. Suggested For You Curated Row -->
+        <section id="studio-styles-suggested" class="studio-styles-suggested" aria-label="Suggested Styles"></section>
+
+        <!-- Library Toolbar: Search Bar, Surprise Me & Favorites Filter -->
+        <div class="studio-library-toolbar" id="studio-library-toolbar" role="search" aria-label="Style Library Search and Filters">
+          <div class="studio-search-bar-wrap">
+            <span class="studio-search-icon" aria-hidden="true">🔍</span>
+            <input type="search" id="studio-styles-search-input" class="studio-search-input" placeholder="Search 36 styles by name, tags, or mood (e.g. neon, 3D, retro, clean)..." aria-label="Search visualizer styles catalog" />
+            <button type="button" id="studio-styles-search-clear" class="studio-search-clear-btn" aria-label="Clear search query" style="display:none;">✕</button>
+          </div>
+          <div class="studio-library-quick-actions">
+            <button type="button" class="studio-btn studio-btn-outline studio-btn-sm" id="studio-btn-surprise-me" title="Pick a random style">
+              <span aria-hidden="true">🎲</span> <span>Surprise Me</span>
+            </button>
+            <button type="button" class="studio-btn studio-btn-outline studio-btn-sm" id="studio-btn-favorites-filter" title="Filter favorite styles" aria-pressed="false">
+              <span aria-hidden="true">♥</span> <span>Favorites</span> <span id="studio-fav-count-badge" class="studio-badge-pill">0</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- 3. Category Filter Chips Bar -->
+        <div id="studio-styles-categories" class="studio-styles-categories"></div>
+
+        <!-- Screen reader live batch announcer -->
+        <div id="studio-styles-announcer" class="sr-only" aria-live="polite" aria-atomic="true"></div>
+
+        <!-- 4. Skeleton Loading Grid -->
+        <div id="studio-styles-skeleton" class="studio-styles-grid studio-styles-skeleton" aria-hidden="true" style="display:none;">
+          <div class="studio-skeleton-card"><div class="studio-skeleton-thumb"></div><div class="studio-skeleton-body"><div class="studio-skeleton-line title"></div><div class="studio-skeleton-line desc"></div></div></div>
+          <div class="studio-skeleton-card"><div class="studio-skeleton-thumb"></div><div class="studio-skeleton-body"><div class="studio-skeleton-line title"></div><div class="studio-skeleton-line desc"></div></div></div>
+          <div class="studio-skeleton-card"><div class="studio-skeleton-thumb"></div><div class="studio-skeleton-body"><div class="studio-skeleton-line title"></div><div class="studio-skeleton-line desc"></div></div></div>
+          <div class="studio-skeleton-card"><div class="studio-skeleton-thumb"></div><div class="studio-skeleton-body"><div class="studio-skeleton-line title"></div><div class="studio-skeleton-line desc"></div></div></div>
+          <div class="studio-skeleton-card"><div class="studio-skeleton-thumb"></div><div class="studio-skeleton-body"><div class="studio-skeleton-line title"></div><div class="studio-skeleton-line desc"></div></div></div>
+          <div class="studio-skeleton-card"><div class="studio-skeleton-thumb"></div><div class="studio-skeleton-body"><div class="studio-skeleton-line title"></div><div class="studio-skeleton-line desc"></div></div></div>
+          <div class="studio-skeleton-card"><div class="studio-skeleton-thumb"></div><div class="studio-skeleton-body"><div class="studio-skeleton-line title"></div><div class="studio-skeleton-line desc"></div></div></div>
+          <div class="studio-skeleton-card"><div class="studio-skeleton-thumb"></div><div class="studio-skeleton-body"><div class="studio-skeleton-line title"></div><div class="studio-skeleton-line desc"></div></div></div>
+          <div class="studio-skeleton-card"><div class="studio-skeleton-thumb"></div><div class="studio-skeleton-body"><div class="studio-skeleton-line title"></div><div class="studio-skeleton-line desc"></div></div></div>
+          <div class="studio-skeleton-card"><div class="studio-skeleton-thumb"></div><div class="studio-skeleton-body"><div class="studio-skeleton-line title"></div><div class="studio-skeleton-line desc"></div></div></div>
+          <div class="studio-skeleton-card"><div class="studio-skeleton-thumb"></div><div class="studio-skeleton-body"><div class="studio-skeleton-line title"></div><div class="studio-skeleton-line desc"></div></div></div>
+          <div class="studio-skeleton-card"><div class="studio-skeleton-thumb"></div><div class="studio-skeleton-body"><div class="studio-skeleton-line title"></div><div class="studio-skeleton-line desc"></div></div></div>
+        </div>
+
+        <!-- 5. Error Fallback with Retry Button -->
+        <div id="studio-styles-error" class="studio-styles-error-card" style="display:none;" role="alert">
+          <div class="studio-error-icon" aria-hidden="true">⚠️</div>
+          <h3 class="studio-error-title">Could not load visualizer styles</h3>
+          <p class="studio-error-desc">We had trouble retrieving the visualizer style presets. Please check your network and try again.</p>
+          <button type="button" class="studio-btn studio-btn-primary" id="studio-styles-retry-btn">Retry Loading Styles</button>
+        </div>
+
+        <!-- 6. Main Style Cards Grid (role="radiogroup" for accessible single selection) -->
+        <div id="studio-styles-grid" class="studio-styles-grid" role="radiogroup" aria-label="Visualizer Styles Catalog"></div>
+
+        <!-- 7. Load More & Pagination Status -->
+        <div id="studio-styles-load-more" class="studio-styles-load-more"></div>
+
+        <!-- 8. Sticky Bottom Selection & Continue Bar (Prompt 5) -->
+        <div id="studio-styles-sticky-bar" class="studio-styles-sticky-bar" role="region" aria-label="Selection Summary and Navigation" style="display:none;">
+          <div class="studio-sticky-bar-inner">
+            <div class="studio-sticky-selected-meta">
+              <div class="studio-sticky-thumb-wrap">
+                <img id="studio-sticky-thumb" class="studio-sticky-thumb" src="" alt="Selected style preview" width="56" height="32" />
+                <span class="studio-sticky-check" aria-hidden="true">✓</span>
+              </div>
+              <div class="studio-sticky-text">
+                <span class="studio-sticky-eyebrow">READY TO CONFIGURE</span>
+                <div class="studio-sticky-title-wrap">
+                  <strong id="studio-sticky-name" class="studio-sticky-name">None</strong>
+                  <span id="studio-sticky-category" class="studio-sticky-category"></span>
+                </div>
+              </div>
+            </div>
+
+            <div class="studio-sticky-actions">
+              <button type="button" class="studio-btn studio-btn-ghost studio-btn-sm" id="studio-sticky-change-btn">Deselect</button>
+              <button type="button" class="studio-btn studio-btn-primary" id="studio-sticky-continue-btn">
+                <span>Continue to Settings</span>
+                <span class="studio-btn-arrow">&rarr;</span>
+              </button>
             </div>
           </div>
         </div>
-      </section>
+      </div>
+
+      <!-- SUB-VIEW 3: RENDER SETTINGS (Active on #visualizer/settings) -->
+      <div id="studio-settings-subview" class="studio-subview" aria-hidden="true">
+        <div class="studio-view-header">
+          <div class="studio-breadcrumb">
+            <span>Visualizer Studio</span>
+            <span class="sep">/</span>
+            <span class="current">Render Settings</span>
+          </div>
+          <div class="studio-header-actions">
+            <button type="button" class="studio-btn studio-btn-secondary studio-btn-sm" id="studio-btn-try-another-style">Try Another Style</button>
+            <button type="button" class="studio-btn studio-btn-secondary studio-btn-sm" id="studio-btn-back-to-styles">Back to Styles</button>
+          </div>
+        </div>
+
+        <div class="studio-subview-intro">
+          <h2 class="studio-subview-heading" tabindex="-1">Configure Video Export</h2>
+          <p class="studio-subview-lead">Adjust aspect ratio, resolution, and audio trim range. All video frames are rendered client-side on your device.</p>
+        </div>
+
+        <!-- 1. Selection Summary Strip (Audio & Chosen Style) -->
+        <div class="studio-settings-summary-strip" id="studio-settings-summary-strip">
+          <div class="studio-summary-pill-card">
+            <div class="studio-summary-pill-left">
+              <span class="studio-pill-tag">AUDIO TRACK</span>
+              <strong class="studio-pill-title" id="studio-settings-audio-title">track.mp3</strong>
+              <span class="studio-pill-sub" id="studio-settings-audio-meta">00:00 • 0 MB</span>
+            </div>
+            <button type="button" class="studio-btn studio-btn-ghost studio-btn-sm" id="studio-settings-change-audio-btn">Change</button>
+          </div>
+
+          <div class="studio-summary-pill-card">
+            <div class="studio-summary-pill-left">
+              <span class="studio-pill-tag">VISUALIZER STYLE</span>
+              <div class="studio-summary-style-row">
+                <img id="studio-settings-style-thumb" class="studio-mini-style-thumb" src="" alt="Selected style preview" width="40" height="24" />
+                <div>
+                  <strong class="studio-pill-title" id="studio-settings-style-title">Style Name</strong>
+                  <span class="studio-pill-sub" id="studio-settings-style-cat">Category</span>
+                </div>
+              </div>
+            </div>
+            <button type="button" class="studio-btn studio-btn-ghost studio-btn-sm" id="studio-settings-change-style-btn">Change</button>
+          </div>
+        </div>
+
+        <!-- 2. Dual-Column Main Configuration Layout -->
+        <div class="studio-settings-layout">
+          <!-- Left Column: Controls -->
+          <div class="studio-settings-controls-col">
+            <!-- Section A: Aspect Ratio Selector -->
+            <section class="studio-settings-section" aria-labelledby="studio-ratio-title">
+              <div class="studio-section-header">
+                <h3 id="studio-ratio-title" class="studio-settings-h3">Video Aspect Ratio</h3>
+                <span class="studio-settings-hint">Select the canvas format for your video platform</span>
+              </div>
+              <div class="studio-ratio-grid" id="studio-ratio-selector" role="radiogroup" aria-label="Video Aspect Ratio">
+                <div class="studio-ratio-card is-selected" role="radio" aria-checked="true" tabindex="0" data-ratio="16:9">
+                  <div class="studio-ratio-icon-box ratio-16-9"></div>
+                  <div class="studio-ratio-card-info">
+                    <span class="studio-ratio-name">16:9 Landscape</span>
+                    <span class="studio-ratio-meta">YouTube, TV, Desktop</span>
+                  </div>
+                </div>
+
+                <div class="studio-ratio-card" role="radio" aria-checked="false" tabindex="0" data-ratio="9:16">
+                  <div class="studio-ratio-icon-box ratio-9-16"></div>
+                  <div class="studio-ratio-card-info">
+                    <span class="studio-ratio-name">9:16 Vertical</span>
+                    <span class="studio-ratio-meta">Reels, TikTok, Shorts</span>
+                  </div>
+                </div>
+
+                <div class="studio-ratio-card" role="radio" aria-checked="false" tabindex="0" data-ratio="1:1">
+                  <div class="studio-ratio-icon-box ratio-1-1"></div>
+                  <div class="studio-ratio-card-info">
+                    <span class="studio-ratio-name">1:1 Square</span>
+                    <span class="studio-ratio-meta">Instagram Feed, Covers</span>
+                  </div>
+                </div>
+
+                <div class="studio-ratio-card" role="radio" aria-checked="false" tabindex="0" data-ratio="4:5">
+                  <div class="studio-ratio-icon-box ratio-4-5"></div>
+                  <div class="studio-ratio-card-info">
+                    <span class="studio-ratio-name">4:5 Social Portrait</span>
+                    <span class="studio-ratio-meta">Feed, Facebook Posts</span>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <!-- Section B: Resolution & Framerate -->
+            <section class="studio-settings-section" aria-labelledby="studio-res-title">
+              <div class="studio-section-header">
+                <h3 id="studio-res-title" class="studio-settings-h3">Export Resolution</h3>
+                <span class="studio-settings-hint">Adjust visual quality according to your device capability</span>
+              </div>
+              <div class="studio-res-grid" id="studio-resolution-selector" role="radiogroup" aria-label="Export Resolution">
+                <div class="studio-res-card is-selected" role="radio" aria-checked="true" tabindex="0" data-res="1080p">
+                  <div class="studio-res-badge">HIGH QUALITY</div>
+                  <span class="studio-res-title">1080p Full HD</span>
+                  <span class="studio-res-sub">1920×1080 • Recommended clarity</span>
+                </div>
+
+                <div class="studio-res-card" role="radio" aria-checked="false" tabindex="0" data-res="720p">
+                  <div class="studio-res-badge">FAST ENCODE</div>
+                  <span class="studio-res-title">720p Standard HD</span>
+                  <span class="studio-res-sub">1280×720 • Fast render, lower RAM</span>
+                </div>
+              </div>
+              <div class="studio-fps-badge">
+                <span class="studio-fps-dot"></span>
+                <span>Frame Rate: <strong>30 FPS Fixed</strong> • AAC 192kbps Audio</span>
+              </div>
+            </section>
+
+            <!-- Section C: Waveform Trim & Presets -->
+            <section class="studio-settings-section" aria-labelledby="studio-trim-title">
+              <div class="studio-section-header">
+                <h3 id="studio-trim-title" class="studio-settings-h3">Audio Trim &amp; Duration</h3>
+                <span class="studio-settings-hint">Select the portion of audio to render (minimum 3 seconds)</span>
+              </div>
+
+              <!-- Quick Presets -->
+              <div class="studio-trim-presets-row" role="group" aria-label="Quick Trim Presets">
+                <span class="studio-presets-label">Quick Trim:</span>
+                <button type="button" class="studio-preset-chip" id="studio-trim-preset-full">Full Track</button>
+                <button type="button" class="studio-preset-chip" id="studio-trim-preset-15s">First 15s</button>
+                <button type="button" class="studio-preset-chip" id="studio-trim-preset-30s">First 30s</button>
+                <button type="button" class="studio-preset-chip" id="studio-trim-preset-60s">First 60s</button>
+              </div>
+
+              <!-- Interactive Waveform Slider -->
+              <div class="studio-trim-slider-wrap">
+                <div class="studio-trim-slider" id="studio-trim-slider">
+                  <canvas id="studio-trim-waveform-canvas" class="studio-trim-waveform-canvas" width="600" height="64" aria-hidden="true"></canvas>
+                  <div class="studio-trim-mask start" id="studio-trim-mask-start" aria-hidden="true"></div>
+                  <div class="studio-trim-mask end" id="studio-trim-mask-end" aria-hidden="true"></div>
+                  <div class="studio-trim-active-region" id="studio-trim-active-region" aria-hidden="true"></div>
+                  <div class="studio-trim-handle start" id="studio-trim-handle-start" role="slider" tabindex="0" aria-label="Trim start handle" aria-valuemin="0" aria-valuemax="30" aria-valuenow="0" aria-valuetext="00:00.0">
+                    <span class="handle-grip"></span>
+                  </div>
+                  <div class="studio-trim-handle end" id="studio-trim-handle-end" role="slider" tabindex="0" aria-label="Trim end handle" aria-valuemin="0" aria-valuemax="30" aria-valuenow="30" aria-valuetext="00:30.0">
+                    <span class="handle-grip"></span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Numeric Time Range Inputs & Validation Notice -->
+              <div class="studio-trim-inputs-row">
+                <div class="studio-trim-input-group">
+                  <label for="studio-trim-start-input">START TIME</label>
+                  <input type="text" id="studio-trim-start-input" class="studio-trim-num-input" value="00:00.0" />
+                </div>
+                <div class="studio-trim-arrow-sep" aria-hidden="true">&rarr;</div>
+                <div class="studio-trim-input-group">
+                  <label for="studio-trim-end-input">END TIME</label>
+                  <input type="text" id="studio-trim-end-input" class="studio-trim-num-input" value="00:30.0" />
+                </div>
+                <div class="studio-trim-duration-wrap">
+                  <span class="duration-label">DURATION</span>
+                  <span id="studio-trim-duration-badge" class="studio-duration-chip">30.0s</span>
+                </div>
+              </div>
+              <div id="studio-trim-error" class="studio-trim-error-msg" style="display:none;" role="alert"></div>
+            </section>
+
+            <!-- Section D: Style Customization & Visual Parameters (Prompt 10) -->
+            <section class="studio-settings-section" aria-labelledby="studio-custom-title">
+              <div class="studio-section-header">
+                <div class="studio-section-header-row">
+                  <h3 id="studio-custom-title" class="studio-settings-h3">Style Customization</h3>
+                  <button type="button" class="studio-btn studio-btn-ghost studio-btn-xs" id="studio-reset-defaults-btn">Reset Defaults</button>
+                </div>
+                <span class="studio-settings-hint">Personalize palette colors, background, typography, artwork, and reactivity</span>
+              </div>
+
+              <!-- D.1: Palette Presets & Custom Colors -->
+              <div class="studio-custom-group">
+                <span class="studio-custom-label">PALETTE PRESETS</span>
+                <div class="studio-palette-chips-row" role="radiogroup" aria-label="Palette Presets">
+                  <button type="button" class="studio-palette-btn is-active" data-palette="cyber-neon" title="Cyber Neon">
+                    <span class="palette-swatch" style="background: linear-gradient(135deg, #00ffb0 50%, #e2b34a 50%);"></span>
+                    <span>Cyber Neon</span>
+                  </button>
+                  <button type="button" class="studio-palette-btn" data-palette="electric-violet" title="Electric Violet">
+                    <span class="palette-swatch" style="background: linear-gradient(135deg, #a855f7 50%, #ec4899 50%);"></span>
+                    <span>Electric Violet</span>
+                  </button>
+                  <button type="button" class="studio-palette-btn" data-palette="sunset-blaze" title="Sunset Blaze">
+                    <span class="palette-swatch" style="background: linear-gradient(135deg, #f97316 50%, #facc15 50%);"></span>
+                    <span>Sunset Blaze</span>
+                  </button>
+                  <button type="button" class="studio-palette-btn" data-palette="ocean-abyss" title="Ocean Abyss">
+                    <span class="palette-swatch" style="background: linear-gradient(135deg, #06b6d4 50%, #3b82f6 50%);"></span>
+                    <span>Ocean Abyss</span>
+                  </button>
+                  <button type="button" class="studio-palette-btn" data-palette="monochrome-clean" title="Monochrome Clean">
+                    <span class="palette-swatch" style="background: linear-gradient(135deg, #f8fafc 50%, #94a3b8 50%);"></span>
+                    <span>Monochrome</span>
+                  </button>
+                  <button type="button" class="studio-palette-btn" data-palette="emerald-matrix" title="Emerald Matrix">
+                    <span class="palette-swatch" style="background: linear-gradient(135deg, #10b981 50%, #34d399 50%);"></span>
+                    <span>Emerald</span>
+                  </button>
+                </div>
+
+                <!-- Custom Hex Color Pickers -->
+                <div class="studio-color-pickers-row">
+                  <div class="studio-color-item">
+                    <label for="studio-custom-primary-color">Primary</label>
+                    <div class="studio-color-input-wrap">
+                      <input type="color" id="studio-custom-primary-color" value="#00ffb0" aria-label="Primary visualizer color" />
+                      <span class="studio-hex-code" id="studio-primary-hex">#00ffb0</span>
+                    </div>
+                  </div>
+                  <div class="studio-color-item">
+                    <label for="studio-custom-accent-color">Accent</label>
+                    <div class="studio-color-input-wrap">
+                      <input type="color" id="studio-custom-accent-color" value="#e2b34a" aria-label="Accent visualizer color" />
+                      <span class="studio-hex-code" id="studio-accent-hex">#e2b34a</span>
+                    </div>
+                  </div>
+                  <div class="studio-color-item">
+                    <label for="studio-custom-bg-color">Background</label>
+                    <div class="studio-color-input-wrap">
+                      <input type="color" id="studio-custom-bg-color" value="#060a0d" aria-label="Background canvas color" />
+                      <span class="studio-hex-code" id="studio-bg-hex">#060a0d</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Live Contrast Warning Alert -->
+                <div id="studio-custom-contrast-alert" class="studio-contrast-warning" style="display:none;" role="alert">
+                  <span class="warning-icon">⚠️</span>
+                  <span id="studio-contrast-text">Low contrast detected: Text or visualizer bars may be difficult to see against background.</span>
+                </div>
+              </div>
+
+              <!-- D.2: Background Style & Cover Image -->
+              <div class="studio-custom-group">
+                <span class="studio-custom-label">BACKGROUND TYPE &amp; MEDIA</span>
+                <div class="studio-bg-type-selector" id="studio-bg-type-selector" role="radiogroup" aria-label="Background Type">
+                  <button type="button" class="studio-bg-btn" data-bg="solid">Solid</button>
+                  <button type="button" class="studio-bg-btn is-active" data-bg="gradient">Gradient</button>
+                  <button type="button" class="studio-bg-btn" data-bg="image">Custom Image</button>
+                  <button type="button" class="studio-bg-btn" data-bg="cover-blur">Blurred Cover</button>
+                </div>
+
+                <!-- Custom Background Image Upload Row (shown when 'image' is active) -->
+                <div class="studio-upload-file-row" id="studio-bg-image-row" style="display:none;">
+                  <input type="file" id="studio-bg-image-upload" accept="image/png,image/jpeg,image/webp" style="display:none;" />
+                  <button type="button" class="studio-btn studio-btn-secondary studio-btn-xs" id="studio-choose-bg-img-btn">Browse Background Image</button>
+                  <span class="studio-uploaded-file-name" id="studio-bg-image-name">No image selected (Max 20MB)</span>
+                  <button type="button" class="studio-btn studio-btn-ghost studio-btn-xs" id="studio-bg-image-remove-btn" style="display:none;">Remove</button>
+                </div>
+
+                <!-- Cover Artwork Upload Row -->
+                <div class="studio-cover-art-row">
+                  <div class="studio-cover-art-left">
+                    <span class="studio-custom-sublabel">Cover Artwork (Album Art)</span>
+                    <span class="studio-settings-hint">Displayed as a floating album card on video frames</span>
+                  </div>
+                  <div class="studio-cover-art-actions">
+                    <input type="file" id="studio-cover-art-upload" accept="image/png,image/jpeg,image/webp" style="display:none;" />
+                    <button type="button" class="studio-btn studio-btn-secondary studio-btn-xs" id="studio-choose-cover-btn">Upload Art</button>
+                    <span class="studio-uploaded-file-name" id="studio-cover-art-name">No cover</span>
+                    <button type="button" class="studio-btn studio-btn-ghost studio-btn-xs" id="studio-cover-art-remove-btn" style="display:none;">Remove</button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- D.3: Typography Overlay & Progress Bar -->
+              <div class="studio-custom-group">
+                <span class="studio-custom-label">TEXT OVERLAY &amp; PROGRESS</span>
+                <div class="studio-text-inputs-grid">
+                  <div class="studio-input-block">
+                    <label for="studio-text-title">TRACK TITLE</label>
+                    <input type="text" id="studio-text-title" class="studio-text-field" placeholder="e.g. Dreams (Acoustic)" maxlength="60" />
+                  </div>
+                  <div class="studio-input-block">
+                    <label for="studio-text-artist">ARTIST NAME</label>
+                    <input type="text" id="studio-text-artist" class="studio-text-field" placeholder="e.g. Synclines Studio" maxlength="60" />
+                  </div>
+                </div>
+
+                <div class="studio-font-progress-row">
+                  <div class="studio-font-select-wrap">
+                    <label for="studio-select-font">FONT FAMILY</label>
+                    <select id="studio-select-font" class="studio-select-field">
+                      <option value="outfit">Outfit (Modern Display)</option>
+                      <option value="inter">Inter (Clean Sans)</option>
+                      <option value="jetbrains">JetBrains Mono (Code)</option>
+                      <option value="playfair">Playfair Display (Serif)</option>
+                      <option value="system">System UI (Default)</option>
+                    </select>
+                  </div>
+
+                  <div class="studio-toggle-item">
+                    <label class="studio-checkbox-label" for="studio-toggle-progress-bar">
+                      <input type="checkbox" id="studio-toggle-progress-bar" checked />
+                      <span>Show Audio Progress Bar</span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              <!-- D.4: Motion Reactivity & Guides -->
+              <div class="studio-custom-group">
+                <span class="studio-custom-label">REACTIVITY &amp; GUIDES</span>
+                <div class="studio-sliders-grid">
+                  <div class="studio-slider-item">
+                    <div class="studio-slider-head">
+                      <label for="studio-slider-sensitivity">Audio Sensitivity Multiplier</label>
+                      <span class="studio-slider-badge" id="studio-sensitivity-value">1.0x</span>
+                    </div>
+                    <input type="range" id="studio-slider-sensitivity" min="0.5" max="2.0" step="0.05" value="1.0" aria-label="Audio Reactivity Sensitivity" />
+                  </div>
+
+                  <div class="studio-slider-item">
+                    <div class="studio-slider-head">
+                      <label for="studio-slider-bar-count">Equalizer Bar Count</label>
+                      <span class="studio-slider-badge" id="studio-bar-count-value">48</span>
+                    </div>
+                    <input type="range" id="studio-slider-bar-count" min="24" max="64" step="2" value="48" aria-label="Equalizer Bar Count" />
+                  </div>
+
+                  <div class="studio-slider-item">
+                    <div class="studio-slider-head">
+                      <label for="studio-slider-bar-gap">Bar Spacing Gap</label>
+                      <span class="studio-slider-badge" id="studio-bar-gap-value">3px</span>
+                    </div>
+                    <input type="range" id="studio-slider-bar-gap" min="1" max="8" step="1" value="3" aria-label="Bar Spacing Gap" />
+                  </div>
+                </div>
+
+                <div class="studio-toggles-row">
+                  <label class="studio-checkbox-label" for="studio-toggle-glow">
+                    <input type="checkbox" id="studio-toggle-glow" checked />
+                    <span>Neon Glow Sheen</span>
+                  </label>
+                  <label class="studio-checkbox-label" for="studio-toggle-reflection">
+                    <input type="checkbox" id="studio-toggle-reflection" checked />
+                    <span>Floor Reflection</span>
+                  </label>
+                  <label class="studio-checkbox-label" for="studio-toggle-safe-guides">
+                    <input type="checkbox" id="studio-toggle-safe-guides" />
+                    <span>Show Safe-Area Guides</span>
+                  </label>
+                </div>
+              </div>
+
+              <!-- D.5: Synchronized Lyrics Overlay (Prompt 11) -->
+              <div class="studio-custom-group" id="studio-lyrics-group">
+                <div class="studio-lyrics-header-row">
+                  <span class="studio-custom-label">SYNCHRONIZED LYRICS OVERLAY</span>
+                  <span class="studio-lyrics-badge" id="studio-lyrics-status-badge">No Lyrics</span>
+                </div>
+
+                <div class="studio-toggle-item studio-lyrics-toggle-wrap">
+                  <label class="studio-checkbox-label" for="studio-toggle-lyrics">
+                    <input type="checkbox" id="studio-toggle-lyrics" />
+                    <span>Enable Lyrics Overlay in Video</span>
+                  </label>
+                </div>
+
+                <!-- Lyrics Controls Body (visible when toggle is checked) -->
+                <div id="studio-lyrics-controls-body" class="studio-lyrics-controls-body" style="display:none;">
+                  <div class="studio-lyrics-actions-row">
+                    <input type="file" id="studio-lyrics-file-upload" accept=".lrc,.srt,.vtt,.txt" style="display:none;" />
+                    <button type="button" class="studio-btn studio-btn-secondary studio-btn-xs" id="studio-btn-browse-lyrics">
+                      <span>📄 Upload .LRC / .SRT / .VTT</span>
+                    </button>
+                    <button type="button" class="studio-btn studio-btn-outline studio-btn-xs" id="studio-btn-paste-lyrics">
+                      <span>✏️ Paste Text</span>
+                    </button>
+                    <button type="button" class="studio-btn studio-btn-outline studio-btn-xs" id="studio-btn-editor-handoff" style="display:none;">
+                      <span>⚡ Load from Lyrics Editor</span>
+                    </button>
+                    <button type="button" class="studio-btn studio-btn-ghost studio-btn-xs" id="studio-btn-clear-lyrics" style="display:none;">
+                      <span>Clear</span>
+                    </button>
+                  </div>
+
+                  <div class="studio-lyrics-filename-row">
+                    <span class="studio-lyrics-filename" id="studio-lyrics-filename">No lyrics loaded</span>
+                  </div>
+
+                  <!-- Overlay Style Pill Selector -->
+                  <div class="studio-lyrics-style-row">
+                    <span class="studio-custom-sublabel">Lyrics Layout Style</span>
+                    <div class="studio-lyrics-style-pills" id="studio-lyrics-style-selector" role="radiogroup" aria-label="Lyrics layout style">
+                      <button type="button" class="studio-lyrics-style-pill is-active" data-style="karaoke" role="radio" aria-checked="true">Karaoke Glow</button>
+                      <button type="button" class="studio-lyrics-style-pill" data-style="centered" role="radio" aria-checked="false">Centered Subtitle</button>
+                      <button type="button" class="studio-lyrics-style-pill" data-style="lower-third" role="radio" aria-checked="false">Lower Third</button>
+                    </div>
+                  </div>
+
+                  <!-- Timing Offset Slider -->
+                  <div class="studio-slider-item studio-lyrics-offset-item">
+                    <div class="studio-slider-head">
+                      <label for="studio-slider-lyrics-offset">Timing Sync Offset</label>
+                      <span class="studio-slider-badge" id="studio-lyrics-offset-val">0.00s</span>
+                    </div>
+                    <input type="range" id="studio-slider-lyrics-offset" min="-5.0" max="5.0" step="0.05" value="0.0" aria-label="Lyrics timing sync offset in seconds" />
+                    <span class="studio-settings-hint">Shift lyrics earlier (-) or later (+) without editing your lyric file.</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- D.6: Saved Presets Management -->
+              <div class="studio-custom-group studio-presets-manager-group">
+                <span class="studio-custom-label">SAVED USER PRESETS</span>
+                <div class="studio-presets-controls-row">
+                  <div class="studio-presets-select-wrap">
+                    <label for="studio-presets-dropdown" class="sr-only">Load Saved Preset</label>
+                    <select id="studio-presets-dropdown" class="studio-select-field">
+                      <option value="">-- Load Saved Preset --</option>
+                    </select>
+                  </div>
+                  <button type="button" class="studio-btn studio-btn-outline studio-btn-sm" id="studio-save-preset-btn">Save Current Preset</button>
+                  <button type="button" class="studio-btn studio-btn-ghost studio-btn-sm" id="studio-delete-preset-btn" style="display:none;">Delete</button>
+                </div>
+              </div>
+            </section>
+          </div>
+
+          <!-- Right Column: Live Frame-Shape Preview & Real-Time Estimates -->
+          <div class="studio-settings-preview-col">
+            <!-- Live Aspect Ratio Morphing Frame -->
+            <div class="studio-frame-shape-container">
+              <span class="studio-preview-label">LIVE FRAME SHAPE PREVIEW</span>
+              <div class="studio-frame-shape-box" id="studio-frame-shape-box">
+                <canvas id="studio-settings-preview-canvas" class="studio-settings-preview-canvas" width="640" height="360" aria-label="Live visualizer motion preview"></canvas>
+                <img id="studio-frame-shape-img" class="studio-frame-shape-img" src="" alt="Aspect ratio frame preview" width="640" height="360" style="display:none;" />
+                <div class="studio-frame-scanlines" aria-hidden="true"></div>
+                <span id="studio-frame-shape-watermark" class="studio-frame-shape-watermark">1920 × 1080 • 16:9</span>
+              </div>
+              <div class="studio-live-preview-controls">
+                <button type="button" class="studio-btn studio-btn-ghost studio-btn-sm" id="studio-preview-play-btn" aria-label="Play or pause live motion preview">
+                  <span id="studio-preview-play-icon">▶</span>
+                  <span id="studio-preview-play-label">Play Preview</span>
+                </button>
+                <span class="studio-preview-time" id="studio-preview-time-display">00:00.0 / 00:30.0</span>
+              </div>
+            </div>
+
+            <!-- Output Estimates Card -->
+            <div class="studio-estimates-card" id="studio-estimates-card">
+              <div class="studio-estimates-header">
+                <span class="estimates-badge">REAL-TIME ESTIMATES</span>
+                <span class="estimates-clarification">Calculated for this device</span>
+              </div>
+              <div class="studio-estimates-grid">
+                <div class="studio-estimate-item">
+                  <span class="estimate-label">Output Duration</span>
+                  <strong class="estimate-value" id="studio-estimate-duration">00:30</strong>
+                  <span class="estimate-note">Exact video length</span>
+                </div>
+                <div class="studio-estimate-item">
+                  <span class="estimate-label">Estimated File Size</span>
+                  <strong class="estimate-value" id="studio-estimate-filesize">~24.5 MB</strong>
+                  <span class="estimate-note">H.264/AAC output estimate</span>
+                </div>
+                <div class="studio-estimate-item">
+                  <span class="estimate-label">Estimated Render Time</span>
+                  <strong class="estimate-value" id="studio-estimate-rendertime">~22s</strong>
+                  <span class="estimate-note">Local in-browser encoding</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Browser Capability Indicator -->
+            <div id="studio-capability-status" class="studio-capability-wrap"></div>
+
+            <!-- Start Video Render CTA -->
+            <button type="button" class="studio-btn studio-btn-primary studio-btn-lg studio-btn-block" id="studio-start-render-btn">
+              <span>Start Video Render</span>
+              <span class="studio-btn-arrow">&rarr;</span>
+            </button>
+            <p class="studio-render-footnote">No audio data leaves your machine. Frame encoding runs 100% locally in your browser.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- SUB-VIEW 4: PROCESSING / RENDER (Active on #visualizer/render) -->
+      <div id="studio-render-subview" class="studio-subview" aria-hidden="true">
+        <div class="studio-view-header">
+          <div class="studio-breadcrumb">
+            <span>Visualizer Studio</span>
+            <span class="sep">/</span>
+            <span class="current">Rendering Video</span>
+          </div>
+          <div class="studio-header-actions">
+            <span class="studio-badge-demo" id="studio-render-demo-badge">PREVIEW BUILD</span>
+          </div>
+        </div>
+
+        <div class="studio-subview-intro">
+          <h2 class="studio-subview-heading" tabindex="-1">Rendering Video</h2>
+          <p class="studio-subview-lead">Your audio frames are being generated locally on your graphics hardware.</p>
+        </div>
+
+        <!-- Render Container Card -->
+        <div class="studio-render-card" id="studio-render-card">
+          <!-- Active Mini Animation Canvas / Stage Preview -->
+          <div class="studio-render-preview-box">
+            <canvas id="studio-render-preview-canvas" class="studio-render-preview-canvas" width="480" height="270" aria-hidden="true"></canvas>
+            <div class="studio-render-pulse-ring" aria-hidden="true"></div>
+            <span class="studio-render-live-tag">PROCESSING FRAMES</span>
+          </div>
+
+          <!-- Progress Section -->
+          <div class="studio-render-progress-section">
+            <div class="studio-render-meta-row">
+              <span class="studio-render-stage-badge" id="studio-render-stage-badge">Stage 1 of 5</span>
+              <span class="studio-render-pct" id="studio-render-percent">0%</span>
+            </div>
+
+            <!-- Progress Bar -->
+            <div class="studio-progress-track">
+              <div class="studio-progress-fill" id="studio-render-progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" aria-label="Rendering video progress"></div>
+            </div>
+
+            <div class="studio-render-stage-name" id="studio-render-stage-name">Analyzing audio spectrum &amp; beat onsets...</div>
+
+            <!-- Time Stats Grid -->
+            <div class="studio-render-stats-grid">
+              <div class="studio-render-stat-item">
+                <span class="render-stat-label">Elapsed Time</span>
+                <strong class="render-stat-val" id="studio-render-elapsed">00:00</strong>
+              </div>
+              <div class="studio-render-stat-item">
+                <span class="render-stat-label">Estimated Remaining</span>
+                <strong class="render-stat-val" id="studio-render-eta">Calculating...</strong>
+              </div>
+              <div class="studio-render-stat-item">
+                <span class="render-stat-label">Encoding Engine</span>
+                <strong class="render-stat-val" id="studio-render-engine-tag">Demo Simulator</strong>
+              </div>
+            </div>
+
+            <!-- Screen reader polite announcer (every 10% & stage changes) -->
+            <div id="studio-render-announcer" class="sr-only" aria-live="polite" aria-atomic="true"></div>
+
+            <!-- Background Warning Notice (hidden by default) -->
+            <div id="studio-render-visibility-notice" class="studio-visibility-notice" style="display:none;" role="alert">
+              <span class="notice-icon" aria-hidden="true">⚠️</span>
+              <span>Notice: This tab was placed in the background. Browser throttling may slow frame processing.</span>
+            </div>
+
+            <!-- Caution footnote -->
+            <div class="studio-render-tab-caution">
+              <span class="caution-icon" aria-hidden="true">🔒</span>
+              <span>Keep this tab open while we create your video. Frame processing runs 100% locally on your machine.</span>
+            </div>
+
+            <!-- Cancel Button -->
+            <div class="studio-render-actions">
+              <button type="button" class="studio-btn studio-btn-ghost studio-btn-sm" id="studio-render-cancel-btn">
+                <span>Cancel Render</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Render Error Card (Hidden unless an error occurs) -->
+        <div class="studio-render-error-card" id="studio-render-error-card" style="display:none;" role="alert">
+          <div class="studio-error-icon-box" aria-hidden="true">⚠️</div>
+          <h3 class="studio-error-title" id="studio-render-error-title">Video Render Interrupted</h3>
+          <p class="studio-error-desc" id="studio-render-error-desc">An unexpected issue occurred while processing video frames. Your audio data remains completely intact and safe.</p>
+
+          <div class="studio-error-actions">
+            <button type="button" class="studio-btn studio-btn-primary" id="studio-render-retry-btn">Retry Render</button>
+            <button type="button" class="studio-btn studio-btn-secondary" id="studio-render-back-settings-btn">Back to Settings</button>
+            <button type="button" class="studio-btn studio-btn-ghost" id="studio-render-start-over-btn">Start Over</button>
+            <button type="button" class="studio-btn studio-btn-ghost studio-btn-sm" id="studio-render-copy-diag-btn">
+              <span>📋 Copy Diagnostics</span>
+            </button>
+          </div>
+          <span class="studio-diag-privacy-note">Diagnostics include browser technical specifications only. No audio or personal data is ever collected.</span>
+        </div>
+      </div>
+
+      <!-- SUB-VIEW 5: RESULT & EXPORT (Active on #visualizer/result) -->
+      <div id="studio-result-subview" class="studio-subview" aria-hidden="true">
+        <div class="studio-view-header">
+          <div class="studio-breadcrumb">
+            <span>Visualizer Studio</span>
+            <span class="sep">/</span>
+            <span class="current">Export Result</span>
+          </div>
+          <div class="studio-header-actions">
+            <span class="studio-badge-demo" id="studio-result-demo-badge">PREVIEW BUILD</span>
+          </div>
+        </div>
+
+        <div class="studio-subview-intro">
+          <h2 class="studio-subview-heading" tabindex="-1">Your Video Preview</h2>
+          <p class="studio-subview-lead">Review your generated motion graphics visualizer below.</p>
+        </div>
+
+        <!-- Result Container Card -->
+        <div class="studio-result-layout">
+          <!-- Left Column: Video Preview Player Area -->
+          <div class="studio-result-player-col">
+            <div class="studio-result-preview-container" id="studio-result-preview-container">
+              <!-- Demo animated canvas player -->
+              <canvas id="studio-result-demo-canvas" class="studio-result-demo-canvas" width="640" height="360" aria-label="Generated visualizer demo preview"></canvas>
+
+              <!-- Demo Overlay Banner (Truth in Advertising) -->
+              <div class="studio-result-demo-banner" id="studio-result-demo-banner">
+                <span class="demo-tag">DEMO PREVIEW</span>
+                <span class="demo-msg">Real MP4 video export engine unlocks in the upcoming release.</span>
+              </div>
+
+              <!-- Play/Pause Overlay Control -->
+              <button type="button" class="studio-result-playback-btn" id="studio-result-playback-btn" aria-label="Play or pause preview">
+                <span id="studio-result-play-icon" aria-hidden="true">⏸</span>
+              </button>
+            </div>
+
+            <!-- Video Metadata Bar -->
+            <div class="studio-result-spec-strip" id="studio-result-spec-strip">
+              <span class="spec-item"><strong id="studio-result-meta-style">Style</strong></span>
+              <span class="spec-sep">•</span>
+              <span class="spec-item" id="studio-result-meta-res">1080p Full HD</span>
+              <span class="spec-sep">•</span>
+              <span class="spec-item" id="studio-result-meta-ratio">16:9</span>
+              <span class="spec-sep">•</span>
+              <span class="spec-item" id="studio-result-meta-dur">00:30</span>
+            </div>
+          </div>
+
+          <!-- Right Column: Download & Action Cards -->
+          <div class="studio-result-actions-col">
+            <!-- Download Card -->
+            <div class="studio-download-card">
+              <div class="studio-download-header">
+                <span class="download-badge">VIDEO EXPORT</span>
+                <span class="download-tag">100% CLIENT-SIDE</span>
+              </div>
+              <h3 class="studio-download-title">Download MP4 Video</h3>
+              <p class="studio-download-desc">Hardware-encoded AVC/H.264 video with AAC stereo audio ready for social sharing.</p>
+
+              <!-- Honest Download Button (Disabled during demo mode) -->
+              <div class="studio-download-btn-wrap">
+                <button type="button" class="studio-btn studio-btn-primary studio-btn-lg studio-btn-block" id="studio-result-download-btn" disabled aria-describedby="studio-download-demo-notice">
+                  <span>Download MP4 Video</span>
+                  <span class="studio-btn-arrow">↓</span>
+                </button>
+                <p id="studio-download-demo-notice" class="studio-download-demo-notice">
+                  ℹ️ Demo preview mode active. The direct client-side WebCodecs MP4 encoder is unlocking in the engine update.
+                </p>
+              </div>
+
+              <!-- Web Share API Button (Conditionally visible when navigator.share supported) -->
+              <button type="button" class="studio-btn studio-btn-secondary studio-btn-block" id="studio-result-share-btn" style="display:none;">
+                <span>🔗 Share Video</span>
+              </button>
+            </div>
+
+            <!-- Navigation Actions Card -->
+            <div class="studio-next-actions-card">
+              <h4 class="next-actions-title">Next Steps</h4>
+              <div class="studio-result-button-grid">
+                <button type="button" class="studio-btn studio-btn-secondary" id="studio-result-try-style-btn">
+                  <span>🎨 Try Another Style</span>
+                </button>
+                <button type="button" class="studio-btn studio-btn-secondary" id="studio-result-change-settings-btn">
+                  <span>⚙️ Change Settings</span>
+                </button>
+                <button type="button" class="studio-btn studio-btn-ghost" id="studio-result-start-over-btn">
+                  <span>↺ Start Over</span>
+                </button>
+              </div>
+              <p class="studio-result-footnote">Your audio track and trim settings remain saved in local memory.</p>
+            </div>
+          </div>
+        </div>
+      </div>
     </div><!-- /#view-hero2 -->
 
     <!-- VIEW 3: LIVE PIANO STUDIO SECTION (Under Development) -->
@@ -1039,8 +1829,8 @@
     <div class="modal-card demo-modal-card" role="dialog" aria-labelledby="demoModalTitle" aria-modal="true">
       <div class="modal-head">
         <div class="modal-title-wrap">
-          <span class="modal-badge">INTERACTIVE TOUR</span>
-          <h2 id="demoModalTitle">Timing Console Studio</h2>
+          <span class="modal-badge">STUDIO PREVIEW</span>
+          <h2 id="demoModalTitle">Audio Visualizer Studio</h2>
         </div>
         <button class="modal-close-btn" id="demoCloseBtn" aria-label="Close demo modal">✕</button>
       </div>
@@ -1050,27 +1840,22 @@
         <div class="demo-preview-box">
           <div class="demo-screen-header">
             <div class="demo-dots"><span></span><span></span><span></span></div>
-            <span class="demo-screen-title">LIVE SYNC WORKSPACE</span>
-            <span class="demo-tag">PRECISION ENGINE</span>
+            <span class="demo-screen-title">AUDIO REACTIVE MOTION PREVIEW</span>
+            <span class="demo-tag">LOCAL ENGINE</span>
           </div>
 
-          <div class="demo-lyrics-stream">
-            <div class="stream-line past">
-              <span class="time-stamp">00:04.120</span>
-              <span class="lyric-text">Electric neon pulses through the wire</span>
+          <!-- Visualizer Style Demo Stream -->
+          <div class="demo-visualizer-stream" style="padding: 16px 20px; display: flex; flex-direction: column; gap: 8px;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span style="font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: #e2b34a;">Style: Classic Bars</span>
+              <span style="font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; color: #00ffb0; background: rgba(0,255,176,0.1); padding: 2px 8px; border-radius: 4px;">PREVIEW • 30 FPS</span>
             </div>
-            <div class="stream-line current">
-              <span class="time-stamp active-stamp">00:08.450</span>
-              <span class="lyric-text">Capturing the beat with instant precision</span>
-              <span class="sync-ping">ACTIVE SYNC</span>
-            </div>
-            <div class="stream-line future">
-              <span class="time-stamp">--:--.---</span>
-              <span class="lyric-text">Every word locks into the timeline groove</span>
-            </div>
+            <p style="font-size: 0.84rem; color: #9ab4a3; margin: 0; line-height: 1.45;">
+              Real-time frequency mapping across 64 sub-bands. Produces hardware-rendered MP4 video files locally in your browser.
+            </p>
           </div>
 
-          <div class="demo-waveform-anim">
+          <div class="demo-waveform-anim" aria-hidden="true">
             <div class="demo-bar" style="--h: 35%"></div>
             <div class="demo-bar" style="--h: 65%"></div>
             <div class="demo-bar" style="--h: 90%"></div>
@@ -1093,31 +1878,31 @@
         <!-- Highlights Grid -->
         <div class="demo-features-grid">
           <div class="demo-feat-item">
-            <div class="feat-icon">⚡</div>
+            <div class="feat-icon">🎛️</div>
             <div class="feat-info">
-              <h3>Tap-to-Sync Keyboard</h3>
-              <p>Hit <kbd>S</kbd> for Start and <kbd>E</kbd> for End as the song plays. Focus scrolls automatically.</p>
+              <h3>Reactive Visualizer Styles</h3>
+              <p>Choose from classic frequency bars, circular spectrums, neon cyber grids, and organic waves.</p>
             </div>
           </div>
           <div class="demo-feat-item">
-            <div class="feat-icon">🎚️</div>
+            <div class="feat-icon">📐</div>
             <div class="feat-info">
-              <h3>Docked Scrubber & Minimap</h3>
-              <p>Zoom from 1× to 10×. Drag lyric blocks directly on the timeline or nudge by ±0.1s.</p>
+              <h3>Multiple Aspect Ratios</h3>
+              <p>Render horizontal (16:9), vertical (9:16 for Reels/Shorts), square (1:1), or portrait (4:5).</p>
             </div>
           </div>
           <div class="demo-feat-item">
             <div class="feat-icon">🔒</div>
             <div class="feat-info">
               <h3>Zero Cloud Upload</h3>
-              <p>All processing stays 100% on your machine. Runs offline with zero network requests.</p>
+              <p>All audio analysis and video frame rendering happen locally on your device with 100% privacy.</p>
             </div>
           </div>
           <div class="demo-feat-item">
-            <div class="feat-icon">📦</div>
+            <div class="feat-icon">🎬</div>
             <div class="feat-info">
-              <h3>Studio Subtitle Exports</h3>
-              <p>Instant one-click exports to .LRC, .SRT, .VTT, and .TXT formats ready for any DAW.</p>
+              <h3>Direct MP4 Video Export</h3>
+              <p>Generate downloadable MP4 video files directly in your browser without external screen recording.</p>
             </div>
           </div>
         </div>
@@ -1125,17 +1910,18 @@
 
       <div class="modal-foot demo-modal-foot">
         <button class="modal-action-btn secondary" id="demoDismissBtn">Close</button>
-        <button class="btn btn-upload btn-island" id="demoLaunchBtn">
-          <span class="btn-text">OPEN SYNC LYRICS & SCRIPT</span>
+        <button class="btn btn-upload btn-island" id="demoLaunchBtn" aria-label="Launch Audio Visualizer Studio">
+          <span class="btn-text">TRY AUDIO VISUALIZER</span>
           <span class="btn-icon-bubble">
             <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.4"
-              stroke-linecap="round" stroke-linejoin="round">
+              stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <path d="M5 12h14M12 5l7 7-7 7" />
             </svg>
           </span>
         </button>
       </div>
     </div>
+  </div>  <!-- /#demoModal (was never closed: swallowed every modal below it) -->
 
     <!-- ================= Pricing Modal (100% Free & Open) ================= -->
     <div class="modal-backdrop" id="pricingModal" aria-hidden="true" style="display:none;">
@@ -1220,7 +2006,7 @@
         </div>
         <div class="coming-soon-icon-ring">
           <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#e8c76a" stroke-width="2"
-            stroke-linecap="round" stroke-linejoin="round">
+            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <rect x="2.5" y="3.5" width="19" height="14" rx="3.5" />
             <path d="M6 11.5h2l2-4.5 3 8.5 2.5-6 2 2h2.5" />
             <line x1="8" y1="21" x2="16" y2="21" />
@@ -1228,31 +2014,197 @@
           </svg>
         </div>
         <h2 id="modal-cs-title" class="coming-soon-title">Audio Visualizer Studio</h2>
-        <p class="coming-soon-desc">Custom audio track upload and real-time GPU spectrum mapping is currently being
-          engineered. You will soon be able to drop any audio file to generate reactive 3D landscapes and spatial
-          waveforms.</p>
+        <p class="coming-soon-desc">Turn any audio track into music-reactive video visualizers right in your browser.
+          Audio decoding, spectral analysis, and MP4 video encoding run 100% locally on your machine with zero cloud uploads.</p>
         <div class="coming-soon-features-list">
           <div class="cs-feature-item">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#00ffb0" stroke-width="2.5">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#00ffb0" stroke-width="2.5" aria-hidden="true">
               <polyline points="20 6 9 17 4 12" />
             </svg>
-            <span>60 FPS WebGL 3D Mesh Spectrum</span>
+            <span>Reactive 2D &amp; 3D Audio Visualizer Styles</span>
           </div>
           <div class="cs-feature-item">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#00ffb0" stroke-width="2.5">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#00ffb0" stroke-width="2.5" aria-hidden="true">
               <polyline points="20 6 9 17 4 12" />
             </svg>
-            <span>Stem Separation & Multi-channel Oscilloscope</span>
+            <span>Vertical (9:16), Square (1:1) &amp; Landscape (16:9) Formats</span>
           </div>
           <div class="cs-feature-item">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#00ffb0" stroke-width="2.5">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#00ffb0" stroke-width="2.5" aria-hidden="true">
               <polyline points="20 6 9 17 4 12" />
             </svg>
-            <span>Lossless 4K Video Render & Export</span>
+            <span>Local MP4 Video Export &mdash; Zero Cloud Uploads</span>
           </div>
         </div>
         <div class="coming-soon-actions">
           <button class="cs-btn-primary" id="visualizerModalDismissBtn">Got It</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================= Audio Visualizer Studio Upload Modal (Prompt 3) ================= -->
+    <div class="studio-upload-modal-backdrop" id="studioUploadModal" aria-hidden="true" style="display:none;" role="dialog" aria-modal="true" aria-labelledby="studioUploadTitle">
+      <div class="studio-upload-card">
+        <button type="button" class="studio-upload-close-btn" id="studioUploadCloseBtn" aria-label="Close upload dialog">&times;</button>
+        
+        <div class="studio-upload-header">
+          <div class="studio-upload-badge">
+            <span class="studio-upload-dot"></span>
+            <span>100% CLIENT-SIDE AUDIO</span>
+          </div>
+          <h2 id="studioUploadTitle" class="studio-upload-title">Upload Audio Track</h2>
+          <p class="studio-upload-subtitle">Choose an audio file to analyze and visualize. Decoding, spectrum extraction, and video rendering happen entirely in your browser.</p>
+        </div>
+
+        <!-- Inline notice / error banner -->
+        <div id="studioUploadNotice" class="studio-upload-notice" style="display:none;" role="alert"></div>
+
+        <!-- Hidden Audio File Input -->
+        <input type="file" id="studioAudioInput" accept="audio/*,.mp3,.wav,.m4a,.aac,.ogg,.flac" style="display:none;" aria-label="Select audio file" />
+
+        <!-- 1. Drag & Drop Zone -->
+        <div class="studio-dropzone" id="studioDropzone" tabindex="0" role="button" aria-label="Click or drag and drop audio file here">
+          <div class="studio-dropzone-icon" aria-hidden="true">
+            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M9 18V5l12-2v13" />
+              <circle cx="6" cy="18" r="3" />
+              <circle cx="18" cy="16" r="3" />
+            </svg>
+          </div>
+          <div class="studio-dropzone-title">Drag &amp; drop audio track here, or <span class="studio-dropzone-highlight">browse files</span></div>
+          <div class="studio-dropzone-hint">Supports MP3, WAV, M4A, AAC, OGG, FLAC &bull; Up to 120 MB &bull; Max 15 minutes</div>
+          <button type="button" class="studio-btn studio-btn-secondary" id="studioChooseFileBtn">Browse Audio File</button>
+        </div>
+
+        <!-- 2. Decoding Progress State -->
+        <div class="studio-upload-decoding" id="studioUploadDecoding" style="display:none;">
+          <div class="studio-decoding-spinner" aria-hidden="true">
+            <div class="studio-spinner-ring"></div>
+          </div>
+          <div class="studio-decoding-text" id="studioDecodingText">Reading audio file...</div>
+          <div class="studio-decode-progress-track">
+            <div class="studio-decode-progress-bar" id="studioDecodeProgressBar" style="width:0%;"></div>
+          </div>
+          <button type="button" class="studio-btn studio-btn-ghost studio-btn-sm" id="studioCancelDecodeBtn">Cancel</button>
+        </div>
+
+        <!-- 3. Audio Preview Card with Mini-Waveform -->
+        <div class="studio-audio-card" id="studioAudioCard" style="display:none;">
+          <div class="studio-audio-meta-row">
+            <div class="studio-audio-name-wrap">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#00ffb0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M9 18V5l12-2v13" />
+                <circle cx="6" cy="18" r="3" />
+                <circle cx="18" cy="16" r="3" />
+              </svg>
+              <span class="studio-audio-filename" id="studioAudioFilename">track.mp3</span>
+            </div>
+            <div class="studio-audio-chips">
+              <span class="studio-audio-meta-chip" id="studioAudioDuration">00:00</span>
+              <span class="studio-audio-meta-chip" id="studioAudioFilesize">0 MB</span>
+              <span class="studio-audio-meta-chip" id="studioAudioSpecs">44100 Hz &bull; Stereo</span>
+            </div>
+          </div>
+
+          <div class="studio-waveform-player-row">
+            <audio id="studioPreviewAudio" preload="none"></audio>
+            <button type="button" class="studio-audio-play-btn" id="studioPlayPauseBtn" aria-label="Play or pause audio preview">
+              <span id="studioPlayIcon">▶</span>
+            </button>
+            <div class="studio-waveform-box" id="studioWaveformBox" title="Click anywhere to scrub preview">
+              <canvas class="studio-mini-waveform" id="studioMiniWaveformCanvas" width="480" height="48"></canvas>
+              <div class="studio-waveform-playhead" id="studioWaveformPlayhead" style="left:0%;"></div>
+            </div>
+            <span class="studio-player-time" id="studioPlayerTime">00:00 / 00:00</span>
+          </div>
+
+          <div class="studio-audio-actions">
+            <button type="button" class="studio-btn studio-btn-secondary studio-btn-sm" id="studioReplaceFileBtn">Replace Track</button>
+            <button type="button" class="studio-btn studio-btn-ghost studio-btn-sm" id="studioRemoveAudioBtn">Remove</button>
+          </div>
+        </div>
+
+        <!-- Privacy & Rights Footnotes -->
+        <div class="studio-upload-privacy-note">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#00ffb0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+          </svg>
+          <span><strong>100% Private:</strong> Audio data stays entirely in your browser memory. Nothing is ever uploaded to external servers.</span>
+        </div>
+        <div class="studio-upload-disclaimer">Please ensure you have the proper rights or licensing for the audio uploaded for visualizer generation.</div>
+
+        <!-- Footer Actions -->
+        <div class="studio-upload-modal-foot">
+          <button type="button" class="studio-btn studio-btn-secondary" id="studioUploadCancelBtn">Cancel</button>
+          <button type="button" class="studio-btn studio-btn-primary" id="studioUploadDoneBtn" disabled>Continue to Styles &rarr;</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================= Audio Visualizer Studio Shortcuts Dialog (Prompt 10) ================= -->
+    <div class="studio-modal-backdrop" id="studioShortcutsModal" aria-hidden="true" style="display:none;" role="dialog" aria-modal="true" aria-labelledby="studioShortcutsTitle">
+      <div class="studio-modal-card">
+        <div class="studio-modal-header">
+          <div class="studio-modal-badge">KEYBOARD SHORTCUTS</div>
+          <h3 id="studioShortcutsTitle" class="studio-modal-heading">Studio Controls &amp; Shortcuts</h3>
+          <button type="button" class="studio-modal-close-btn" id="studioShortcutsCloseBtn" aria-label="Close shortcuts modal">&times;</button>
+        </div>
+        <div class="studio-shortcuts-grid">
+          <div class="studio-shortcut-row"><kbd class="studio-kbd">Space</kbd><span>Play / Pause Live Motion Preview</span></div>
+          <div class="studio-shortcut-row"><kbd class="studio-kbd">&larr;</kbd> <kbd class="studio-kbd">&rarr;</kbd><span>Scrub audio backward / forward 1.0s</span></div>
+          <div class="studio-shortcut-row"><kbd class="studio-kbd">1</kbd> <kbd class="studio-kbd">2</kbd> <kbd class="studio-kbd">3</kbd> <kbd class="studio-kbd">4</kbd><span>Quick Aspect Ratio (16:9, 9:16, 1:1, 4:5)</span></div>
+          <div class="studio-shortcut-row"><kbd class="studio-kbd">?</kbd><span>Toggle Keyboard Shortcuts</span></div>
+          <div class="studio-shortcut-row"><kbd class="studio-kbd">Esc</kbd><span>Close open dialog / modal</span></div>
+        </div>
+        <div class="studio-modal-footer">
+          <button type="button" class="studio-btn studio-btn-primary" id="studioShortcutsDismissBtn">Got It</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================= Audio Visualizer Studio Preset Save Dialog (Prompt 10) ================= -->
+    <div class="studio-modal-backdrop" id="studioPresetModal" aria-hidden="true" style="display:none;" role="dialog" aria-modal="true" aria-labelledby="studioPresetTitle">
+      <div class="studio-modal-card">
+        <div class="studio-modal-header">
+          <div class="studio-modal-badge">SAVE PRESET</div>
+          <h3 id="studioPresetTitle" class="studio-modal-heading">Save Custom Style Preset</h3>
+          <button type="button" class="studio-modal-close-btn" id="studioPresetCloseBtn" aria-label="Close save preset modal">&times;</button>
+        </div>
+        <div class="studio-modal-body">
+          <p class="studio-modal-desc">Save your current palette colors, background, typography, and motion parameters to use on any audio track.</p>
+          <div class="studio-preset-input-group">
+            <label for="studioPresetNameInput">Preset Name</label>
+            <input type="text" id="studioPresetNameInput" class="studio-text-field" placeholder="e.g. My Cyber Neon Preset" maxlength="40" />
+          </div>
+          <div id="studioPresetError" class="studio-error-inline" style="display:none;" role="alert"></div>
+        </div>
+        <div class="studio-modal-footer">
+          <button type="button" class="studio-btn studio-btn-secondary" id="studioPresetCancelBtn">Cancel</button>
+          <button type="button" class="studio-btn studio-btn-primary" id="studioPresetConfirmBtn">Save Preset</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================= Audio Visualizer Studio Paste Lyrics Dialog (Prompt 11) ================= -->
+    <div class="studio-modal-backdrop" id="studioLyricsPasteModal" aria-hidden="true" style="display:none;" role="dialog" aria-modal="true" aria-labelledby="studioLyricsPasteTitle">
+      <div class="studio-modal-card studio-lyrics-modal-card">
+        <div class="studio-modal-header">
+          <div class="studio-modal-badge">PASTE LYRICS</div>
+          <h3 id="studioLyricsPasteTitle" class="studio-modal-heading">Paste Synchronized Lyrics</h3>
+          <button type="button" class="studio-modal-close-btn" id="studioLyricsPasteCloseBtn" aria-label="Close lyrics paste modal">&times;</button>
+        </div>
+        <div class="studio-modal-body">
+          <p class="studio-modal-desc">Paste standard LRC format (e.g. <code>[00:12.50] Your lyric here</code>), SRT, WebVTT, or plain text. Full Devanagari Hindi Unicode &amp; word-level timestamps supported.</p>
+          <div class="studio-lyrics-textarea-wrap">
+            <label for="studioLyricsTextarea" class="sr-only">Raw lyrics content</label>
+            <textarea id="studioLyricsTextarea" class="studio-lyrics-textarea" rows="8" placeholder="[00:04.20]Searching for a little light&#10;[00:08.50]And now I see the morning&#10;[00:14.00]It's gonna be alright"></textarea>
+          </div>
+          <div id="studioLyricsPasteError" class="studio-error-inline" style="display:none;" role="alert"></div>
+        </div>
+        <div class="studio-modal-footer">
+          <button type="button" class="studio-btn studio-btn-secondary" id="studioLyricsPasteCancelBtn">Cancel</button>
+          <button type="button" class="studio-btn studio-btn-primary" id="studioLyricsPasteConfirmBtn">Apply Lyrics</button>
         </div>
       </div>
     </div>
@@ -1281,6 +2233,9 @@
         </div>
       </div>
     </div>
+
+    <!-- Accessible Toast Container for Studio -->
+    <div id="studio-toast-container" class="studio-toast-container" aria-live="polite" aria-atomic="true"></div>
 
     <script src="piano.js"></script>
     <script src="script.js"></script>

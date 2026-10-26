@@ -237,7 +237,9 @@ html {
   overflow-x: clip;
 }
 
-*, *::before, *::after {
+*,
+*::before,
+*::after {
   box-sizing: inherit;
 }
 
@@ -2586,7 +2588,8 @@ body {
   opacity: 1 !important;
   visibility: visible !important;
   pointer-events: auto !important;
-  transform: translate3d(0, 0, 0) scale(1) !important;
+  transform: none !important;
+  will-change: auto !important;
 }
 
 .view-panel:not(.is-active),
@@ -4120,6 +4123,7 @@ body[data-theme="piano"] {
 
 /* --- TIER 1 & 2: MOBILE PHONES (<= 767px) --- */
 @media (max-width: 767px) {
+
   #top .header-nav,
   #top .nav-links a,
   #top .nav-pricing,
@@ -4264,6 +4268,7 @@ body[data-theme="piano"] {
 
 /* --- TOUCH DEVICES ACCESSIBILITY (Pointer Coarse) --- */
 @media (hover: none) and (pointer: coarse) {
+
   .btn,
   .side-btn,
   .footer-link,

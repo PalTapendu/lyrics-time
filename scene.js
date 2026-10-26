@@ -53,18 +53,19 @@
      ACOUSTIC CLICK SHOCKWAVE SYSTEM
      ===================================================================== */
   var ripples = []; // [{ u, v, radius, intensity, startTime }]
+  var currentAnimTime = 0;
 
   window.addEventListener('pointerdown', function (e) {
     if (!isRunning) return;
-    // Ignore clicks inside modals, sidebar, or topbar
-    if (e.target.closest('.modal-card, .sidebar, .topbar, #side, #top, .account-card, .video-screen')) return;
+    // Ignore clicks inside buttons, links, inputs, modals, sidebar, topbar, or hero content
+    if (e.target.closest('button, a, input, select, textarea, .btn, .modal-card, .sidebar, .topbar, #side, #top, .account-card, .video-screen, .studio-upload-card, .studio-modal-card, .hero-copy, .hero')) return;
 
     ripples.push({
       u: (e.clientX / (W || 1) - 0.5) * 4,
       v: (e.clientY / (H || 1) - 0.5) * 4,
       radius: 0,
       intensity: 1.0,
-      startTime: performance.now() / 1000
+      startTime: currentAnimTime
     });
 
     if (ripples.length > 4) ripples.shift();
@@ -268,11 +269,12 @@
     for (var ri = ripples.length - 1; ri >= 0; ri--) {
       var r = ripples[ri];
       var age = time - r.startTime;
+      if (age < 0 || age > 1.6) {
+        ripples.splice(ri, 1);
+        continue;
+      }
       r.radius = age * 3.5;
       r.intensity = Math.max(0, 1.0 - age / 1.6);
-      if (age > 1.6) {
-        ripples.splice(ri, 1);
-      }
     }
 
     /* WARPED MESH GRID (refined footprint & balanced center) */
@@ -479,6 +481,7 @@
 
     if (startTime === null) startTime = timestamp;
     var elapsed = (timestamp - startTime - totalPausedTime) / 1000;
+    currentAnimTime = elapsed;
 
     draw(elapsed);
     updateAndDrawParticles(elapsed);

@@ -264,29 +264,30 @@
       <section class="section-block">
         <h2>1. 100% Local Processing (Zero Cloud Uploads)</h2>
         <p>
-          SyncLines is built from the ground up as a fully client-side web application. When you open or drag-and-drop an audio file (such as MP3, WAV, FLAC, M4A, or OGG) or paste lyric text into the editor:
+          SyncLines is built from the ground up as a fully client-side web application across both the <strong>Lyric &amp; Timing Editor</strong> and the <strong>Audio Visualizer Studio</strong>. When you open or drag-and-drop an audio file (such as MP3, WAV, FLAC, M4A, or OGG), import lyrics, or render a visualizer video:
         </p>
         <div class="highlight-box">
           <p>
-            <strong>Your files never leave your computer.</strong> All audio decoding, spectrum analysis, waveform peak computation, and subtitle formatting (.LRC, .SRT, .VTT, .TXT) are performed strictly inside your browser via the Web Audio API and JavaScript. No audio is ever uploaded to any server.
+            <strong>Your files never leave your computer.</strong> All audio decoding, spectrum analysis, waveform peak computation, subtitle formatting (.LRC, .SRT, .VTT, .TXT), and hardware-accelerated MP4 video frame encoding (via WebCodecs <code>VideoEncoder</code> and Web Audio) are performed strictly inside your browser. No audio data, lyric text, or video frames are ever uploaded to external servers.
           </p>
         </div>
       </section>
 
       <section class="section-block">
-        <h2>2. Browser Storage (localStorage &amp; File Handles)</h2>
+        <h2>2. Browser Storage (IndexedDB, localStorage &amp; File Handles)</h2>
         <p>
-          To ensure you do not lose your work if your tab refreshes, SyncLines uses standard in-browser <code>localStorage</code> and the native browser File System Access API. The data stored includes:
+          To ensure you do not lose your work if your tab refreshes, SyncLines uses standard in-browser <code>localStorage</code>, <code>IndexedDB</code>, and the native browser File System Access API. The data stored includes:
         </p>
         <ul>
-          <li><code>synclines-editor-theme</code>: Remembers your interface theme preference (Light or Dark).</li>
-          <li><code>timing-console-autosave</code>: Temporarily caches your current song title, lyric rows, and timestamps.</li>
+          <li><code>synclines_studio_session</code>: Temporarily caches your active visualizer audio file and waveform peaks in IndexedDB with an automatic 24-hour expiration window.</li>
+          <li><code>synclines_studio_presets</code>: Saves your custom color palettes, background choices, typography, and motion parameters locally.</li>
+          <li><code>synclines_studio_favorites</code>: Saves your favorited visualizer style presets.</li>
+          <li><code>timing-console-autosave</code>: Temporarily caches your current song title, lyric rows, and timestamps in the editor.</li>
           <li><code>timing-console-history</code>: Saves references to your recent session files for 1-click reopening.</li>
-          <li><code>timing-console-clicks</code>: Remembers whether rhythmic audio click feedback is toggled on or off.</li>
-          <li><code>timing-console-dock-h</code>: Remembers your preferred height for the docked waveform player.</li>
+          <li><code>synclines-editor-theme</code>: Remembers your interface theme preference.</li>
         </ul>
         <p>
-          <strong>How to clear this data:</strong> You can purge all stored project data at any time by clicking "Clear Session" within the editor, or by clearing your browser's site data/cookies under your browser's privacy settings.
+          <strong>How to clear this data:</strong> You can purge all stored project and studio data at any time by clicking <strong>"Clear My Data"</strong> inside the Audio Visualizer Studio, "Clear Session" in the Editor, or by clearing your browser's site data/cookies under your browser privacy settings.
         </p>
       </section>
 
