@@ -572,8 +572,8 @@
         };
 
         // Run deterministic audio analysis
-        var analysisEngine = (typeof window !== 'undefined' && window.StudioAudioAnalysis) || root.StudioAudioAnalysis;
-        var rendererEngine = (typeof window !== 'undefined' && window.StudioRenderer) || root.StudioRenderer;
+        var analysisEngine = (typeof window !== 'undefined' && window.StudioAudioAnalysis) || null;
+        var rendererEngine = (typeof window !== 'undefined' && window.StudioRenderer) || null;
         if (analysisEngine && currentAudioBuffer) {
           try {
             var mono = analysisEngine.downmixToMono(currentAudioBuffer);

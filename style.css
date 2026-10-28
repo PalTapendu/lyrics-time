@@ -11,14 +11,12 @@
   box-sizing: border-box;
   margin: 0;
   padding: 0;
-  text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 svg {
-  shape-rendering: geometricPrecision;
-  text-rendering: geometricPrecision;
+  shape-rendering: auto;
 }
 
 :root {
@@ -237,18 +235,8 @@ html {
   overflow-x: clip;
 }
 
-*,
-*::before,
-*::after {
-  box-sizing: inherit;
-}
-
 body {
   background-color: #fdfaf4;
-  background:
-    radial-gradient(1000px 600px at 15% 15%, #ffffff, transparent 70%),
-    radial-gradient(1200px 800px at 85% 75%, #f4ece0, transparent 75%),
-    linear-gradient(135deg, #fdfaf4 0%, #f8f1e4 50%, #f4ead7 100%);
   color: var(--text-main);
   font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
   overflow-x: clip;
@@ -964,7 +952,7 @@ body {
    ========================================================================== */
 .hero-layout {
   display: grid;
-  grid-template-columns: minmax(380px, 1fr) minmax(480px, 1.25fr);
+  grid-template-columns: minmax(320px, 1fr) minmax(420px, 1.25fr);
   align-items: center;
   min-height: calc(100dvh - var(--shell-header-h) - var(--shell-footer-h, 42px));
   width: 100%;
@@ -4467,4 +4455,83 @@ body[data-theme="piano"] {
   color: #9db2a5;
   margin-top: 0.5rem;
   margin-bottom: 0;
+}
+
+/* === Studio critical rules (kept in the main sheet because studio.css is lazy-loaded) === */
+/* Without these, all 5 Studio sub-views render stacked (page grows to ~3800px and the scene canvas with it). */
+.studio-subview { display: none; }
+.studio-subview.is-active { display: block; }
+/* Headings receive programmatic focus on route change; they are not interactive, so no focus ring. */
+[tabindex="-1"]:focus { outline: none; }
+
+/* U7: GPU-composited fixed background gradient - avoids repainting 3 radial gradients on scroll */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(1000px 600px at 15% 15%, #ffffff, transparent 70%),
+    radial-gradient(1200px 800px at 85% 75%, #f4ece0, transparent 75%),
+    linear-gradient(135deg, #fdfaf4 0%, #f8f1e4 50%, #f4ead7 100%);
+  transition: opacity 0.38s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+[data-theme="hero2"] body::before,
+body[data-theme="hero2"]::before,
+[data-theme="piano"] body::before,
+body[data-theme="piano"]::before {
+  opacity: 0;
+}
+
+/* U9: Button resets for dropdown-item so buttons inherit layout cleanly */
+button.dropdown-item {
+  border: none;
+  background: transparent;
+  font: inherit;
+  text-align: left;
+  width: 100%;
+}
+
+/* U11: Demo Modal design-token CSS classes */
+.demo-visualizer-stream {
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.demo-stream-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.demo-stream-label {
+  font-family: var(--font-mono, 'JetBrains Mono', monospace);
+  font-size: var(--font-caption, 0.8rem);
+  color: var(--accent-gold, #e2b34a);
+}
+.demo-stream-badge {
+  font-family: var(--font-mono, 'JetBrains Mono', monospace);
+  font-size: 0.72rem;
+  color: #00ffb0;
+  background: rgba(0, 255, 176, 0.1);
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+.demo-stream-desc {
+  font-size: var(--font-body, 0.84rem);
+  color: #9ab4a3;
+  margin: 0;
+  line-height: 1.45;
+}
+
+/* Responsive UI Polish: Smoothly tuck mobile dock away while Studio wizard is open so it never collides with sticky continue bar */
+@media (max-width: 1023px) {
+  body.studio-subview-open #side {
+    opacity: 0 !important;
+    pointer-events: none !important;
+    transform: translateX(-50%) translateY(32px) !important;
+    transition: opacity 0.22s cubic-bezier(0.16, 1, 0.3, 1), transform 0.22s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  }
 }

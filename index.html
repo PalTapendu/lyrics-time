@@ -306,7 +306,7 @@
           <div class="dropdown-header-label">PRO STUDIO TOOLS</div>
 
           <!-- 1. Sync Lyrics & Script Tool (Top position, default active on Hero 1) -->
-          <a href="javascript:void(0)" class="dropdown-item active" id="dropdown-console-btn">
+          <button type="button" class="dropdown-item active" id="dropdown-console-btn">
             <div class="dropdown-item-icon-box">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                 stroke-linecap="round">
@@ -318,10 +318,10 @@
               <span class="dropdown-item-title">Sync Lyrics & Script</span>
               <span class="dropdown-item-desc">Precision microsecond audio-to-lyric aligner</span>
             </div>
-          </a>
+          </button>
 
           <!-- 2. Audio Visualizer (Middle position, with NEW badge) -->
-          <a href="javascript:void(0)" class="dropdown-item" id="dropdown-visualizer-btn" aria-label="Audio Visualizer Studio">
+          <button type="button" class="dropdown-item" id="dropdown-visualizer-btn" aria-label="Audio Visualizer Studio">
             <div class="dropdown-item-icon-box visualizer-icon-box">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                 stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -338,10 +338,10 @@
               </div>
               <span class="dropdown-item-desc">Reactive motion visualizers &amp; local MP4 video export</span>
             </div>
-          </a>
+          </button>
 
           <!-- 3. Live Harmonic Piano Tool (Bottom position) -->
-          <a href="javascript:void(0)" class="dropdown-item" id="dropdown-piano-btn">
+          <button type="button" class="dropdown-item" id="dropdown-piano-btn">
             <div class="dropdown-item-icon-box">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                 stroke-linecap="round">
@@ -353,7 +353,7 @@
               <span class="dropdown-item-title">Live Harmonic Piano</span>
               <span class="dropdown-item-desc">Acoustic Web Audio harmonic synthesizer</span>
             </div>
-          </a>
+          </button>
         </div>
       </div>
 
@@ -1845,33 +1845,14 @@
           </div>
 
           <!-- Visualizer Style Demo Stream -->
-          <div class="demo-visualizer-stream" style="padding: 16px 20px; display: flex; flex-direction: column; gap: 8px;">
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-              <span style="font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: #e2b34a;">Style: Classic Bars</span>
-              <span style="font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; color: #00ffb0; background: rgba(0,255,176,0.1); padding: 2px 8px; border-radius: 4px;">PREVIEW • 30 FPS</span>
+          <div class="demo-visualizer-stream">
+            <div class="demo-stream-header">
+              <span class="demo-stream-label">Style: Classic Bars</span>
+              <span class="demo-stream-badge">PREVIEW &bull; 30 FPS</span>
             </div>
-            <p style="font-size: 0.84rem; color: #9ab4a3; margin: 0; line-height: 1.45;">
+            <p class="demo-stream-desc">
               Real-time frequency mapping across 64 sub-bands. Produces hardware-rendered MP4 video files locally in your browser.
             </p>
-          </div>
-
-          <div class="demo-waveform-anim" aria-hidden="true">
-            <div class="demo-bar" style="--h: 35%"></div>
-            <div class="demo-bar" style="--h: 65%"></div>
-            <div class="demo-bar" style="--h: 90%"></div>
-            <div class="demo-bar" style="--h: 40%"></div>
-            <div class="demo-bar" style="--h: 80%"></div>
-            <div class="demo-bar" style="--h: 100%"></div>
-            <div class="demo-bar" style="--h: 55%"></div>
-            <div class="demo-bar" style="--h: 95%"></div>
-            <div class="demo-bar" style="--h: 30%"></div>
-            <div class="demo-bar" style="--h: 70%"></div>
-            <div class="demo-bar" style="--h: 85%"></div>
-            <div class="demo-bar" style="--h: 50%"></div>
-            <div class="demo-bar" style="--h: 75%"></div>
-            <div class="demo-bar" style="--h: 90%"></div>
-            <div class="demo-bar" style="--h: 45%"></div>
-            <div class="demo-playhead"></div>
           </div>
         </div>
 

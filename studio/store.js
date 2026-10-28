@@ -200,20 +200,12 @@
           break;
 
         case 'SETTINGS_UPDATED':
-          if (payload.settings) {
-            for (var key in payload.settings) {
-              if (Object.prototype.hasOwnProperty.call(payload.settings, key)) {
-                state.settings[key] = payload.settings[key];
-              }
-            }
-          }
-          break;
-
         case 'SETTINGS_CONFIRMED':
           if (payload.settings) {
-            for (var k in payload.settings) {
-              if (Object.prototype.hasOwnProperty.call(payload.settings, k)) {
-                state.settings[k] = payload.settings[k];
+            var _skeys = Object.keys(payload.settings);
+            for (var _ski = 0; _ski < _skeys.length; _ski++) {
+              if (Object.prototype.hasOwnProperty.call(payload.settings, _skeys[_ski])) {
+                state.settings[_skeys[_ski]] = payload.settings[_skeys[_ski]];
               }
             }
           }

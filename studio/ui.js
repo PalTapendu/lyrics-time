@@ -19,7 +19,7 @@
   var confirmContainer = null;
 
   function ensureToastContainer() {
-    if (toastContainer && document.body.contains(toastContainer)) return toastContainer;
+    if (toastContainer) return toastContainer; // already mounted
     toastContainer = document.getElementById('studio-toast-container');
     if (!toastContainer) {
       toastContainer = document.createElement('div');

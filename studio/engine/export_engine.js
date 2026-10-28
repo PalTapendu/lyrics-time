@@ -188,6 +188,18 @@
         videoEncoder.configure(encoderConfig);
 
         // 5. Render & Encode Loop
+        var lastYieldAt = performance.now();
+        var yieldToUI = function () {
+          return new Promise(function (resolve) {
+            if (typeof MessageChannel !== 'undefined') {
+              var ch = new MessageChannel();
+              ch.port1.onmessage = function () { ch.port1.close(); resolve(); };
+              ch.port2.postMessage(0);
+            } else {
+              setTimeout(resolve, 0);
+            }
+          });
+        };
         for (var i = 0; i < totalFrames; i++) {
           if (isCancelled || !isRunning) break;
           if (encoderError) throw encoderError;
@@ -214,6 +226,12 @@
               videoEncoder.ondequeue = resolve;
               setTimeout(resolve, 25);
             });
+          }
+
+          // Time-sliced yield: let the browser paint and handle clicks (e.g. Cancel) every ~30 ms of work.
+          if (performance.now() - lastYieldAt > 30) {
+            await yieldToUI();
+            lastYieldAt = performance.now();
           }
 
           // Progress reporting

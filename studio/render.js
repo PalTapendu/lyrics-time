@@ -411,7 +411,7 @@
       }
     }
 
-    var exportMod = (typeof window !== 'undefined' && window.StudioExportEngine) || root.StudioExportEngine;
+    var exportMod = (typeof window !== 'undefined' && window.StudioExportEngine) || null;
     if (useRealEngine && exportMod && exportMod.RealRenderJob) {
       currentJob = new exportMod.RealRenderJob();
     } else {
@@ -690,7 +690,7 @@
         downloadBtn.disabled = false;
         if (demoNoticeEl) demoNoticeEl.style.display = 'none';
         downloadBtn.onclick = function () {
-          var exportEngine = (typeof window !== 'undefined' && window.StudioExportEngine) || root.StudioExportEngine;
+          var exportEngine = (typeof window !== 'undefined' && window.StudioExportEngine) || null;
           if (exportEngine && typeof exportEngine.triggerDownload === 'function') {
             exportEngine.triggerDownload(resultBlob, (state && state.filename) || 'synclines-visualizer.mp4');
           } else {
@@ -787,7 +787,7 @@
       container.style.aspectRatio = ratioMap[ratio] || '16 / 9';
     }
 
-    var renderer = (typeof window !== 'undefined' && window.StudioRenderer) || root.StudioRenderer;
+    var renderer = (typeof window !== 'undefined' && window.StudioRenderer) || null;
 
     function loop() {
       if (isResultPlaying) {

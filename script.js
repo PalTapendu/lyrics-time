@@ -153,6 +153,10 @@
     fitHeroIllustration();
   }
 
+  // E9: Cached references for fitHeroIllustration
+  var _fitTopEl = null;
+  var _fitFooterEl = null;
+
   function fitHeroIllustration() {
     if (!illustrationContainer || !illustrationScaler) {
       illustrationContainer = document.getElementById('hero-illustration-container');
@@ -171,10 +175,11 @@
 
     if (isDesktop) {
       // In 2-column mode, compute scale based on available column width and available viewport height
-      var topEl = document.getElementById('top');
-      var topH = topEl ? topEl.offsetHeight : 64;
-      var footerEl = document.getElementById('site-footer');
-      var footerH = footerEl ? footerEl.offsetHeight : 36;
+      // E9: Use cached references (set once at IIFE init, or lazy-initialise here on first call)
+      if (!_fitTopEl) _fitTopEl = document.getElementById('top');
+      if (!_fitFooterEl) _fitFooterEl = document.getElementById('site-footer');
+      var topH = _fitTopEl ? _fitTopEl.offsetHeight : 64;
+      var footerH = _fitFooterEl ? _fitFooterEl.offsetHeight : 36;
       var availH = Math.max(340, window.innerHeight - topH - footerH - 36);
 
       var scaleW = cw / refW;
@@ -205,11 +210,18 @@
     illustrationScaler.style.transform = 'translate(' + offsetX.toFixed(1) + 'px, 0px) scale(' + scale.toFixed(4) + ')';
   }
 
-  updateResponsiveState();
-  window.addEventListener('resize', updateResponsiveState);
-  window.addEventListener('orientationchange', updateResponsiveState);
+  // Debounce resize to max ~8x/sec instead of every pixel (120ms)
+  var _resizeTimer = null;
+  function debouncedResponsive() {
+    clearTimeout(_resizeTimer);
+    _resizeTimer = setTimeout(updateResponsiveState, 120);
+  }
+  // Defer initial call so container has a measured width
+  requestAnimationFrame(function () { updateResponsiveState(); });
+  window.addEventListener('resize', debouncedResponsive);
+  window.addEventListener('orientationchange', debouncedResponsive);
   if (window.visualViewport) {
-    window.visualViewport.addEventListener('resize', updateResponsiveState);
+    window.visualViewport.addEventListener('resize', debouncedResponsive);
   }
   if (window.ResizeObserver) {
     try {
@@ -282,14 +294,16 @@
     return stage ? stage.getBoundingClientRect() : { left: 0, top: 0, width: window.innerWidth, height: window.innerHeight };
   }
 
-  function getRelativeCoord(e) {
-    return {
-      x: e.clientX,
-      y: e.clientY
-    };
+  // Mouse Parallax & Console Hover Tracker
+  // Cache card rect - refresh on resize, not per-mousemove (avoids layout reflow every event)
+  var _cachedCardRect = null;
+  function _refreshCardRect() {
+    var targetCard = mainCard || consoleEl;
+    _cachedCardRect = targetCard ? targetCard.getBoundingClientRect() : null;
   }
+  window.addEventListener('resize', _refreshCardRect);
+  requestAnimationFrame(_refreshCardRect); // initial measure after layout
 
-  // Mouse Parallax & Console Hover Tracker (Derived from actual bounding rect)
   window.addEventListener('mousemove', function (e) {
     var winW = window.innerWidth || 1920;
     var winH = window.innerHeight || 1080;
@@ -298,19 +312,16 @@
     targetGlowX = e.clientX;
     targetGlowY = e.clientY;
 
-    // Derived from element's actual bounding rect on screen with hysteresis buffer
-    var targetCard = mainCard || consoleEl;
-    if (targetCard) {
-      var r = targetCard.getBoundingClientRect();
+    var r = _cachedCardRect;
+    if (r) {
       var buffer = isConsoleHovered ? 28 : -8;
-      var inConsole = (
+      isConsoleHovered = (
         r.width > 0 && r.height > 0 &&
         e.clientX >= (r.left - buffer) &&
         e.clientX <= (r.right + buffer) &&
         e.clientY >= (r.top - buffer) &&
         e.clientY <= (r.bottom + buffer)
       );
-      isConsoleHovered = inConsole;
     }
   });
 
@@ -333,10 +344,13 @@
     return mm + ':' + ss;
   }
 
+  // Cache waveform-panel reference once (called every rAF frame)
+  var _wfContainerCache = null;
   // Update Scrubber Playhead Position
   function updatePlayhead(percent) {
     playheadPercent = Math.max(0, Math.min(1, percent));
-    var wfContainer = document.querySelector('.waveform-panel');
+    if (!_wfContainerCache) _wfContainerCache = document.querySelector('.waveform-panel');
+    var wfContainer = _wfContainerCache;
     var wfWidth = (wfContainer && wfContainer.clientWidth) ? wfContainer.clientWidth : 650;
     var xPos = playheadPercent * wfWidth;
     if (ph) {
@@ -350,7 +364,11 @@
 
   // Dynamic Waveform Audio Bars (Reacts musically to acoustic guitar, bass & chimes)
   var baseH = wfBars.map(function (r) { return +r.getAttribute('height') || 30; });
+  var _wfLastPlaying = false; // track state to skip loop when idle
   function pulseWaveform(timeSec, audioTime) {
+    // Skip expensive 240-DOM-write loop when nothing is animating
+    if (!isPlaying && !_wfLastPlaying) return;
+    _wfLastPlaying = isPlaying;
     var curTime = (audioTime !== undefined && audioTime !== null) ? audioTime : timeSec;
     var centerBar = playheadPercent * wfBars.length;
 
@@ -397,7 +415,12 @@
     bgCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
   }
   setupCanvasResolution();
-  window.addEventListener('resize', setupCanvasResolution);
+  // Canvas resize also debounced; uses same resize event — no double-handler needed
+  var _canvasResizeTimer = null;
+  window.addEventListener('resize', function () {
+    clearTimeout(_canvasResizeTimer);
+    _canvasResizeTimer = setTimeout(setupCanvasResolution, 120);
+  });
 
   var particles = [];
   var colors = ['16,185,129', '217,119,6', '225,29,72', '124,58,237', '16,185,129'];
@@ -447,10 +470,17 @@
         bgCtx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
         bgCtx.fill();
       } else {
-        var grad = bgCtx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r);
-        grad.addColorStop(0, 'rgba(' + p.color + ',' + alpha + ')');
-        grad.addColorStop(1, 'rgba(' + p.color + ',0)');
-        bgCtx.fillStyle = grad;
+        // Only recreate the gradient object when the orb has moved significantly (>2px)
+        var moved = !p._lastGX || Math.abs(p.x - p._lastGX) > 2 || Math.abs(p.y - p._lastGY) > 2;
+        if (moved || !p._grad) {
+          var grad = bgCtx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r);
+          grad.addColorStop(0, 'rgba(' + p.color + ',' + alpha + ')');
+          grad.addColorStop(1, 'rgba(' + p.color + ',0)');
+          p._grad = grad;
+          p._lastGX = p.x;
+          p._lastGY = p.y;
+        }
+        bgCtx.fillStyle = p._grad;
         bgCtx.beginPath();
         bgCtx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
         bgCtx.fill();
@@ -459,7 +489,9 @@
   }
 
   // Animation Loop
+  var loopActive = true;
   function mainLoop(now) {
+    if (!loopActive) return;
     var timeSec = now / 1000;
     var dt = Math.min(0.05, timeSec - lastTimestamp);
     lastTimestamp = timeSec;
@@ -648,6 +680,12 @@
     requestAnimationFrame(mainLoop);
   }
   requestAnimationFrame(mainLoop);
+
+  // Expose loop pause/resume so switchView can stop the Hero-1 loop when not visible
+  window.__heroLoopPause = function () { loopActive = false; };
+  window.__heroLoopResume = function () {
+    if (!loopActive) { loopActive = true; requestAnimationFrame(mainLoop); }
+  };
 
   // ==========================================================================
   // IN-BROWSER CD-QUALITY STEREO ACOUSTIC AUDIO ENGINE ("Dreams – Acoustic Version")
@@ -1041,20 +1079,33 @@
 
   // Lyrics Row Click Interaction
   var npBadge = document.getElementById('np');
+  // E3: Pre-cache row elements (.row-dot, .mw) to eliminate 14+ querySelector calls per lyric step
+  var lyricRowData = lyricRows.map(function (r) {
+    return {
+      el: r,
+      dot: r.querySelector('.row-dot'),
+      mw: r.querySelector('.mw')
+    };
+  });
+
   function setActiveLyricRow(row) {
-    lyricRows.forEach(function (r) {
+    var activeEntry = null;
+    for (var i = 0; i < lyricRowData.length; i++) {
+      var item = lyricRowData[i];
+      var r = item.el;
+      if (r === row) { activeEntry = item; }
       r.classList.remove('active');
-      var dot = r.querySelector('.row-dot');
+      var dot = item.dot;
       if (dot && dot.classList.contains('dot-play')) {
         dot.className = 'row-dot ' + (r.dataset.origDot || 'dot-mint');
         dot.innerHTML = '';
       }
-      var mw = r.querySelector('.mw');
+      var mw = item.mw;
       if (mw) mw.classList.remove('hl');
-    });
+    }
 
     row.classList.add('active');
-    var activeMw = row.querySelector('.mw');
+    var activeMw = activeEntry ? activeEntry.mw : row.querySelector('.mw');
     if (activeMw) activeMw.classList.add('hl');
 
     if (hl) {
@@ -1063,12 +1114,12 @@
     }
 
     // Move Now Playing badge
-    if (npBadge && !row.contains(npBadge)) {
-      row.insertBefore(npBadge, row.querySelector('.mw'));
+    if (npBadge && activeMw && !row.contains(npBadge)) {
+      row.insertBefore(npBadge, activeMw);
     }
 
     // Convert dot to play button
-    var curDot = row.querySelector('.row-dot');
+    var curDot = activeEntry ? activeEntry.dot : row.querySelector('.row-dot');
     if (curDot && !curDot.classList.contains('dot-play')) {
       row.dataset.origDot = curDot.className.replace('row-dot ', '');
       curDot.className = 'row-dot dot-play';
@@ -1291,71 +1342,39 @@
   function updateActiveProduct(product) {
     currentActiveProduct = product;
 
-    // 1. Sync Products Dropdown Menu Items
-    if (dropdownConsoleBtn) {
-      if (product === 'lyrics') {
-        dropdownConsoleBtn.classList.add('active');
-      } else {
-        dropdownConsoleBtn.classList.remove('active');
-      }
-    }
-    if (dropdownVisualizerBtn) {
-      if (product === 'visualizer') {
-        dropdownVisualizerBtn.classList.add('active');
-      } else {
-        dropdownVisualizerBtn.classList.remove('active');
-      }
-    }
-    if (dropdownPianoBtn) {
-      if (product === 'piano') {
-        dropdownPianoBtn.classList.add('active');
-      } else {
-        dropdownPianoBtn.classList.remove('active');
-      }
+    // Toggle active class on all nav buttons via a single data-map (E1 refactor)
+    var _navMap = [
+      [dropdownConsoleBtn,    'lyrics'],
+      [dropdownVisualizerBtn, 'visualizer'],
+      [dropdownPianoBtn,      'piano'],
+      [sideHomeBtn,           'lyrics'],
+      [sideVisualizerBtn,     'visualizer'],
+      [sidePianoBtn,          'piano']
+    ];
+    for (var _ni = 0; _ni < _navMap.length; _ni++) {
+      if (_navMap[_ni][0]) _navMap[_ni][0].classList.toggle('active', product === _navMap[_ni][1]);
     }
 
-    // 2. Sync Sidebar Buttons
-    if (sideHomeBtn) {
-      if (product === 'lyrics') {
-        sideHomeBtn.classList.add('active');
-      } else {
-        sideHomeBtn.classList.remove('active');
-      }
-    }
-    if (sideVisualizerBtn) {
-      if (product === 'visualizer') {
-        sideVisualizerBtn.classList.add('active');
-      } else {
-        sideVisualizerBtn.classList.remove('active');
-      }
-    }
-    if (sidePianoBtn) {
-      if (product === 'piano') {
-        sidePianoBtn.classList.add('active');
-      } else {
-        sidePianoBtn.classList.remove('active');
-      }
-    }
-
-    // 3. Smoothly animate persistent sliding sidebar active indicator
+    // Smoothly animate persistent sliding sidebar active indicator
     syncSidebarIndicator(product);
   }
 
+  // E2: Cache sidebar indicator elements once at init to avoid repeated getElementById calls
+  var _sideIndicator = document.getElementById('side-active-indicator');
+  var _sideFirstBtn = document.getElementById('side-home-btn');
+  var _sideBtnMap = {
+    'lyrics':     sideHomeBtn || document.getElementById('side-home-btn'),
+    'visualizer': sideVisualizerBtn || document.getElementById('side-visualizer-btn'),
+    'piano':      sidePianoBtn || document.getElementById('side-piano-btn'),
+    'account':    document.getElementById('side-account-btn')
+  };
+
   function syncSidebarIndicator(product) {
-    var indicator = document.getElementById('side-active-indicator');
-    var firstBtn = document.getElementById('side-home-btn');
+    var indicator = _sideIndicator;
+    var firstBtn = _sideFirstBtn;
     if (!indicator || !firstBtn) return;
 
-    var targetBtn = null;
-    if (product === 'lyrics') {
-      targetBtn = document.getElementById('side-home-btn');
-    } else if (product === 'visualizer') {
-      targetBtn = document.getElementById('side-visualizer-btn');
-    } else if (product === 'piano') {
-      targetBtn = document.getElementById('side-piano-btn');
-    } else if (product === 'account') {
-      targetBtn = document.getElementById('side-account-btn');
-    }
+    var targetBtn = _sideBtnMap[product] || null;
 
     if (targetBtn) {
       var deltaY = targetBtn.offsetTop - firstBtn.offsetTop;
@@ -1401,18 +1420,14 @@
   var isVisualizerLoaded = false;
   var isVisualizerLoading = false;
 
+  var _vizPendingCallbacks = []; // queue replaces setInterval polling
   function loadVisualizerScene(callback) {
     if (isVisualizerLoaded) {
       if (callback) callback();
       return;
     }
     if (isVisualizerLoading) {
-      var checkInterval = setInterval(function () {
-        if (isVisualizerLoaded) {
-          clearInterval(checkInterval);
-          if (callback) callback();
-        }
-      }, 50);
+      if (callback) _vizPendingCallbacks.push(callback);
       return;
     }
 
@@ -1449,6 +1464,10 @@
         }
 
         if (callback) callback(err);
+
+        // Drain pending callbacks queued while the visualizer was loading
+        var _queued = _vizPendingCallbacks.splice(0);
+        for (var _qi = 0; _qi < _queued.length; _qi++) { try { _queued[_qi](); } catch(e){} }
       }, remaining);
     }
 
@@ -1474,17 +1493,24 @@
     }, 2800);
   }
 
+  // E4: Cache view containers once instead of re-querying on every switchView call
+  var _viewHero1 = document.getElementById('view-hero1');
+  var _viewHero2 = document.getElementById('view-hero2');
+  var _viewPiano = document.getElementById('view-piano');
+
   function switchView(targetView, productHint) {
     try { window.scrollTo(0, 0); } catch (e) { }
-    var viewHero1 = document.getElementById('view-hero1');
-    var viewHero2 = document.getElementById('view-hero2');
-    var viewPiano = document.getElementById('view-piano');
+    var viewHero1 = _viewHero1;
+    var viewHero2 = _viewHero2;
+    var viewPiano = _viewPiano;
     var html = document.documentElement;
     var body = document.body;
 
     function applyHero2View() {
       currentActiveView = 'hero2';
       window.__isHero1ViewActive = false;
+      // Pause the Hero-1 rAF loop — scene.js takes over rendering
+      if (typeof window.__heroLoopPause === 'function') window.__heroLoopPause();
       html.setAttribute('data-theme', 'hero2');
       body.setAttribute('data-theme', 'hero2');
 
@@ -1595,6 +1621,8 @@
       // targetView === 'hero1'
       currentActiveView = 'hero1';
       window.__isHero1ViewActive = true;
+      // Resume Hero-1 rAF loop
+      if (typeof window.__heroLoopResume === 'function') window.__heroLoopResume();
       html.setAttribute('data-theme', 'hero1');
       body.setAttribute('data-theme', 'hero1');
 

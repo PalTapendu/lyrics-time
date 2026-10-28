@@ -165,6 +165,10 @@
       var targetContainerId = SUBVIEW_IDS[route] || SUBVIEW_IDS[ROUTES.LANDING];
       var targetEl = document.getElementById(targetContainerId);
 
+      // Background scene is only needed on the landing sub-view; scene.js idles while this class is set.
+      var hero2Host = document.getElementById('view-hero2');
+      if (hero2Host) hero2Host.classList.toggle('studio-in-flow', route !== ROUTES.LANDING);
+
       // Hide all subview containers
       for (var r in SUBVIEW_IDS) {
         var id = SUBVIEW_IDS[r];
@@ -225,22 +229,22 @@
 
       // Hook subview controllers
       if (route === ROUTES.STYLES) {
-        var stylesMod = (typeof window !== 'undefined' && window.StudioStyles) || root.StudioStyles;
+        var stylesMod = (typeof window !== 'undefined' && window.StudioStyles) || null;
         if (stylesMod && typeof stylesMod.render === 'function') {
           stylesMod.render();
         }
       } else if (route === ROUTES.SETTINGS) {
-        var settingsMod = (typeof window !== 'undefined' && window.StudioSettings) || root.StudioSettings;
+        var settingsMod = (typeof window !== 'undefined' && window.StudioSettings) || null;
         if (settingsMod && typeof settingsMod.render === 'function') {
           settingsMod.render();
         }
       } else if (route === ROUTES.RENDER) {
-        var renderMod = (typeof window !== 'undefined' && window.StudioRender) || root.StudioRender;
+        var renderMod = (typeof window !== 'undefined' && window.StudioRender) || null;
         if (renderMod && typeof renderMod.renderProcessing === 'function') {
           renderMod.renderProcessing();
         }
       } else if (route === ROUTES.RESULT) {
-        var renderResultMod = (typeof window !== 'undefined' && window.StudioRender) || root.StudioRender;
+        var renderResultMod = (typeof window !== 'undefined' && window.StudioRender) || null;
         if (renderResultMod && typeof renderResultMod.renderResult === 'function') {
           renderResultMod.renderResult();
         }

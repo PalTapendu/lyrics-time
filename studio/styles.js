@@ -382,7 +382,9 @@
 
     var state = Store ? Store.getState() : null;
     var audio = state ? state.audio : null;
-    var analysis = (audio && audio.analysis) || (root.StudioRenderer && root.StudioRenderer.getAnalysis());
+    var analysis = (audio && audio.analysis) ||
+      (window.StudioRenderer && typeof window.StudioRenderer.getAnalysis === 'function' && window.StudioRenderer.getAnalysis()) ||
+      null; // analysis may be missing (failed / not finished / restored session): fall back to the curated order
     if (analysis && analysis.profile && analysis.profile.suggestedCategories) {
       var topCats = analysis.profile.suggestedCategories;
       suggested.sort(function (a, b) {

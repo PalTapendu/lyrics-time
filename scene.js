@@ -84,9 +84,11 @@
 
   function resize() {
     var stage = document.getElementById('stage') || document.body;
-    W = stage.clientWidth || window.innerWidth;
-    H = stage.clientHeight || window.innerHeight;
-    currentDPR = Math.max(window.devicePixelRatio || 1, 1);
+    // Measure the canvas' own CSS box (not the whole page) and never exceed a sane size.
+    W = (gc && gc.clientWidth) || stage.clientWidth || window.innerWidth;
+    H = Math.min((gc && gc.clientHeight) || stage.clientHeight || window.innerHeight, window.innerHeight * 1.5);
+    // DPR above 1.5 multiplies the pixel count for almost no visible gain on a glowing background.
+    currentDPR = Math.min(Math.max(window.devicePixelRatio || 1, 1), 1.5);
 
     if (gc) {
       gc.width = Math.round(W * currentDPR);
@@ -96,6 +98,16 @@
       pc.width = Math.round(W * currentDPR);
       pc.height = Math.round(H * currentDPR);
     }
+  }
+
+  // Re-measure whenever the layout changes (e.g. studio.css finishing its lazy load), not only on window resize.
+  if (typeof ResizeObserver !== 'undefined') {
+    var roPending = false;
+    new ResizeObserver(function () {
+      if (roPending) return;
+      roPending = true;
+      requestAnimationFrame(function () { roPending = false; resize(); });
+    }).observe(document.getElementById('stage') || document.body);
   }
 
   window.addEventListener('resize', function () {
@@ -475,9 +487,21 @@
   var totalPausedTime = 0;
   var pauseStartTime = 0;
 
+  var hero2El = null, lastInFlow = false;
   function loop(timestamp) {
     if (!isRunning) return;
     animFrameId = requestAnimationFrame(loop);
+
+    // While a Studio screen (styles / settings / render / result) covers the page, draw nothing.
+    if (!hero2El) hero2El = document.getElementById('view-hero2');
+    var inFlow = !!(hero2El && hero2El.classList.contains('studio-in-flow'));
+    if (inFlow !== lastInFlow) {
+      lastInFlow = inFlow;
+      if (gc) gc.style.visibility = inFlow ? 'hidden' : '';
+      if (pc) pc.style.visibility = inFlow ? 'hidden' : '';
+      if (!inFlow) resize(); // layout may have changed while hidden
+    }
+    if (inFlow) return;
 
     if (startTime === null) startTime = timestamp;
     var elapsed = (timestamp - startTime - totalPausedTime) / 1000;
@@ -521,6 +545,10 @@
     if (cursorGlow) {
       cursorGlow.style.opacity = '0';
     }
+    // give the shared canvases back to other views
+    lastInFlow = false;
+    if (gc) gc.style.visibility = '';
+    if (pc) pc.style.visibility = '';
   }
 
   function resume() {
